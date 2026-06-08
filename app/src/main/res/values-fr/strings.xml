@@ -1,0 +1,131 @@
+<resources>
+    <string name="app_name">Speedrun</string>
+    <string name="back">Retour</string>
+    <string name="save">Enregistrer</string>
+    <string name="delete">Supprimer</string>
+    <string name="edit">Modifier</string>
+    <string name="add">Ajouter</string>
+    <string name="cancel">Annuler</string>
+    <string name="confirm">Confirmer</string>
+
+    <!-- Runs List Screen -->
+    <string name="runs_list_title">SpeedrunCompanion</string>
+    <string name="runs_list_pc_remote">Télécommande PC</string>
+    <string name="runs_list_settings">Paramètres</string>
+    <string name="runs_list_empty_title">Aucun split importé</string>
+    <string name="runs_list_empty_desc">Appuyez sur le bouton + pour importer un fichier LiveSplit .lss ou créer un chrono.</string>
+    <string name="runs_list_import_lss">Importer un fichier LSS</string>
+    <string name="runs_list_no_pb">Pas de PB</string>
+
+    <!-- New Run Dialog -->
+    <string name="new_run_dialog_title">Nouveau LiveSplit</string>
+    <string name="new_run_dialog_quick">Chronomètre rapide</string>
+    <string name="new_run_dialog_quick_desc">Lancer directement un chrono simple sans configuration</string>
+    <string name="new_run_dialog_custom">Créer un LiveSplit personnalisé</string>
+    <string name="new_run_dialog_custom_desc">Configurer les informations du jeu et créer vos segments</string>
+    <string name="new_run_dialog_import">Importer un fichier LiveSplit (.lss)</string>
+    <string name="new_run_dialog_import_desc">Importer un fichier de splits depuis votre stockage local</string>
+    <string name="new_run_dialog_field_game">Nom du jeu</string>
+    <string name="new_run_dialog_field_category">Catégorie (ex. Any%)</string>
+    <string name="new_run_dialog_field_platform">Plateforme (facultatif)</string>
+    <string name="new_run_dialog_create">Créer</string>
+
+    <!-- Timer Screen -->
+    <string name="timer_title">Chronomètre</string>
+    <string name="timer_edit_splits">Modifier les segments</string>
+    <string name="timer_active_comparison">Comparaison : %1$s</string>
+    <string name="timer_attempts">Tentatives : %1$d</string>
+    <string name="timer_attempts_label">Tentatives</string>
+    <string name="timer_finished">Terminé</string>
+
+    <!-- Split Editor Screen -->
+    <string name="editor_title">Modifier les segments</string>
+    <string name="editor_game_name">Nom du jeu</string>
+    <string name="editor_category_name">Nom de la catégorie</string>
+    <string name="editor_splits_count">Segments (%1$d)</string>
+    <string name="editor_split_name_placeholder">Nom du segment</string>
+    <string name="editor_add_split">Ajouter un segment</string>
+    <string name="editor_move_up">Monter</string>
+    <string name="editor_move_down">Descendre</string>
+
+    <!-- Remote Screen -->
+    <string name="remote_title">Télécommande PC</string>
+    <string name="remote_conn_settings">Paramètres de connexion</string>
+    <string name="remote_ip_address">Adresse IP</string>
+    <string name="remote_port">Port</string>
+    <string name="remote_connect">Se connecter</string>
+    <string name="remote_disconnect">Se déconnecter</string>
+    <string name="remote_console_response">Réponse de la console</string>
+    <string name="remote_no_response">Aucune réponse pour le moment</string>
+    <string name="remote_controls">Commandes à distance</string>
+    <string name="remote_btn_split">Split / Démarrer</string>
+    <string name="remote_btn_pause">Pause</string>
+    <string name="remote_btn_undo">Annuler le split</string>
+    <string name="remote_btn_skip">Passer le split</string>
+    <string name="remote_btn_reset">Réinitialiser</string>
+    <string name="remote_btn_get_time">Obtenir le temps</string>
+    <string name="remote_btn_get_delta">Obtenir le delta</string>
+    <string name="remote_btn_ping">Ping le PC</string>
+    <string name="remote_live_timer">TIMER PC EN DIRECT</string>
+    <string name="remote_btn_resume">Reprendre</string>
+    <string name="remote_empty_title">Se connecter au serveur LiveSplit sur PC</string>
+    <string name="remote_empty_desc">Assurez-vous que le serveur LiveSplit TCP est démarré sur le port 16834</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_title">Paramètres</string>
+    <string name="settings_timer_header">Paramètres du chrono</string>
+    <string name="settings_timing_method">Méthode de chronométrage</string>
+    <string name="settings_active_comparison">Comparaison active</string>
+    <string name="settings_global_hotkeys">Activer les raccourcis globaux</string>
+    <string name="settings_global_hotkeys_desc">Permet aux boutons de volume de contrôler les splits</string>
+    <string name="settings_save_quick_runs">Sauvegarder les chronos rapides</string>
+    <string name="settings_save_quick_runs_desc">Sauvegarder automatiquement les chronos rapides dans la liste</string>
+    <string name="settings_language">Langue</string>
+    <string name="settings_theme">Thème</string>
+    <string name="settings_theme_system">Système</string>
+    <string name="settings_theme_light">Clair</string>
+    <string name="settings_theme_dark">Sombre</string>
+    <string name="settings_language_auto">Auto</string>
+    <string name="settings_language_en">English</string>
+    <string name="settings_language_fr">Français</string>
+    <string name="settings_appearance_header">Apparence</string>
+
+    <!-- Network Settings -->
+    <string name="settings_network_header">Réseau</string>
+    <string name="settings_polling_delay">Délai de polling</string>
+    <string name="settings_polling_delay_desc">Intervalle entre chaque actualisation du timer PC en mode télécommande</string>
+    <string name="settings_network_timeout">Délai d\'expiration réseau</string>
+    <string name="settings_network_timeout_desc">Temps d\'attente maximum lors de la connexion ou de la lecture du serveur LiveSplit</string>
+    <string name="settings_network_ms_value">%1$d ms</string>
+
+    <!-- Layout Editor -->
+    <string name="layout_editor_title">Mise en page du chrono</string>
+    <string name="layout_editor_preview_header">Aperçu</string>
+    <string name="layout_editor_format_header">Format du temps</string>
+    <string name="layout_editor_leading_zeros">Afficher les zéros en trop</string>
+    <string name="layout_editor_leading_zeros_desc">Afficher 00:05:30 au lieu de 5:30</string>
+    <string name="layout_editor_show_fraction">Afficher les décimales</string>
+    <string name="layout_editor_show_fraction_desc">Afficher les fractions de seconde après la virgule</string>
+    <string name="layout_editor_decimal_places">Chiffres après la virgule</string>
+    <string name="layout_editor_decimal_places_value">%1$d chiffre(s)</string>
+    <string name="layout_editor_color_header">Couleur du chrono</string>
+    <string name="layout_editor_color_mode">Mode de couleur</string>
+    <string name="layout_editor_color_delta">Delta de comparaison</string>
+    <string name="layout_editor_color_delta_desc">Vert/rouge selon l\'avance ou le retard vs comparaison</string>
+    <string name="layout_editor_color_state">État du chrono</string>
+    <string name="layout_editor_color_state_desc">Couleur selon inactif, en cours, en pause ou terminé</string>
+    <string name="layout_editor_state_colors_legend">Couleurs par état</string>
+    <string name="layout_editor_state_idle">Inactif</string>
+    <string name="layout_editor_state_running">En cours</string>
+    <string name="layout_editor_state_paused">En pause</string>
+    <string name="layout_editor_state_finished">Terminé</string>
+
+    <!-- Timer Control Labels -->
+    <string name="timer_control_start">Démarrer</string>
+    <string name="timer_control_split">Split</string>
+    <string name="timer_control_resume">Reprendre</string>
+    <string name="timer_control_pause">Pause</string>
+    <string name="timer_control_undo">Annuler le split</string>
+    <string name="timer_control_skip">Passer le split</string>
+    <string name="timer_control_reset">Réinitialiser</string>
+</resources>

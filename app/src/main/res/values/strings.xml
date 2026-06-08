@@ -1,0 +1,131 @@
+<resources>
+    <string name="app_name">Speedrun</string>
+    <string name="back">Back</string>
+    <string name="save">Save</string>
+    <string name="delete">Delete</string>
+    <string name="edit">Edit</string>
+    <string name="add">Add</string>
+    <string name="cancel">Cancel</string>
+    <string name="confirm">Confirm</string>
+
+    <!-- Runs List Screen -->
+    <string name="runs_list_title">SpeedrunCompanion</string>
+    <string name="runs_list_pc_remote">PC Remote</string>
+    <string name="runs_list_settings">Settings</string>
+    <string name="runs_list_empty_title">No runs imported yet</string>
+    <string name="runs_list_empty_desc">Tap the + button to import a LiveSplit .lss file or create a run.</string>
+    <string name="runs_list_import_lss">Import LSS file</string>
+    <string name="runs_list_no_pb">No PB</string>
+
+    <!-- New Run Dialog -->
+    <string name="new_run_dialog_title">New Run</string>
+    <string name="new_run_dialog_quick">Quick Stopwatch</string>
+    <string name="new_run_dialog_quick_desc">Instantly start a simple timer without configuration</string>
+    <string name="new_run_dialog_custom">Create Custom Run</string>
+    <string name="new_run_dialog_custom_desc">Configure game info and create splits from scratch</string>
+    <string name="new_run_dialog_import">Import LiveSplit File (.lss)</string>
+    <string name="new_run_dialog_import_desc">Import a splits file from your local storage</string>
+    <string name="new_run_dialog_field_game">Game Name</string>
+    <string name="new_run_dialog_field_category">Category (e.g. Any%)</string>
+    <string name="new_run_dialog_field_platform">Platform (optional)</string>
+    <string name="new_run_dialog_create">Create</string>
+
+    <!-- Timer Screen -->
+    <string name="timer_title">Timer</string>
+    <string name="timer_edit_splits">Edit Splits</string>
+    <string name="timer_active_comparison">Comparison: %1$s</string>
+    <string name="timer_attempts">Attempts: %1$d</string>
+    <string name="timer_attempts_label">Attempts</string>
+    <string name="timer_finished">Finished</string>
+
+    <!-- Split Editor Screen -->
+    <string name="editor_title">Edit Splits</string>
+    <string name="editor_game_name">Game Name</string>
+    <string name="editor_category_name">Category Name</string>
+    <string name="editor_splits_count">Splits (%1$d)</string>
+    <string name="editor_split_name_placeholder">Split Name</string>
+    <string name="editor_add_split">Add Split</string>
+    <string name="editor_move_up">Move Up</string>
+    <string name="editor_move_down">Move Down</string>
+
+    <!-- Remote Screen -->
+    <string name="remote_title">PC Remote</string>
+    <string name="remote_conn_settings">Connection Settings</string>
+    <string name="remote_ip_address">IP Address</string>
+    <string name="remote_port">Port</string>
+    <string name="remote_connect">Connect</string>
+    <string name="remote_disconnect">Disconnect</string>
+    <string name="remote_console_response">Console Response</string>
+    <string name="remote_no_response">No response yet</string>
+    <string name="remote_controls">Remote Controls</string>
+    <string name="remote_btn_split">Split / Start</string>
+    <string name="remote_btn_pause">Pause</string>
+    <string name="remote_btn_undo">Undo Split</string>
+    <string name="remote_btn_skip">Skip Split</string>
+    <string name="remote_btn_reset">Reset</string>
+    <string name="remote_btn_get_time">Get Time</string>
+    <string name="remote_btn_get_delta">Get Delta</string>
+    <string name="remote_btn_ping">Ping PC</string>
+    <string name="remote_live_timer">LIVE PC TIMER</string>
+    <string name="remote_btn_resume">Resume</string>
+    <string name="remote_empty_title">Connect to LiveSplit Server on PC</string>
+    <string name="remote_empty_desc">Ensure LiveSplit TCP Server is started on port 16834</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_timer_header">Timer Settings</string>
+    <string name="settings_timing_method">Timing Method</string>
+    <string name="settings_active_comparison">Active Comparison</string>
+    <string name="settings_global_hotkeys">Enable Global Hotkeys</string>
+    <string name="settings_global_hotkeys_desc">Allows volume buttons to control splits</string>
+    <string name="settings_save_quick_runs">Save Quick Runs</string>
+    <string name="settings_save_quick_runs_desc">Automatically save quick stopwatch runs to the list</string>
+    <string name="settings_language">Language</string>
+    <string name="settings_theme">Theme</string>
+    <string name="settings_theme_system">System</string>
+    <string name="settings_theme_light">Light</string>
+    <string name="settings_theme_dark">Dark</string>
+    <string name="settings_language_auto">Auto</string>
+    <string name="settings_language_en">English</string>
+    <string name="settings_language_fr">Français</string>
+    <string name="settings_appearance_header">Appearance</string>
+
+    <!-- Network Settings -->
+    <string name="settings_network_header">Network</string>
+    <string name="settings_polling_delay">Polling delay</string>
+    <string name="settings_polling_delay_desc">Interval between PC timer updates when connected via remote</string>
+    <string name="settings_network_timeout">Network timeout</string>
+    <string name="settings_network_timeout_desc">Maximum wait time when connecting or reading from the LiveSplit server</string>
+    <string name="settings_network_ms_value">%1$d ms</string>
+
+    <!-- Layout Editor -->
+    <string name="layout_editor_title">Timer Layout</string>
+    <string name="layout_editor_preview_header">Preview</string>
+    <string name="layout_editor_format_header">Time Format</string>
+    <string name="layout_editor_leading_zeros">Show leading zeros</string>
+    <string name="layout_editor_leading_zeros_desc">Display as 00:05:30 instead of 5:30</string>
+    <string name="layout_editor_show_fraction">Show decimals</string>
+    <string name="layout_editor_show_fraction_desc">Display fractional seconds after the decimal point</string>
+    <string name="layout_editor_decimal_places">Decimal places</string>
+    <string name="layout_editor_decimal_places_value">%1$d digit(s)</string>
+    <string name="layout_editor_color_header">Timer Color</string>
+    <string name="layout_editor_color_mode">Color mode</string>
+    <string name="layout_editor_color_delta">Comparison delta</string>
+    <string name="layout_editor_color_delta_desc">Green/red based on pace vs comparison</string>
+    <string name="layout_editor_color_state">Timer state</string>
+    <string name="layout_editor_color_state_desc">Color based on idle, running, paused, or finished</string>
+    <string name="layout_editor_state_colors_legend">State colors</string>
+    <string name="layout_editor_state_idle">Idle</string>
+    <string name="layout_editor_state_running">Running</string>
+    <string name="layout_editor_state_paused">Paused</string>
+    <string name="layout_editor_state_finished">Finished</string>
+
+    <!-- Timer Control Labels -->
+    <string name="timer_control_start">Start</string>
+    <string name="timer_control_split">Split</string>
+    <string name="timer_control_resume">Resume</string>
+    <string name="timer_control_pause">Pause</string>
+    <string name="timer_control_undo">Undo split</string>
+    <string name="timer_control_skip">Skip split</string>
+    <string name="timer_control_reset">Reset</string>
+</resources>
