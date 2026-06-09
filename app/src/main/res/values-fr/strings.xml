@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Speedrun</string>
+    <string name="app_name">SwiftSplit</string>
     <string name="back">Retour</string>
     <string name="save">Enregistrer</string>
     <string name="delete">Supprimer</string>

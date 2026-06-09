@@ -22,7 +22,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Speedrun"
+rootProject.name = "SwiftSplit"
 include(":app")
 include(":domain")
 include(":application")
