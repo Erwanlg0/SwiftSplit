@@ -1,5 +1,6 @@
 package com.elg.speedruncompanion.ui.screen.timer
 
+import com.elg.speedruncompanion.application.port.output.SettingsPort
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -24,6 +25,8 @@ class TimerViewModel @Inject constructor(
     private val skipSplitUseCase: SkipSplitUseCase,
     private val pauseResumeTimerUseCase: PauseResumeTimerUseCase,
     private val resetTimerUseCase: ResetTimerUseCase,
+    private val deleteRunUseCase: DeleteRunUseCase,
+    private val settingsPort: SettingsPort,
     observeTimerLayoutPreferencesUseCase: ObserveTimerLayoutPreferencesUseCase
 ) : ViewModel() {
 
@@ -139,5 +142,17 @@ class TimerViewModel @Inject constructor(
     override fun onCleared() {
         super.onCleared()
         stopTicking()
+        viewModelScope.launch {
+            val currentRun = _run.value
+            if (currentRun != null &&
+                currentRun.gameInfo.gameName == "Quick Run" &&
+                currentRun.gameInfo.categoryName == "Stopwatch"
+            ) {
+                val shouldSaveQuickRun = settingsPort.observeSaveQuickRuns().first()
+                if (!shouldSaveQuickRun) {
+                    deleteRunUseCase(RunId(runId))
+                }
+            }
+        }
     }
 }

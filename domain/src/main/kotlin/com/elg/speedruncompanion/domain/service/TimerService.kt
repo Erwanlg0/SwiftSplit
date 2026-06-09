@@ -20,8 +20,11 @@ class TimerService {
     fun split(activeRun: ActiveRun, currentTimeMillis: Long): Pair<ActiveRun, TimerEvent> {
         if (activeRun.startTime == 0L || activeRun.pauseStart != null) return activeRun to TimerEvent.Paused // Can't split if not running
 
-        val elapsed = getElapsedTime(activeRun, currentTimeMillis)
         val currentIndex = activeRun.currentSegmentIndex
+        // Guard: can't split if we've already passed all segments
+        if (currentIndex >= activeRun.run.segments.size) return activeRun to TimerEvent.Paused
+
+        val elapsed = getElapsedTime(activeRun, currentTimeMillis)
 
         val newSplitTimes = activeRun.splitTimes.toMutableList()
         newSplitTimes[currentIndex] = elapsed

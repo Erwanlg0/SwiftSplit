@@ -25,7 +25,8 @@ fun TimerControls(
     onUndo: () -> Unit,
     onSkip: () -> Unit,
     onReset: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isLastSplit: Boolean = false
 ) {
     val colors = SpeedrunThemeColors.colors
 
@@ -65,13 +66,25 @@ fun TimerControls(
         FilledIconButton(
             onClick = onStartSplit,
             modifier = Modifier.size(64.dp),
+            enabled = timerState !is TimerState.Finished,
             colors = IconButtonDefaults.filledIconButtonColors(
-                containerColor = colors.success
+                containerColor = colors.success,
+                disabledContainerColor = colors.textDisabled
             )
         ) {
+            val icon = when {
+                timerState is TimerState.Idle -> Icons.Default.PlayArrow
+                isLastSplit -> Icons.Default.Check
+                else -> Icons.Default.Flag
+            }
+            val contentDesc = when {
+                timerState is TimerState.Idle -> stringResource(R.string.timer_control_start)
+                isLastSplit -> stringResource(R.string.timer_control_finish)
+                else -> stringResource(R.string.timer_control_split)
+            }
             Icon(
-                imageVector = if (timerState is TimerState.Idle) Icons.Default.PlayArrow else Icons.Default.Flag,
-                contentDescription = if (timerState is TimerState.Idle) stringResource(R.string.timer_control_start) else stringResource(R.string.timer_control_split),
+                imageVector = icon,
+                contentDescription = contentDesc,
                 modifier = Modifier.size(32.dp)
             )
         }

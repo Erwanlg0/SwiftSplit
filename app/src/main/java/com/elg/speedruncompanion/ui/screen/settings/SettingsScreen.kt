@@ -6,6 +6,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -23,6 +24,8 @@ import com.elg.speedruncompanion.ui.theme.SpeedrunThemeColors
 @Composable
 fun SettingsScreen(
     onNavigateBack: () -> Unit,
+    onNavigateToAbout: () -> Unit,
+    onNavigateToLayoutEditor: () -> Unit = {},
     modifier: Modifier = Modifier,
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
@@ -223,6 +226,20 @@ fun SettingsScreen(
                 modifier = Modifier.padding(top = 8.dp)
             )
 
+            ListItem(
+                headlineContent = { Text(stringResource(R.string.settings_customization)) },
+                supportingContent = { Text(stringResource(R.string.settings_customization_desc)) },
+                leadingContent = {
+                    Icon(
+                        Icons.Default.Palette,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                },
+                modifier = Modifier.clickable { onNavigateToLayoutEditor() },
+                colors = ListItemDefaults.colors(containerColor = colors.elevatedSurface)
+            )
+
             Box {
                 val themeLabel = when(themeMode) {
                     "light" -> stringResource(R.string.settings_theme_light)
@@ -284,6 +301,21 @@ fun SettingsScreen(
                     )
                 }
             }
+
+            // About Section
+            Text(
+                stringResource(R.string.settings_about_header),
+                style = MaterialTheme.typography.titleMedium,
+                color = colors.textPrimary,
+                modifier = Modifier.padding(top = 8.dp)
+            )
+
+            ListItem(
+                headlineContent = { Text(stringResource(R.string.settings_about_title)) },
+                supportingContent = { Text(stringResource(R.string.settings_about_desc)) },
+                modifier = Modifier.clickable { onNavigateToAbout() },
+                colors = ListItemDefaults.colors(containerColor = colors.elevatedSurface)
+            )
         }
     }
 }

@@ -26,4 +26,9 @@ interface SettingsPort {
 
     fun observeNetworkPreferences(): Flow<NetworkPreferences>
     suspend fun setNetworkPreferences(preferences: NetworkPreferences)
+
+    fun observeRemoteHost(): Flow<String>
+    suspend fun setRemoteHost(host: String)
+    fun observeRemotePort(): Flow<String>
+    suspend fun setRemotePort(port: String)
 }

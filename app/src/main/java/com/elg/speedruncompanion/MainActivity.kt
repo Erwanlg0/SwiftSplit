@@ -41,7 +41,7 @@ class MainActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContent {
             val themeMode by settingsPort.observeThemeMode().collectAsStateWithLifecycle(initialValue = "system")
-            val language by settingsPort.observeLanguage().collectAsStateWithLifecycle(initialValue = "auto")
+            val language by settingsPort.observeLanguage().collectAsStateWithLifecycle(initialValue = null)
 
             val darkTheme = when (themeMode) {
                 "dark" -> true
@@ -52,10 +52,11 @@ class MainActivity : AppCompatActivity() {
             // Gestion de la langue via l'API officielle Android/AppCompat
             // Cela permet de changer la langue dynamiquement sans casser le contexte Hilt (ViewModel)
             LaunchedEffect(language) {
-                val appLocales = if (language == "auto") {
+                val lang = language ?: return@LaunchedEffect
+                val appLocales = if (lang == "auto") {
                     LocaleListCompat.getEmptyLocaleList()
                 } else {
-                    LocaleListCompat.forLanguageTags(language)
+                    LocaleListCompat.forLanguageTags(lang)
                 }
                 if (AppCompatDelegate.getApplicationLocales() != appLocales) {
                     AppCompatDelegate.setApplicationLocales(appLocales)
@@ -113,13 +114,8 @@ class MainActivity : AppCompatActivity() {
 private fun SpeedrunMainScreen() {
     val navController = rememberNavController()
 
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        containerColor = MaterialTheme.colorScheme.background,
-    ) { innerPadding ->
-        AppNavigation(
-            navController = navController,
-            modifier = Modifier.padding(innerPadding)
-        )
-    }
+    AppNavigation(
+        navController = navController,
+        modifier = Modifier.fillMaxSize()
+    )
 }

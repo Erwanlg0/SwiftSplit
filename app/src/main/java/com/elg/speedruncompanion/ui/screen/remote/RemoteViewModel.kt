@@ -6,6 +6,8 @@ import com.elg.speedruncompanion.application.port.input.*
 import com.elg.speedruncompanion.application.port.output.ConnectionState
 import com.elg.speedruncompanion.application.port.output.SettingsPort
 import com.elg.speedruncompanion.domain.model.NetworkPreferences
+import com.elg.speedruncompanion.domain.model.TimerLayoutPreferences
+import com.elg.speedruncompanion.domain.model.TimeFormatOptions
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -24,7 +26,8 @@ class RemoteViewModel @Inject constructor(
     private val disconnectLiveSplitUseCase: DisconnectLiveSplitUseCase,
     private val sendLiveSplitCommandUseCase: SendLiveSplitCommandUseCase,
     observeLiveSplitConnectionUseCase: ObserveLiveSplitConnectionUseCase,
-    settingsPort: SettingsPort
+    private val settingsPort: SettingsPort,
+    private val updateTimerLayoutPreferencesUseCase: UpdateTimerLayoutPreferencesUseCase
 ) : ViewModel() {
 
     private val _host = MutableStateFlow("192.168.1.10")
@@ -45,6 +48,15 @@ class RemoteViewModel @Inject constructor(
     private val _remotePhase = MutableStateFlow("NotRunning")
     val remotePhase = _remotePhase.asStateFlow()
 
+    private val _remoteSplitName = MutableStateFlow<String?>(null)
+    val remoteSplitName = _remoteSplitName.asStateFlow()
+
+    private val _remoteSplitIndex = MutableStateFlow(-1)
+    val remoteSplitIndex = _remoteSplitIndex.asStateFlow()
+
+    private val _remoteDelta = MutableStateFlow<String?>(null)
+    val remoteDelta = _remoteDelta.asStateFlow()
+
     private var pollingJob: Job? = null
 
     val connectionState = observeLiveSplitConnectionUseCase().stateIn(
@@ -59,7 +71,23 @@ class RemoteViewModel @Inject constructor(
         initialValue = NetworkPreferences.DEFAULT
     )
 
+    val timerLayoutPreferences = settingsPort.observeTimerLayoutPreferences().stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = TimerLayoutPreferences.DEFAULT
+    )
+
     init {
+        viewModelScope.launch {
+            settingsPort.observeRemoteHost().collect { h ->
+                _host.value = h
+            }
+        }
+        viewModelScope.launch {
+            settingsPort.observeRemotePort().collect { p ->
+                _port.value = p
+            }
+        }
         viewModelScope.launch {
             combine(connectionState, networkPreferences) { state, prefs ->
                 state to prefs.pollingDelayMs
@@ -76,14 +104,41 @@ class RemoteViewModel @Inject constructor(
 
     fun updateHost(h: String) {
         _host.value = h
+        viewModelScope.launch {
+            settingsPort.setRemoteHost(h)
+        }
     }
 
     fun updatePort(p: String) {
         _port.value = p
+        viewModelScope.launch {
+            settingsPort.setRemotePort(p)
+        }
     }
 
     fun clearError() {
         _errorMessage.value = null
+    }
+
+    fun setShowLeadingZeros(enabled: Boolean) {
+        viewModelScope.launch {
+            val current = timerLayoutPreferences.value
+            updateTimerLayoutPreferencesUseCase(current.copy(timeFormat = current.timeFormat.copy(showLeadingZeros = enabled)))
+        }
+    }
+
+    fun setShowFraction(enabled: Boolean) {
+        viewModelScope.launch {
+            val current = timerLayoutPreferences.value
+            updateTimerLayoutPreferencesUseCase(current.copy(timeFormat = current.timeFormat.copy(showFraction = enabled)))
+        }
+    }
+
+    fun setDecimalPlaces(places: Int) {
+        viewModelScope.launch {
+            val current = timerLayoutPreferences.value
+            updateTimerLayoutPreferencesUseCase(current.copy(timeFormat = current.timeFormat.copy(decimalPlaces = places.coerceIn(1, 3))))
+        }
     }
 
     fun connect() {
@@ -121,11 +176,27 @@ class RemoteViewModel @Inject constructor(
         pollingJob = viewModelScope.launch {
             while (isActive) {
                 val phaseResult = sendLiveSplitCommandUseCase("getcurrenttimerphase")
-                _remotePhase.value = phaseResult.getOrNull()?.trim() ?: "NotRunning"
+                val phase = phaseResult.getOrNull()?.trim() ?: "NotRunning"
+                _remotePhase.value = phase
 
                 val timeResult = sendLiveSplitCommandUseCase("getcurrenttime")
                 val rawTime = timeResult.getOrNull()?.trim() ?: "00:00:00.000"
                 _remoteTime.value = formatRemoteTime(rawTime)
+
+                if (phase == "Running" || phase == "Paused") {
+                    val idxResult = sendLiveSplitCommandUseCase("getsplitindex")
+                    _remoteSplitIndex.value = idxResult.getOrNull()?.trim()?.toIntOrNull() ?: -1
+
+                    val nameResult = sendLiveSplitCommandUseCase("getcurrentsplitname")
+                    _remoteSplitName.value = nameResult.getOrNull()?.trim()
+
+                    val deltaResult = sendLiveSplitCommandUseCase("getdelta")
+                    _remoteDelta.value = deltaResult.getOrNull()?.trim()
+                } else {
+                    _remoteSplitIndex.value = -1
+                    _remoteSplitName.value = null
+                    _remoteDelta.value = null
+                }
 
                 delay(pollingDelayMs)
             }
@@ -149,6 +220,9 @@ class RemoteViewModel @Inject constructor(
         pollingJob = null
         _remoteTime.value = "00:00:00.000"
         _remotePhase.value = "NotRunning"
+        _remoteSplitIndex.value = -1
+        _remoteSplitName.value = null
+        _remoteDelta.value = null
     }
 
     override fun onCleared() {

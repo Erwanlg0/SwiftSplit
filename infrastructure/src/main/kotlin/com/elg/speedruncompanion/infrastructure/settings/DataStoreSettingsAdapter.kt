@@ -36,6 +36,8 @@ class DataStoreSettingsAdapter @Inject constructor(
         val TIMER_COLOR_MODE = stringPreferencesKey("timer_color_mode")
         val POLLING_DELAY_MS = longPreferencesKey("polling_delay_ms")
         val NETWORK_TIMEOUT_MS = longPreferencesKey("network_timeout_ms")
+        val REMOTE_HOST = stringPreferencesKey("remote_host")
+        val REMOTE_PORT = stringPreferencesKey("remote_port")
     }
 
     override fun observeTimingMethod(): Flow<TimingMethod> {
@@ -162,6 +164,30 @@ class DataStoreSettingsAdapter @Inject constructor(
         context.dataStore.edit { prefs ->
             prefs[PreferencesKeys.POLLING_DELAY_MS] = preferences.pollingDelayMs
             prefs[PreferencesKeys.NETWORK_TIMEOUT_MS] = preferences.networkTimeoutMs
+        }
+    }
+
+    override fun observeRemoteHost(): Flow<String> {
+        return context.dataStore.data.map { preferences ->
+            preferences[PreferencesKeys.REMOTE_HOST] ?: "192.168.1.10"
+        }
+    }
+
+    override suspend fun setRemoteHost(host: String) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.REMOTE_HOST] = host
+        }
+    }
+
+    override fun observeRemotePort(): Flow<String> {
+        return context.dataStore.data.map { preferences ->
+            preferences[PreferencesKeys.REMOTE_PORT] ?: "16834"
+        }
+    }
+
+    override suspend fun setRemotePort(port: String) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.REMOTE_PORT] = port
         }
     }
 }

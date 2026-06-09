@@ -15,6 +15,7 @@ import com.elg.speedruncompanion.ui.screen.editor.SplitEditorScreen
 import com.elg.speedruncompanion.ui.screen.layout.LayoutEditorScreen
 import com.elg.speedruncompanion.ui.screen.remote.RemoteScreen
 import com.elg.speedruncompanion.ui.screen.runs.RunsListScreen
+import com.elg.speedruncompanion.ui.screen.settings.AboutScreen
 import com.elg.speedruncompanion.ui.screen.settings.SettingsScreen
 import com.elg.speedruncompanion.ui.screen.timer.TimerScreen
 
@@ -101,18 +102,27 @@ fun AppNavigation(
 
         composable(Screen.Remote.route) {
             RemoteScreen(
-                onNavigateBack = { navController.popBackStack() }
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToLayoutEditor = { navController.navigate(Screen.LayoutEditor.route) }
             )
         }
 
         composable(Screen.Settings.route) {
             SettingsScreen(
-                onNavigateBack = { navController.popBackStack() }
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToAbout = { navController.navigate(Screen.About.route) },
+                onNavigateToLayoutEditor = { navController.navigate(Screen.LayoutEditor.route) }
             )
         }
 
         composable(Screen.LayoutEditor.route) {
             LayoutEditorScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(Screen.About.route) {
+            AboutScreen(
                 onNavigateBack = { navController.popBackStack() }
             )
         }

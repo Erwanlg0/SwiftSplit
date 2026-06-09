@@ -58,7 +58,7 @@
     <string name="remote_console_response">Réponse de la console</string>
     <string name="remote_no_response">Aucune réponse pour le moment</string>
     <string name="remote_controls">Commandes à distance</string>
-    <string name="remote_btn_split">Split / Démarrer</string>
+    <string name="remote_btn_split">Démarrer / Split / Terminer</string>
     <string name="remote_btn_pause">Pause</string>
     <string name="remote_btn_undo">Annuler le split</string>
     <string name="remote_btn_skip">Passer le split</string>
@@ -98,6 +98,10 @@
     <string name="settings_network_timeout_desc">Temps d\'attente maximum lors de la connexion ou de la lecture du serveur LiveSplit</string>
     <string name="settings_network_ms_value">%1$d ms</string>
 
+    <!-- Personnalisation -->
+    <string name="settings_customization">Personnalisation</string>
+    <string name="settings_customization_desc">Format du chrono, couleurs et préférences d\'affichage</string>
+
     <!-- Layout Editor -->
     <string name="layout_editor_title">Mise en page du chrono</string>
     <string name="layout_editor_preview_header">Aperçu</string>
@@ -128,4 +132,30 @@
     <string name="timer_control_undo">Annuler le split</string>
     <string name="timer_control_skip">Passer le split</string>
     <string name="timer_control_reset">Réinitialiser</string>
+
+    <!-- About / Legal Screen -->
+    <string name="settings_about_header">À propos</string>
+    <string name="settings_about_title">À propos &amp; Mentions légales</string>
+    <string name="settings_about_desc">Mentions légales, version et licences open-source</string>
+    <string name="about_title">À propos &amp; Licences</string>
+    <string name="about_version">Version %1$s</string>
+    <string name="about_developer">Développeur</string>
+    <string name="about_developer_value">Charles</string>
+    <string name="about_legal_mentions_title">Mentions Légales</string>
+    <string name="about_legal_mentions_desc">Cette application mobile est éditée en tant que projet open-source. Les fonctionnalités s\'exécutent localement sur l\'appareil sans aucune collecte de données personnelles.</string>
+    <string name="about_licenses_title">Licences Open Source</string>
+    <string name="about_licenses_desc">Cette application utilise des bibliothèques logicielles tierces sous licences libres. Voici les détails et droits correspondants :</string>
+    <string name="license_livesplit_core_title">LiveSplit Core</string>
+    <string name="license_livesplit_core_desc">Double licence MIT ou Apache License 2.0</string>
+    <string name="license_view_mit">Voir la Licence MIT</string>
+    <string name="license_view_apache">Voir la Licence Apache 2.0</string>
+
+    <!-- Timer Control Finish -->
+    <string name="timer_control_finish">Terminer</string>
+
+    <!-- Timer Phases -->
+    <string name="phase_running">En cours</string>
+    <string name="phase_paused">En pause</string>
+    <string name="phase_ended">Terminé</string>
+    <string name="phase_not_running">Arrêté</string>
 </resources>

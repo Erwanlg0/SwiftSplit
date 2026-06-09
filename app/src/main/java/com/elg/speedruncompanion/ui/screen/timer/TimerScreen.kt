@@ -3,6 +3,7 @@ package com.elg.speedruncompanion.ui.screen.timer
 import android.app.Activity
 import android.view.WindowManager
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -109,16 +110,27 @@ fun TimerScreen(
         }
     }
 
-    // Manage screen orientation based on fullscreen state
+    // Manage screen orientation and system bars visibility based on fullscreen state
     DisposableEffect(isFullscreen) {
         val activity = context.findActivity()
-        if (isFullscreen) {
-            activity?.requestedOrientation = android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-        } else {
-            activity?.requestedOrientation = android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+        val window = activity?.window
+        if (window != null) {
+            val insetsController = androidx.core.view.WindowCompat.getInsetsController(window, window.decorView)
+            if (isFullscreen) {
+                activity.requestedOrientation = android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+                insetsController.hide(androidx.core.view.WindowInsetsCompat.Type.systemBars())
+                insetsController.systemBarsBehavior = androidx.core.view.WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            } else {
+                activity.requestedOrientation = android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+                insetsController.show(androidx.core.view.WindowInsetsCompat.Type.systemBars())
+            }
         }
         onDispose {
             activity?.requestedOrientation = android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+            if (window != null) {
+                val insetsController = androidx.core.view.WindowCompat.getInsetsController(window, window.decorView)
+                insetsController.show(androidx.core.view.WindowInsetsCompat.Type.systemBars())
+            }
         }
     }
 
@@ -128,12 +140,11 @@ fun TimerScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .background(androidx.compose.ui.graphics.Color.Black)
-                .pointerInput(Unit) {
-                    detectTapGestures(
-                        onDoubleTap = {
-                            isFullscreen = false
-                        }
-                    )
+                .clickable(
+                    interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
+                    indication = null
+                ) {
+                    viewModel.pauseResume()
                 },
             contentAlignment = Alignment.Center
         ) {
@@ -187,6 +198,36 @@ fun TimerScreen(
                     color = timerColor,
                     textAlign = androidx.compose.ui.text.style.TextAlign.Center
                 )
+
+                Spacer(modifier = Modifier.height(8.dp))
+                val stateText = when (timerState) {
+                    is TimerState.Running -> stringResource(R.string.phase_running)
+                    is TimerState.Paused -> stringResource(R.string.phase_paused)
+                    is TimerState.Finished -> stringResource(R.string.phase_ended)
+                    else -> stringResource(R.string.phase_not_running)
+                }
+                Surface(
+                    shape = MaterialTheme.shapes.small,
+                    color = when (timerState) {
+                        is TimerState.Running -> colors.success.copy(alpha = 0.2f)
+                        is TimerState.Paused -> colors.warning.copy(alpha = 0.2f)
+                        is TimerState.Finished -> colors.info.copy(alpha = 0.2f)
+                        else -> colors.textDisabled.copy(alpha = 0.2f)
+                    }
+                ) {
+                    Text(
+                        text = stateText.uppercase(),
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = when (timerState) {
+                            is TimerState.Running -> colors.success
+                            is TimerState.Paused -> colors.warning
+                            is TimerState.Finished -> colors.info
+                            else -> colors.textSecondary
+                        },
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                    )
+                }
 
                 // Current Segment Name or Completed indicator
                 val currentSegmentName = if (timerState is TimerState.Finished) {
@@ -300,6 +341,8 @@ fun TimerScreen(
                         else -> "Personal Best"
                     }
 
+                    val isLastSplit = currentRun.segments.let { currentIndex == it.size - 1 }
+
                     SplitList(
                         run = currentRun,
                         currentSegmentIndex = currentIndex,
@@ -335,6 +378,7 @@ fun TimerScreen(
                     // Controls
                     TimerControls(
                         timerState = timerState,
+                        isLastSplit = isLastSplit,
                         onStartSplit = {
                             if (timerState is TimerState.Idle) {
                                 viewModel.startTimer()

@@ -12,6 +12,6 @@ fun TimerDisplayColorToken.toComposeColor(colors: SpeedrunColorScheme) = when (t
     TimerDisplayColorToken.BEST_SEGMENT -> colors.bestSegment
     TimerDisplayColorToken.STATE_IDLE -> colors.timerTextDim
     TimerDisplayColorToken.STATE_RUNNING -> colors.success
-    TimerDisplayColorToken.STATE_PAUSED -> colors.info
-    TimerDisplayColorToken.STATE_FINISHED -> colors.bestSegment
+    TimerDisplayColorToken.STATE_PAUSED -> colors.timerTextDim
+    TimerDisplayColorToken.STATE_FINISHED -> colors.info
 }

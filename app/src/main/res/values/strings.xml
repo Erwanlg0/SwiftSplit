@@ -58,7 +58,7 @@
     <string name="remote_console_response">Console Response</string>
     <string name="remote_no_response">No response yet</string>
     <string name="remote_controls">Remote Controls</string>
-    <string name="remote_btn_split">Split / Start</string>
+    <string name="remote_btn_split">Start / Split / Finish</string>
     <string name="remote_btn_pause">Pause</string>
     <string name="remote_btn_undo">Undo Split</string>
     <string name="remote_btn_skip">Skip Split</string>
@@ -98,6 +98,10 @@
     <string name="settings_network_timeout_desc">Maximum wait time when connecting or reading from the LiveSplit server</string>
     <string name="settings_network_ms_value">%1$d ms</string>
 
+    <!-- Customization -->
+    <string name="settings_customization">Customization</string>
+    <string name="settings_customization_desc">Timer format, colors and display preferences</string>
+
     <!-- Layout Editor -->
     <string name="layout_editor_title">Timer Layout</string>
     <string name="layout_editor_preview_header">Preview</string>
@@ -128,4 +132,30 @@
     <string name="timer_control_undo">Undo split</string>
     <string name="timer_control_skip">Skip split</string>
     <string name="timer_control_reset">Reset</string>
+
+    <!-- About / Legal Screen -->
+    <string name="settings_about_header">About</string>
+    <string name="settings_about_title">About &amp; Licenses</string>
+    <string name="settings_about_desc">Legal notices, version and open source licenses</string>
+    <string name="about_title">About &amp; Licenses</string>
+    <string name="about_version">Version %1$s</string>
+    <string name="about_developer">Developer</string>
+    <string name="about_developer_value">Charles</string>
+    <string name="about_legal_mentions_title">Legal Mentions</string>
+    <string name="about_legal_mentions_desc">This mobile application is published as an open source project. All features are run locally on the device without data collection.</string>
+    <string name="about_licenses_title">Open Source Licenses</string>
+    <string name="about_licenses_desc">This application uses libraries under open-source licenses. Below are the details of the third-party components:</string>
+    <string name="license_livesplit_core_title">LiveSplit Core</string>
+    <string name="license_livesplit_core_desc">Dual-licensed under MIT or Apache License 2.0</string>
+    <string name="license_view_mit">View MIT License</string>
+    <string name="license_view_apache">View Apache License 2.0</string>
+
+    <!-- Timer Control Finish -->
+    <string name="timer_control_finish">Finish</string>
+
+    <!-- Timer Phases -->
+    <string name="phase_running">Running</string>
+    <string name="phase_paused">Paused</string>
+    <string name="phase_ended">Finished</string>
+    <string name="phase_not_running">Stopped</string>
 </resources>

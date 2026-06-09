@@ -137,7 +137,7 @@ class TimerManager @Inject constructor(
         val shouldSaveQuickRun = settingsPort.observeSaveQuickRuns().first()
 
         if (isQuickRun && !shouldSaveQuickRun) {
-            runRepository.delete(current.run.id)
+            // Do not delete here, deletion will happen on screen exit/dismiss
         } else if (saveAttempt) {
             val nowStr = SimpleDateFormat("MM/dd/yyyy HH:mm:ss", Locale.US).format(Date())
             val attemptId = current.run.attemptCount + 1
@@ -158,6 +158,20 @@ class TimerManager @Inject constructor(
                 val splitVal = current.splitTimes[idx]
                 val segmentVal = SplitTimeCalculator.getSegmentTime(current.splitTimes, idx)
 
+                val newSplitTimes = segment.splitTimes.toMutableMap()
+                
+                // If the run is completed, we always save these split times as the "last run" splits,
+                // and if it's a Personal Best (or it's the first time), we also save them as the Personal Best comparison.
+                if (isCompleted && splitVal != null && finalTime != null) {
+                    val pbTime = current.run.personalBest?.getTime(current.timingMethod)
+                    if (pbTime == null || finalTime < pbTime) {
+                        newSplitTimes[ComparisonName.PERSONAL_BEST] = SplitTime(
+                            realTime = if (current.timingMethod == TimingMethod.REAL_TIME) splitVal else segment.splitTimes[ComparisonName.PERSONAL_BEST]?.realTime,
+                            gameTime = if (current.timingMethod == TimingMethod.GAME_TIME) splitVal else segment.splitTimes[ComparisonName.PERSONAL_BEST]?.gameTime
+                        )
+                    }
+                }
+
                 if (segmentVal != null) {
                     val newHistoryEntry = SegmentHistoryEntry(
                         attemptId = attemptId,
@@ -177,24 +191,13 @@ class TimerManager @Inject constructor(
                         segment.bestSegmentTime
                     }
 
-                    val newSplitTimes = segment.splitTimes.toMutableMap()
-                    if (isCompleted && finalTime != null) {
-                        val pbTime = current.run.personalBest?.getTime(current.timingMethod)
-                        if (pbTime == null || finalTime < pbTime) {
-                            newSplitTimes[ComparisonName.PERSONAL_BEST] = SplitTime(
-                                realTime = if (current.timingMethod == TimingMethod.REAL_TIME) splitVal else segment.splitTimes[ComparisonName.PERSONAL_BEST]?.realTime,
-                                gameTime = if (current.timingMethod == TimingMethod.GAME_TIME) splitVal else segment.splitTimes[ComparisonName.PERSONAL_BEST]?.gameTime
-                            )
-                        }
-                    }
-
                     segment.copy(
                         bestSegmentTime = newBest,
                         segmentHistory = segment.segmentHistory + newHistoryEntry,
                         splitTimes = newSplitTimes
                     )
                 } else {
-                    segment
+                    segment.copy(splitTimes = newSplitTimes)
                 }
             }
 
