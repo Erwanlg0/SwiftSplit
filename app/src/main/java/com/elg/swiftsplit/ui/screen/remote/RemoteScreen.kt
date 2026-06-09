@@ -32,9 +32,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.elg.swiftsplit.application.port.output.ConnectionState
-import com.elg.swiftsplit.ui.theme.SpeedrunThemeColors
+import com.elg.swiftsplit.ui.theme.SwiftSplitThemeColors
 import com.elg.swiftsplit.R
 
 import androidx.compose.ui.res.stringResource
@@ -138,7 +138,7 @@ fun RemoteScreen(
     val layoutPrefs by viewModel.timerLayoutPreferences.collectAsState()
     val smoothRemoteTime = rememberAnimatedRemoteTime(remoteTime, remotePhase, layoutPrefs.timeFormat)
     val errorMessage by viewModel.errorMessage.collectAsState()
-    val colors = SpeedrunThemeColors.colors
+    val colors = SwiftSplitThemeColors.colors
     val context = LocalContext.current
     var isFullscreen by rememberSaveable { mutableStateOf(false) }
 
@@ -852,7 +852,7 @@ fun RemoteScreen(
                                 colors = ButtonDefaults.buttonColors(containerColor = colors.warning),
                                 modifier = Modifier.weight(1f)
                             ) {
-                                Icon(Icons.Default.Undo, contentDescription = null, modifier = Modifier.size(16.dp))
+                                Icon(Icons.AutoMirrored.Filled.Undo, contentDescription = null, modifier = Modifier.size(16.dp))
                                 Spacer(modifier = Modifier.width(4.dp))
                                 Text(stringResource(R.string.remote_btn_undo), style = MaterialTheme.typography.labelSmall)
                             }

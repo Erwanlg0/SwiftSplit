@@ -3,6 +3,7 @@ package com.elg.swiftsplit.ui.screen.timer.components
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.automirrored.filled.Undo
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -12,7 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.elg.swiftsplit.domain.model.TimerState
-import com.elg.swiftsplit.ui.theme.SpeedrunThemeColors
+import com.elg.swiftsplit.ui.theme.SwiftSplitThemeColors
 import com.elg.swiftsplit.R
 
 import androidx.compose.ui.res.stringResource
@@ -28,7 +29,7 @@ fun TimerControls(
     modifier: Modifier = Modifier,
     isLastSplit: Boolean = false
 ) {
-    val colors = SpeedrunThemeColors.colors
+    val colors = SwiftSplitThemeColors.colors
 
     Row(
         modifier = modifier
@@ -57,7 +58,7 @@ fun TimerControls(
             }
         ) {
             Icon(
-                Icons.Default.Undo,
+                Icons.AutoMirrored.Filled.Undo,
                 contentDescription = stringResource(R.string.timer_control_undo),
                 tint = when (timerState) {
                     is TimerState.Running -> if (timerState.currentSegmentIndex > 0) colors.warning else colors.textDisabled

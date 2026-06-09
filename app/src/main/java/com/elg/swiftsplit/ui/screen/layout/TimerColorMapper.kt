@@ -4,9 +4,9 @@ import androidx.compose.ui.graphics.Color
 import com.elg.swiftsplit.domain.model.StateColorPreset
 import com.elg.swiftsplit.domain.model.TimerDisplayColorToken
 import com.elg.swiftsplit.domain.model.TimerLayoutPreferences
-import com.elg.swiftsplit.ui.theme.SpeedrunColorScheme
+import com.elg.swiftsplit.ui.theme.SwiftSplitColorScheme
 
-fun TimerDisplayColorToken.toComposeColor(colors: SpeedrunColorScheme) = when (this) {
+fun TimerDisplayColorToken.toComposeColor(colors: SwiftSplitColorScheme) = when (this) {
     TimerDisplayColorToken.DEFAULT -> colors.timerText
     TimerDisplayColorToken.AHEAD_GAINING -> colors.aheadGaining
     TimerDisplayColorToken.AHEAD_LOSING -> colors.aheadLosing
@@ -20,7 +20,7 @@ fun TimerDisplayColorToken.toComposeColor(colors: SpeedrunColorScheme) = when (t
 }
 
 fun TimerDisplayColorToken.toComposeColorWithPrefs(
-    colors: SpeedrunColorScheme,
+    colors: SwiftSplitColorScheme,
     prefs: TimerLayoutPreferences
 ): Color = when (this) {
     TimerDisplayColorToken.STATE_RUNNING -> prefs.stateColorRunning.toComposeColor(colors)
@@ -29,7 +29,7 @@ fun TimerDisplayColorToken.toComposeColorWithPrefs(
     else -> toComposeColor(colors)
 }
 
-fun StateColorPreset.toComposeColor(colors: SpeedrunColorScheme): Color = when (this) {
+fun StateColorPreset.toComposeColor(colors: SwiftSplitColorScheme): Color = when (this) {
     StateColorPreset.GREEN -> colors.success
     StateColorPreset.BLUE -> colors.info
     StateColorPreset.GRAY -> colors.timerTextDim

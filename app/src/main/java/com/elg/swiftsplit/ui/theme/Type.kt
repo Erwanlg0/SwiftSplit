@@ -9,7 +9,7 @@ import androidx.compose.ui.unit.sp
 
 val TimerFontFamily = FontFamily.Monospace
 
-val SpeedrunTypography = Typography(
+val SwiftSplitTypography = Typography(
     
     displayLarge = TextStyle(
         fontFamily = TimerFontFamily,

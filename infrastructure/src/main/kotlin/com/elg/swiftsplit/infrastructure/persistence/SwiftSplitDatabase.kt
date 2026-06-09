@@ -18,19 +18,19 @@ import com.elg.swiftsplit.infrastructure.persistence.entity.*
     version = 1,
     exportSchema = false
 )
-abstract class SpeedrunDatabase : RoomDatabase() {
+abstract class SwiftSplitDatabase : RoomDatabase() {
 
     abstract fun runDao(): RunDao
 
     companion object {
-        private const val DB_NAME = "speedrun_companion.db"
+        private const val DB_NAME = "swiftsplit.db"
 
-        fun create(context: Context): SpeedrunDatabase {
+        fun create(context: Context): SwiftSplitDatabase {
             return Room.databaseBuilder(
                 context.applicationContext,
-                SpeedrunDatabase::class.java,
+                SwiftSplitDatabase::class.java,
                 DB_NAME
-            ).fallbackToDestructiveMigration().build()
+            ).fallbackToDestructiveMigration(dropAllTables = true).build()
         }
     }
 }

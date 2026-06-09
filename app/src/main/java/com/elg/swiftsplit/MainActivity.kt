@@ -20,7 +20,7 @@ import androidx.navigation.compose.rememberNavController
 import com.elg.swiftsplit.application.port.input.ImportRunUseCase
 import com.elg.swiftsplit.application.port.output.SettingsPort
 import com.elg.swiftsplit.navigation.AppNavigation
-import com.elg.swiftsplit.ui.theme.SpeedrunTheme
+import com.elg.swiftsplit.ui.theme.SwiftSplitTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -61,8 +61,8 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
-            SpeedrunTheme(darkTheme = darkTheme) {
-                SpeedrunMainScreen()
+            SwiftSplitTheme(darkTheme = darkTheme) {
+                SwiftSplitMainScreen()
             }
         }
         handleIntent(intent)
@@ -109,7 +109,7 @@ class MainActivity : AppCompatActivity() {
 }
 
 @Composable
-private fun SpeedrunMainScreen() {
+private fun SwiftSplitMainScreen() {
     val navController = rememberNavController()
 
     AppNavigation(

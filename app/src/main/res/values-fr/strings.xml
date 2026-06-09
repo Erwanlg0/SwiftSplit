@@ -9,7 +9,7 @@
     <string name="confirm">Confirmer</string>
 
     <!-- Runs List Screen -->
-    <string name="runs_list_title">SpeedrunCompanion</string>
+    <string name="runs_list_title">SwiftSplit</string>
     <string name="runs_list_pc_remote">Télécommande PC</string>
     <string name="runs_list_settings">Paramètres</string>
     <string name="runs_list_empty_title">Aucun split importé</string>

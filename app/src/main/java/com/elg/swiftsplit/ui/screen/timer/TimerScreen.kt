@@ -7,12 +7,12 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.filled.List
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -23,7 +23,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.elg.swiftsplit.domain.model.ComparisonName
 import com.elg.swiftsplit.domain.model.Delta
 import com.elg.swiftsplit.domain.model.Run
@@ -38,7 +38,7 @@ import com.elg.swiftsplit.ui.screen.timer.components.RunHeader
 import com.elg.swiftsplit.ui.screen.timer.components.SplitList
 import com.elg.swiftsplit.ui.screen.timer.components.TimerControls
 import com.elg.swiftsplit.ui.screen.timer.components.TimerDisplay
-import com.elg.swiftsplit.ui.theme.SpeedrunThemeColors
+import com.elg.swiftsplit.ui.theme.SwiftSplitThemeColors
 import com.elg.swiftsplit.R
 
 import androidx.compose.ui.res.stringResource
@@ -96,7 +96,7 @@ fun TimerScreen(
     val currentElapsed by viewModel.currentElapsed.collectAsState()
     val layoutPreferences by viewModel.layoutPreferences.collectAsState()
 
-    val colors = SpeedrunThemeColors.colors
+    val colors = SwiftSplitThemeColors.colors
     val context = LocalContext.current
     var isFullscreen by rememberSaveable { mutableStateOf(false) }
     var showSplitsInFullscreen by rememberSaveable(layoutPreferences.showSplits) {
@@ -415,7 +415,7 @@ fun TimerScreen(
                     )
                 ) {
                     Icon(
-                        imageVector = Icons.Default.List,
+                        imageVector = Icons.AutoMirrored.Filled.List,
                         contentDescription = "Toggle Splits",
                         tint = androidx.compose.ui.graphics.Color.White
                     )
@@ -441,7 +441,7 @@ fun TimerScreen(
                     navigationIcon = {
                         IconButton(onClick = onNavigateBack) {
                             Icon(
-                                Icons.Default.ArrowBack,
+                                Icons.AutoMirrored.Filled.ArrowBack,
                                 contentDescription = stringResource(R.string.back),
                                 tint = colors.textPrimary
                             )

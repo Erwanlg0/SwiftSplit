@@ -18,7 +18,7 @@ import com.elg.swiftsplit.domain.model.TimeSpan
 import com.elg.swiftsplit.domain.model.TimerLayoutPreferences
 import com.elg.swiftsplit.domain.model.TimingMethod
 import com.elg.swiftsplit.domain.service.SplitTimeCalculator
-import com.elg.swiftsplit.ui.theme.SpeedrunThemeColors
+import com.elg.swiftsplit.ui.theme.SwiftSplitThemeColors
 
 @Composable
 fun SplitRow(
@@ -34,7 +34,7 @@ fun SplitRow(
     layoutPreferences: TimerLayoutPreferences = TimerLayoutPreferences.DEFAULT,
     modifier: Modifier = Modifier
 ) {
-    val colors = SpeedrunThemeColors.colors
+    val colors = SwiftSplitThemeColors.colors
     val compSplit = segment.splitTimes[com.elg.swiftsplit.domain.model.ComparisonName(comparisonName)]?.getTime(timingMethod)
 
     val delta = if (isCompleted && elapsedSplit != null) {

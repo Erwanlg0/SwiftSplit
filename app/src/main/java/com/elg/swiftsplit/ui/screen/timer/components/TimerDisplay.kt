@@ -18,7 +18,7 @@ import com.elg.swiftsplit.domain.model.TimerLayoutPreferences
 import com.elg.swiftsplit.domain.model.TimerState
 import com.elg.swiftsplit.domain.service.TimerDisplayColorResolver
 import com.elg.swiftsplit.ui.screen.layout.toComposeColorWithPrefs
-import com.elg.swiftsplit.ui.theme.SpeedrunThemeColors
+import com.elg.swiftsplit.ui.theme.SwiftSplitThemeColors
 
 @Composable
 fun TimerDisplay(
@@ -31,7 +31,7 @@ fun TimerDisplay(
     fontSize: TextUnit = TextUnit.Unspecified,
     layoutPreferences: TimerLayoutPreferences = TimerLayoutPreferences.DEFAULT
 ) {
-    val colors = SpeedrunThemeColors.colors
+    val colors = SwiftSplitThemeColors.colors
     val colorToken = TimerDisplayColorResolver.resolve(colorMode, timerState, delta)
     val timerColor = colorToken.toComposeColorWithPrefs(colors, layoutPreferences)
 

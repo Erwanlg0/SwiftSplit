@@ -18,7 +18,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.elg.swiftsplit.domain.model.ComparisonName
 import com.elg.swiftsplit.domain.model.Delta
 import com.elg.swiftsplit.domain.model.FullscreenOrientationPreset
@@ -28,8 +28,9 @@ import com.elg.swiftsplit.domain.model.TimeSpan
 import com.elg.swiftsplit.domain.model.TimerColorMode
 import com.elg.swiftsplit.domain.model.TimerState
 import com.elg.swiftsplit.domain.service.TimerDisplayColorResolver
-import com.elg.swiftsplit.ui.theme.SpeedrunThemeColors
+import com.elg.swiftsplit.ui.theme.SwiftSplitThemeColors
 import com.elg.swiftsplit.R
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 
 private sealed class LayoutPreviewState {
     data object Idle : LayoutPreviewState()
@@ -134,7 +135,7 @@ fun LayoutEditorScreen(
     viewModel: LayoutEditorViewModel = hiltViewModel()
 ) {
     val preferences by viewModel.layoutPreferences.collectAsState()
-    val colors = SpeedrunThemeColors.colors
+    val colors = SwiftSplitThemeColors.colors
     var showColorModeMenu by remember { mutableStateOf(false) }
     var showOrientationMenu by remember { mutableStateOf(false) }
     var showSplitsDecimalsMenu by remember { mutableStateOf(false) }
@@ -162,7 +163,7 @@ fun LayoutEditorScreen(
                 title = { Text(stringResource(R.string.layout_editor_title), color = colors.textPrimary) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.back), tint = colors.textPrimary)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back), tint = colors.textPrimary)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = colors.deepBackground)
@@ -502,7 +503,7 @@ private fun StateColorLegend(
     preset: com.elg.swiftsplit.domain.model.StateColorPreset?,
     onPresetSelected: (com.elg.swiftsplit.domain.model.StateColorPreset) -> Unit
 ) {
-    val colors = SpeedrunThemeColors.colors
+    val colors = SwiftSplitThemeColors.colors
     var expanded by remember { mutableStateOf(false) }
 
     Box {

@@ -10,7 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.elg.swiftsplit.domain.model.Run
-import com.elg.swiftsplit.ui.theme.SpeedrunThemeColors
+import com.elg.swiftsplit.ui.theme.SwiftSplitThemeColors
 
 import androidx.compose.ui.res.stringResource
 
@@ -19,12 +19,12 @@ fun RunHeader(
     run: Run,
     modifier: Modifier = Modifier
 ) {
-    val speedrunColors = SpeedrunThemeColors.colors
+    val swiftSplitColors = SwiftSplitThemeColors.colors
  
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .background(speedrunColors.elevatedSurface)
+            .background(swiftSplitColors.elevatedSurface)
             .padding(16.dp)
     ) {
         Row(
@@ -37,12 +37,12 @@ fun RunHeader(
                     text = run.gameInfo.gameName,
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
-                    color = speedrunColors.textPrimary
+                    color = swiftSplitColors.textPrimary
                 )
                 Text(
                     text = run.gameInfo.categoryName,
                     style = MaterialTheme.typography.titleMedium,
-                    color = speedrunColors.textSecondary
+                    color = swiftSplitColors.textSecondary
                 )
             }
              
@@ -50,13 +50,13 @@ fun RunHeader(
                 Text(
                     text = stringResource(com.elg.swiftsplit.R.string.timer_attempts_label),
                     style = MaterialTheme.typography.labelSmall,
-                    color = speedrunColors.textTertiary
+                    color = swiftSplitColors.textTertiary
                 )
                 Text(
                     text = run.attemptCount.toString(),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
-                    color = speedrunColors.textPrimary
+                    color = swiftSplitColors.textPrimary
                 )
             }
         }

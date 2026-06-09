@@ -15,7 +15,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.elg.swiftsplit.domain.model.Run
 import com.elg.swiftsplit.domain.model.TimingMethod
-import com.elg.swiftsplit.ui.theme.SpeedrunThemeColors
+import com.elg.swiftsplit.ui.theme.SwiftSplitThemeColors
 
 import androidx.compose.ui.res.stringResource
 
@@ -28,7 +28,7 @@ fun RunCard(
     onDeleteClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val speedrunColors = SpeedrunThemeColors.colors
+    val swiftSplitColors = SwiftSplitThemeColors.colors
     
     Card(
         modifier = modifier
@@ -39,10 +39,10 @@ fun RunCard(
                 onLongClick = onEditClick
             ),
         colors = CardDefaults.cardColors(
-            containerColor = speedrunColors.cardBackground
+            containerColor = swiftSplitColors.cardBackground
         ),
         border = CardDefaults.outlinedCardBorder().copy(
-            brush = androidx.compose.ui.graphics.SolidColor(speedrunColors.cardBorder)
+            brush = androidx.compose.ui.graphics.SolidColor(swiftSplitColors.cardBorder)
         )
     ) {
         Column(
@@ -60,12 +60,12 @@ fun RunCard(
                         text = run.gameInfo.gameName,
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
-                        color = speedrunColors.textPrimary
+                        color = swiftSplitColors.textPrimary
                     )
                     Text(
                         text = run.gameInfo.categoryName,
                         style = MaterialTheme.typography.titleMedium,
-                        color = speedrunColors.textSecondary
+                        color = swiftSplitColors.textSecondary
                     )
                 }
  
@@ -99,7 +99,7 @@ fun RunCard(
                     Text(
                         text = stringResource(com.elg.swiftsplit.R.string.timer_attempts, run.attemptCount),
                         style = MaterialTheme.typography.bodyMedium,
-                        color = speedrunColors.textTertiary
+                        color = swiftSplitColors.textTertiary
                     )
                 }
  
@@ -108,7 +108,7 @@ fun RunCard(
                     text = pbTime?.formatted() ?: stringResource(com.elg.swiftsplit.R.string.runs_list_no_pb),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
-                    color = pbTime?.let { speedrunColors.aheadGaining } ?: speedrunColors.textTertiary
+                    color = pbTime?.let { swiftSplitColors.aheadGaining } ?: swiftSplitColors.textTertiary
                 )
             }
 
@@ -122,14 +122,14 @@ fun RunCard(
                     Icon(
                         Icons.Default.Edit,
                         contentDescription = "Edit splits",
-                        tint = speedrunColors.textSecondary
+                        tint = swiftSplitColors.textSecondary
                     )
                 }
                 IconButton(onClick = onDeleteClick) {
                     Icon(
                         Icons.Default.Delete,
                         contentDescription = "Delete run",
-                        tint = speedrunColors.error
+                        tint = swiftSplitColors.error
                     )
                 }
             }

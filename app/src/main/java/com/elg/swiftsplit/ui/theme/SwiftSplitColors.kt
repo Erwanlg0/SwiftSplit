@@ -6,7 +6,7 @@ import androidx.compose.runtime.staticCompositionLocalOf
 
 
 @Immutable
-data class SpeedrunColorScheme(
+data class SwiftSplitColorScheme(
     val aheadGaining: Color = AheadGaining,
     val aheadLosing: Color = AheadLosing,
     val behindLosing: Color = BehindLosing,
@@ -29,4 +29,4 @@ data class SpeedrunColorScheme(
     val textDisabled: Color = TextDisabled,
 )
 
-val LocalSpeedrunColors = staticCompositionLocalOf { SpeedrunColorScheme() }
+val LocalSwiftSplitColors = staticCompositionLocalOf { SwiftSplitColorScheme() }

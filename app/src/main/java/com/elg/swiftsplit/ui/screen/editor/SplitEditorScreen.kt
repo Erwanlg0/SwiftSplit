@@ -5,6 +5,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -12,8 +13,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
-import com.elg.swiftsplit.ui.theme.SpeedrunThemeColors
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.elg.swiftsplit.ui.theme.SwiftSplitThemeColors
 import com.elg.swiftsplit.R
 
 import androidx.compose.ui.res.stringResource
@@ -28,7 +29,7 @@ fun SplitEditorScreen(
 ) {
     val run by viewModel.run.collectAsState()
     val segments by viewModel.segments.collectAsState()
-    val colors = SpeedrunThemeColors.colors
+    val colors = SwiftSplitThemeColors.colors
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -37,7 +38,7 @@ fun SplitEditorScreen(
                 title = { Text(stringResource(R.string.editor_title), color = colors.textPrimary) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.back), tint = colors.textPrimary)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back), tint = colors.textPrimary)
                     }
                 },
                 actions = {

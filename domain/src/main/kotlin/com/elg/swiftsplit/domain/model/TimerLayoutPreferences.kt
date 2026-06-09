@@ -23,9 +23,7 @@ enum class StateColorPreset {
     RED,
     ORANGE,
     GOLD,
-    WHITE;
-
-    fun displayName(): String = name
+    WHITE
 }
 
 enum class FullscreenOrientationPreset {

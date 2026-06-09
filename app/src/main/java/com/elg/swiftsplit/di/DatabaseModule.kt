@@ -1,7 +1,7 @@
 package com.elg.swiftsplit.di
 
 import android.content.Context
-import com.elg.swiftsplit.infrastructure.persistence.SpeedrunDatabase
+import com.elg.swiftsplit.infrastructure.persistence.SwiftSplitDatabase
 import com.elg.swiftsplit.infrastructure.persistence.dao.RunDao
 import dagger.Module
 import dagger.Provides
@@ -16,12 +16,12 @@ object DatabaseModule {
 
     @Provides
     @Singleton
-    fun provideDatabase(@ApplicationContext context: Context): SpeedrunDatabase {
-        return SpeedrunDatabase.create(context)
+    fun provideDatabase(@ApplicationContext context: Context): SwiftSplitDatabase {
+        return SwiftSplitDatabase.create(context)
     }
 
     @Provides
-    fun provideRunDao(database: SpeedrunDatabase): RunDao {
+    fun provideRunDao(database: SwiftSplitDatabase): RunDao {
         return database.runDao()
     }
 }

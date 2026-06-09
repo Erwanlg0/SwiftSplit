@@ -16,7 +16,7 @@ import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
 
-private val Context.dataStore by preferencesDataStore(name = "speedrun_companion_settings")
+private val Context.dataStore by preferencesDataStore(name = "swiftsplit_settings")
 
 @Singleton
 class DataStoreSettingsAdapter @Inject constructor(

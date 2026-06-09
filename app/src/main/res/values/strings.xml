@@ -9,7 +9,7 @@
     <string name="confirm">Confirm</string>
 
     <!-- Runs List Screen -->
-    <string name="runs_list_title">SpeedrunCompanion</string>
+    <string name="runs_list_title">SwiftSplit</string>
     <string name="runs_list_pc_remote">PC Remote</string>
     <string name="runs_list_settings">Settings</string>
     <string name="runs_list_empty_title">No runs imported yet</string>

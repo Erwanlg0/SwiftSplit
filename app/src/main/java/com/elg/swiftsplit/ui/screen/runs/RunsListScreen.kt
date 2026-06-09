@@ -18,9 +18,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.elg.swiftsplit.ui.screen.runs.components.RunCard
-import com.elg.swiftsplit.ui.theme.SpeedrunThemeColors
+import com.elg.swiftsplit.ui.theme.SwiftSplitThemeColors
 import android.widget.Toast
 import com.elg.swiftsplit.R
 
@@ -37,7 +37,7 @@ fun RunsListScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
-    val speedrunColors = SpeedrunThemeColors.colors
+    val swiftSplitColors = SwiftSplitThemeColors.colors
 
     var showNewRunDialog by remember { mutableStateOf(false) }
     var showCustomRunForm by remember { mutableStateOf(false) }
@@ -67,7 +67,7 @@ fun RunsListScreen(
             title = {
                 Text(
                     text = stringResource(R.string.new_run_dialog_title),
-                    color = speedrunColors.textPrimary,
+                    color = swiftSplitColors.textPrimary,
                     fontWeight = FontWeight.Bold
                 )
             },
@@ -86,7 +86,7 @@ fun RunsListScreen(
                                     onRunClick(runId)
                                 }
                             },
-                        colors = CardDefaults.cardColors(containerColor = speedrunColors.elevatedSurface)
+                        colors = CardDefaults.cardColors(containerColor = swiftSplitColors.elevatedSurface)
                     ) {
                         Column(modifier = Modifier.padding(12.dp)) {
                             Text(
@@ -98,7 +98,7 @@ fun RunsListScreen(
                             Text(
                                 text = stringResource(R.string.new_run_dialog_quick_desc),
                                 style = MaterialTheme.typography.bodySmall,
-                                color = speedrunColors.textSecondary
+                                color = swiftSplitColors.textSecondary
                             )
                         }
                     }
@@ -111,7 +111,7 @@ fun RunsListScreen(
                                 showNewRunDialog = false
                                 showCustomRunForm = true
                             },
-                        colors = CardDefaults.cardColors(containerColor = speedrunColors.elevatedSurface)
+                        colors = CardDefaults.cardColors(containerColor = swiftSplitColors.elevatedSurface)
                     ) {
                         Column(modifier = Modifier.padding(12.dp)) {
                             Text(
@@ -123,7 +123,7 @@ fun RunsListScreen(
                             Text(
                                 text = stringResource(R.string.new_run_dialog_custom_desc),
                                 style = MaterialTheme.typography.bodySmall,
-                                color = speedrunColors.textSecondary
+                                color = swiftSplitColors.textSecondary
                             )
                         }
                     }
@@ -136,19 +136,19 @@ fun RunsListScreen(
                                 showNewRunDialog = false
                                 fileLauncher.launch("*/*")
                             },
-                        colors = CardDefaults.cardColors(containerColor = speedrunColors.elevatedSurface)
+                        colors = CardDefaults.cardColors(containerColor = swiftSplitColors.elevatedSurface)
                     ) {
                         Column(modifier = Modifier.padding(12.dp)) {
                             Text(
                                 text = stringResource(R.string.new_run_dialog_import),
                                 fontWeight = FontWeight.Bold,
-                                color = speedrunColors.textPrimary
+                                color = swiftSplitColors.textPrimary
                             )
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
                                 text = stringResource(R.string.new_run_dialog_import_desc),
                                 style = MaterialTheme.typography.bodySmall,
-                                color = speedrunColors.textSecondary
+                                color = swiftSplitColors.textSecondary
                             )
                         }
                     }
@@ -161,7 +161,7 @@ fun RunsListScreen(
                     if (showUrlImportDialog) {
                         AlertDialog(
                             onDismissRequest = { showUrlImportDialog = false; urlToImport = "" },
-                            title = { Text("Importer via Lien / URL", color = speedrunColors.textPrimary) },
+                            title = { Text("Importer via Lien / URL", color = swiftSplitColors.textPrimary) },
                             text = {
                                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                     OutlinedTextField(
@@ -205,7 +205,7 @@ fun RunsListScreen(
                                     Text("Annuler")
                                 }
                             },
-                            containerColor = speedrunColors.cardBackground
+                            containerColor = swiftSplitColors.cardBackground
                         )
                     }
 
@@ -216,7 +216,7 @@ fun RunsListScreen(
                                 showNewRunDialog = false
                                 showUrlImportDialog = true
                             },
-                        colors = CardDefaults.cardColors(containerColor = speedrunColors.elevatedSurface)
+                        colors = CardDefaults.cardColors(containerColor = swiftSplitColors.elevatedSurface)
                     ) {
                         Column(modifier = Modifier.padding(12.dp)) {
                             Text(
@@ -228,7 +228,7 @@ fun RunsListScreen(
                             Text(
                                 text = "Télécharger directement un fichier .lss en collant son adresse web",
                                 style = MaterialTheme.typography.bodySmall,
-                                color = speedrunColors.textSecondary
+                                color = swiftSplitColors.textSecondary
                             )
                         }
                     }
@@ -239,11 +239,11 @@ fun RunsListScreen(
                 TextButton(onClick = { showNewRunDialog = false }) {
                     Text(
                         text = stringResource(R.string.cancel),
-                        color = speedrunColors.textSecondary
+                        color = swiftSplitColors.textSecondary
                     )
                 }
             },
-            containerColor = speedrunColors.cardBackground
+            containerColor = swiftSplitColors.cardBackground
         )
     }
 
@@ -259,7 +259,7 @@ fun RunsListScreen(
             title = {
                 Text(
                     text = stringResource(R.string.new_run_dialog_custom),
-                    color = speedrunColors.textPrimary,
+                    color = swiftSplitColors.textPrimary,
                     fontWeight = FontWeight.Bold
                 )
             },
@@ -274,8 +274,8 @@ fun RunsListScreen(
                         label = { Text(stringResource(R.string.new_run_dialog_field_game)) },
                         singleLine = true,
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedTextColor = speedrunColors.textPrimary,
-                            unfocusedTextColor = speedrunColors.textSecondary
+                            focusedTextColor = swiftSplitColors.textPrimary,
+                            unfocusedTextColor = swiftSplitColors.textSecondary
                         )
                     )
 
@@ -285,8 +285,8 @@ fun RunsListScreen(
                         label = { Text(stringResource(R.string.new_run_dialog_field_category)) },
                         singleLine = true,
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedTextColor = speedrunColors.textPrimary,
-                            unfocusedTextColor = speedrunColors.textSecondary
+                            focusedTextColor = swiftSplitColors.textPrimary,
+                            unfocusedTextColor = swiftSplitColors.textSecondary
                         )
                     )
 
@@ -296,8 +296,8 @@ fun RunsListScreen(
                         label = { Text(stringResource(R.string.new_run_dialog_field_platform)) },
                         singleLine = true,
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedTextColor = speedrunColors.textPrimary,
-                            unfocusedTextColor = speedrunColors.textSecondary
+                            focusedTextColor = swiftSplitColors.textPrimary,
+                            unfocusedTextColor = swiftSplitColors.textSecondary
                         )
                     )
                 }
@@ -332,7 +332,7 @@ fun RunsListScreen(
                     Text(stringResource(R.string.cancel))
                 }
             },
-            containerColor = speedrunColors.cardBackground
+            containerColor = swiftSplitColors.cardBackground
         )
     }
 
@@ -344,7 +344,7 @@ fun RunsListScreen(
                     Text(
                         stringResource(R.string.runs_list_title),
                         fontWeight = FontWeight.Bold,
-                        color = speedrunColors.textPrimary
+                        color = swiftSplitColors.textPrimary
                     )
                 },
                 actions = {
@@ -352,19 +352,19 @@ fun RunsListScreen(
                         Icon(
                             Icons.Default.CastConnected,
                             contentDescription = stringResource(R.string.runs_list_pc_remote),
-                            tint = speedrunColors.textPrimary
+                            tint = swiftSplitColors.textPrimary
                         )
                     }
                     IconButton(onClick = onSettingsClick) {
                         Icon(
                             Icons.Default.Settings,
                             contentDescription = stringResource(R.string.runs_list_settings),
-                            tint = speedrunColors.textPrimary
+                            tint = swiftSplitColors.textPrimary
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = speedrunColors.deepBackground
+                    containerColor = swiftSplitColors.deepBackground
                 )
             )
         },
@@ -377,7 +377,7 @@ fun RunsListScreen(
                 Icon(Icons.Default.Add, contentDescription = stringResource(R.string.new_run_dialog_title))
             }
         },
-        containerColor = speedrunColors.deepBackground
+        containerColor = swiftSplitColors.deepBackground
     ) { innerPadding ->
         Box(
             modifier = Modifier
@@ -402,13 +402,13 @@ fun RunsListScreen(
                         Text(
                             text = stringResource(R.string.runs_list_empty_title),
                             style = MaterialTheme.typography.titleMedium,
-                            color = speedrunColors.textSecondary
+                            color = swiftSplitColors.textSecondary
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
                             text = stringResource(R.string.runs_list_empty_desc),
                             style = MaterialTheme.typography.bodyMedium,
-                            color = speedrunColors.textTertiary
+                            color = swiftSplitColors.textTertiary
                         )
                     }
                 }
@@ -431,7 +431,7 @@ fun RunsListScreen(
                     Text(
                         text = "Error: ${state.message}",
                         style = MaterialTheme.typography.bodyLarge,
-                        color = speedrunColors.error,
+                        color = swiftSplitColors.error,
                         modifier = Modifier
                             .align(Alignment.Center)
                             .padding(16.dp)

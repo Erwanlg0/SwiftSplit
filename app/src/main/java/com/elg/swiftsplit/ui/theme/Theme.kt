@@ -10,11 +10,12 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
+import androidx.activity.enableEdgeToEdge
 
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
 
-private val SpeedrunDarkColorScheme = darkColorScheme(
+private val SwiftSplitDarkColorScheme = darkColorScheme(
     primary = DarkPrimary,
     onPrimary = DarkOnPrimary,
     primaryContainer = DarkPrimaryContainer,
@@ -37,7 +38,7 @@ private val SpeedrunDarkColorScheme = darkColorScheme(
     outline = DarkOutline,
 )
 
-private val SpeedrunLightColorScheme = lightColorScheme(
+private val SwiftSplitLightColorScheme = lightColorScheme(
     primary = LightPrimary,
     onPrimary = Color.White,
     primaryContainer = Color(0xFFD1E4FF),
@@ -61,15 +62,15 @@ private val SpeedrunLightColorScheme = lightColorScheme(
 )
 
 @Composable
-fun SpeedrunTheme(
+fun SwiftSplitTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
-    val colorScheme = if (darkTheme) SpeedrunDarkColorScheme else SpeedrunLightColorScheme
-    val speedrunColors = if (darkTheme) {
-        SpeedrunColorScheme()
+    val colorScheme = if (darkTheme) SwiftSplitDarkColorScheme else SwiftSplitLightColorScheme
+    val swiftSplitColors = if (darkTheme) {
+        SwiftSplitColorScheme()
     } else {
-        SpeedrunColorScheme(
+        SwiftSplitColorScheme(
             aheadGaining = LightAheadGaining,
             aheadLosing = LightAheadLosing,
             behindLosing = LightBehindLosing,
@@ -96,36 +97,43 @@ fun SpeedrunTheme(
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
-            val window = (view.context as Activity).window
-            val insetsController = WindowCompat.getInsetsController(window, view)
-            if (darkTheme) {
-                window.statusBarColor = DeepBlack.toArgb()
-                window.navigationBarColor = DeepBlack.toArgb()
-                insetsController.isAppearanceLightStatusBars = false
-                insetsController.isAppearanceLightNavigationBars = false
-            } else {
-                window.statusBarColor = LightBackground.toArgb()
-                window.navigationBarColor = LightBackground.toArgb()
-                insetsController.isAppearanceLightStatusBars = true
-                insetsController.isAppearanceLightNavigationBars = true
+            val activity = view.context as? androidx.activity.ComponentActivity
+            if (activity != null) {
+                if (darkTheme) {
+                    activity.enableEdgeToEdge(
+                        statusBarStyle = androidx.activity.SystemBarStyle.dark(DeepBlack.toArgb()),
+                        navigationBarStyle = androidx.activity.SystemBarStyle.dark(DeepBlack.toArgb())
+                    )
+                } else {
+                    activity.enableEdgeToEdge(
+                        statusBarStyle = androidx.activity.SystemBarStyle.light(
+                            LightBackground.toArgb(),
+                            LightBackground.toArgb()
+                        ),
+                        navigationBarStyle = androidx.activity.SystemBarStyle.light(
+                            LightBackground.toArgb(),
+                            LightBackground.toArgb()
+                        )
+                    )
+                }
             }
         }
     }
 
     CompositionLocalProvider(
-        LocalSpeedrunColors provides speedrunColors
+        LocalSwiftSplitColors provides swiftSplitColors
     ) {
         MaterialTheme(
             colorScheme = colorScheme,
-            typography = SpeedrunTypography,
+            typography = SwiftSplitTypography,
             content = content
         )
     }
 }
 
 
-object SpeedrunThemeColors {
-    val colors: SpeedrunColorScheme
+object SwiftSplitThemeColors {
+    val colors: SwiftSplitColorScheme
         @Composable
-        get() = LocalSpeedrunColors.current
+        get() = LocalSwiftSplitColors.current
 }
