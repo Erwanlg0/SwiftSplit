@@ -26,6 +26,7 @@ class TimerViewModel @Inject constructor(
     private val pauseResumeTimerUseCase: PauseResumeTimerUseCase,
     private val resetTimerUseCase: ResetTimerUseCase,
     private val deleteRunUseCase: DeleteRunUseCase,
+    private val exportRunUseCase: ExportRunUseCase,
     private val settingsPort: SettingsPort,
     observeTimerLayoutPreferencesUseCase: ObserveTimerLayoutPreferencesUseCase
 ) : ViewModel() {
@@ -37,6 +38,14 @@ class TimerViewModel @Inject constructor(
 
     private val _currentElapsed = MutableStateFlow(TimeSpan.ZERO)
     val currentElapsed = _currentElapsed.asStateFlow()
+
+    fun exportCurrentRun(onSuccess: (ByteArray) -> Unit, onFailure: (Throwable) -> Unit) {
+        viewModelScope.launch {
+            exportRunUseCase(RunId(runId))
+                .onSuccess(onSuccess)
+                .onFailure(onFailure)
+        }
+    }
 
     val timerState = observeTimerUseCase().stateIn(
         scope = viewModelScope,

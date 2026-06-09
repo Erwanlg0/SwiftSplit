@@ -123,6 +123,25 @@
     <string name="layout_editor_state_running">En cours</string>
     <string name="layout_editor_state_paused">En pause</string>
     <string name="layout_editor_state_finished">Terminé</string>
+    <string name="layout_editor_preview_tap_hint">Appuyez pour prévisualiser : %1$s</string>
+    <string name="layout_editor_timer_format">Format du chronomètre</string>
+    <string name="layout_editor_format_examples">1s : %1$s · 1h : %2$s</string>
+    <string name="layout_editor_splits_header">Mise en page des splits</string>
+    <string name="layout_editor_show_splits">Afficher la liste des splits</string>
+    <string name="layout_editor_show_splits_desc">Affiche ou masque les segments sous le chronomètre</string>
+    <string name="layout_editor_orientation">Orientation plein écran</string>
+    <string name="layout_editor_orientation_portrait">Vertical (portrait)</string>
+    <string name="layout_editor_orientation_landscape">Horizontal (paysage)</string>
+    <string name="layout_editor_orientation_auto">Automatique (capteur)</string>
+    <string name="layout_editor_splits_fraction">Décimales des splits</string>
+    <string name="layout_editor_splits_fraction_desc">Afficher les fractions de seconde sur les deltas</string>
+    <string name="layout_editor_splits_decimals">Décimales des deltas</string>
+    <string name="layout_editor_delta_ahead_gaining">En avance (gagne)</string>
+    <string name="layout_editor_delta_ahead_losing">En avance (perd)</string>
+    <string name="layout_editor_delta_behind_losing">En retard (perd)</string>
+    <string name="layout_editor_delta_behind_gaining">En retard (gagne)</string>
+    <string name="layout_editor_delta_best_segment">Meilleur segment</string>
+    <string name="layout_editor_delta_exact">Exact</string>
 
     <!-- Timer Control Labels -->
     <string name="timer_control_start">Démarrer</string>
@@ -137,6 +156,8 @@
     <string name="settings_about_header">À propos</string>
     <string name="settings_about_title">À propos &amp; Mentions légales</string>
     <string name="settings_about_desc">Mentions légales, version et licences open-source</string>
+    <string name="settings_rate_app">Noter sur Google Play</string>
+    <string name="settings_rate_app_desc">Laisser un avis sur le Play Store</string>
     <string name="about_title">À propos &amp; Licences</string>
     <string name="about_version">Version %1$s</string>
     <string name="about_developer">Développeur</string>

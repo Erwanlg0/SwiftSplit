@@ -123,6 +123,25 @@
     <string name="layout_editor_state_running">Running</string>
     <string name="layout_editor_state_paused">Paused</string>
     <string name="layout_editor_state_finished">Finished</string>
+    <string name="layout_editor_preview_tap_hint">Tap to preview: %1$s</string>
+    <string name="layout_editor_timer_format">Timer format</string>
+    <string name="layout_editor_format_examples">1s: %1$s · 1h: %2$s</string>
+    <string name="layout_editor_splits_header">Splits layout</string>
+    <string name="layout_editor_show_splits">Show splits list</string>
+    <string name="layout_editor_show_splits_desc">Show or hide segments below the timer</string>
+    <string name="layout_editor_orientation">Fullscreen orientation</string>
+    <string name="layout_editor_orientation_portrait">Vertical (portrait)</string>
+    <string name="layout_editor_orientation_landscape">Horizontal (landscape)</string>
+    <string name="layout_editor_orientation_auto">Automatic (sensor)</string>
+    <string name="layout_editor_splits_fraction">Show split decimals</string>
+    <string name="layout_editor_splits_fraction_desc">Show fractional seconds on split deltas</string>
+    <string name="layout_editor_splits_decimals">Split decimal places</string>
+    <string name="layout_editor_delta_ahead_gaining">Ahead (gaining)</string>
+    <string name="layout_editor_delta_ahead_losing">Ahead (losing)</string>
+    <string name="layout_editor_delta_behind_losing">Behind (losing)</string>
+    <string name="layout_editor_delta_behind_gaining">Behind (gaining)</string>
+    <string name="layout_editor_delta_best_segment">Best segment</string>
+    <string name="layout_editor_delta_exact">Exact</string>
 
     <!-- Timer Control Labels -->
     <string name="timer_control_start">Start</string>
@@ -137,6 +156,8 @@
     <string name="settings_about_header">About</string>
     <string name="settings_about_title">About &amp; Licenses</string>
     <string name="settings_about_desc">Legal notices, version and open source licenses</string>
+    <string name="settings_rate_app">Rate on Google Play</string>
+    <string name="settings_rate_app_desc">Leave a review on the Play Store</string>
     <string name="about_title">About &amp; Licenses</string>
     <string name="about_version">Version %1$s</string>
     <string name="about_developer">Developer</string>

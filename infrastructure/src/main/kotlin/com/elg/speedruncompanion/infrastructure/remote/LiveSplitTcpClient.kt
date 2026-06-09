@@ -2,11 +2,15 @@ package com.elg.speedruncompanion.infrastructure.remote
 
 import com.elg.speedruncompanion.application.port.output.ConnectionState
 import com.elg.speedruncompanion.application.port.output.LiveSplitRemotePort
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.serialization.json.Json
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.io.PrintWriter
@@ -21,9 +25,16 @@ class LiveSplitTcpClient @Inject constructor() : LiveSplitRemotePort {
     private val _connectionState = MutableStateFlow(ConnectionState.DISCONNECTED)
     override fun observeConnectionState(): Flow<ConnectionState> = _connectionState.asStateFlow()
 
+    private val _events = MutableSharedFlow<String>(extraBufferCapacity = 64)
+    val events = _events.asSharedFlow()
+
     private var socket: Socket? = null
     private var writer: PrintWriter? = null
     private var reader: BufferedReader? = null
+    private var coroutineScope: CoroutineScope? = null
+
+    private val responseMutex = Mutex()
+    private var pendingResponseDeferred: CompletableDeferred<String?>? = null
 
     override val isConnected: Boolean
         get() = _connectionState.value == ConnectionState.CONNECTED && socket?.isConnected == true
@@ -36,13 +47,19 @@ class LiveSplitTcpClient @Inject constructor() : LiveSplitRemotePort {
             val address = InetSocketAddress(host, port)
             val newSocket = Socket()
             newSocket.connect(address, timeoutMs)
-            newSocket.soTimeout = timeoutMs
             
             socket = newSocket
             writer = PrintWriter(newSocket.getOutputStream(), true)
             reader = BufferedReader(InputStreamReader(newSocket.getInputStream()))
             
             _connectionState.value = ConnectionState.CONNECTED
+            
+            val newScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+            coroutineScope = newScope
+            newScope.launch {
+                runReaderLoop()
+            }
+
             Result.success(Unit)
         } catch (e: Exception) {
             cleanup()
@@ -58,19 +75,32 @@ class LiveSplitTcpClient @Inject constructor() : LiveSplitRemotePort {
 
     override suspend fun sendCommand(command: String): Result<String?> = withContext(Dispatchers.IO) {
         val currentWriter = writer
-        val currentReader = reader
-        if (!isConnected || currentWriter == null || currentReader == null) {
+        if (!isConnected || currentWriter == null) {
             return@withContext Result.failure(Exception("Not connected to LiveSplit Server"))
         }
 
         try {
-            currentWriter.print(command + LiveSplitProtocol.TERMINATOR)
-            currentWriter.flush()
-
             if (LiveSplitProtocol.expectsResponse(command)) {
-                val response = currentReader.readLine()
-                Result.success(response)
+                responseMutex.withLock {
+                    val deferred = CompletableDeferred<String?>()
+                    pendingResponseDeferred = deferred
+                    currentWriter.print(command + LiveSplitProtocol.TERMINATOR)
+                    currentWriter.flush()
+                    
+                    try {
+                        withTimeout(3000) {
+                            val response = deferred.await()
+                            Result.success(response)
+                        }
+                    } catch (e: TimeoutCancellationException) {
+                        Result.failure(Exception("Timeout waiting for response to command: $command"))
+                    } finally {
+                        pendingResponseDeferred = null
+                    }
+                }
             } else {
+                currentWriter.print(command + LiveSplitProtocol.TERMINATOR)
+                currentWriter.flush()
                 Result.success(null)
             }
         } catch (e: Exception) {
@@ -80,17 +110,68 @@ class LiveSplitTcpClient @Inject constructor() : LiveSplitRemotePort {
         }
     }
 
+    private suspend fun runReaderLoop() {
+        val currentReader = reader ?: return
+        try {
+            val scope = coroutineScope ?: return
+            while (scope.isActive && isConnected) {
+                val line = currentReader.readLine() ?: break
+                handleIncomingMessage(line)
+            }
+        } catch (e: Exception) {
+            // Socket read exception or closed
+        } finally {
+            if (isConnected) {
+                withContext(NonCancellable) {
+                    cleanup()
+                    _connectionState.value = ConnectionState.DISCONNECTED
+                }
+            }
+        }
+    }
+
+    private suspend fun handleIncomingMessage(line: String) {
+        val trimmed = line.trim()
+        if (trimmed.isEmpty()) return
+
+        // 1. Check if it's a JSON string representing a LiveSplit Event or a general JSON message
+        if (trimmed.startsWith("{") && trimmed.endsWith("}")) {
+            try {
+                // Try decoding as event
+                val event = Json.decodeFromString<LiveSplitEvent>(trimmed)
+                _events.emit(trimmed)
+                return
+            } catch (e: Exception) {
+                // Not a LiveSplitEvent or failed to parse. Fall through.
+            }
+        }
+
+        // 2. Otherwise check if we have a pending request waiting for a response
+        val deferred = pendingResponseDeferred
+        if (deferred != null && deferred.isActive) {
+            deferred.complete(trimmed)
+        } else {
+            // Unsolicited raw/text push event
+            _events.emit(trimmed)
+        }
+    }
+
     private fun cleanup() {
         try {
+            coroutineScope?.cancel()
             writer?.close()
             reader?.close()
             socket?.close()
         } catch (e: Exception) {
             // Ignore
         } finally {
+            coroutineScope = null
             writer = null
             reader = null
             socket = null
+            pendingResponseDeferred?.cancel()
+            pendingResponseDeferred = null
         }
     }
 }
+

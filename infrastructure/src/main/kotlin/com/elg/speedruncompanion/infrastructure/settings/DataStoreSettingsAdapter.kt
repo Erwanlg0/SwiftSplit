@@ -34,6 +34,11 @@ class DataStoreSettingsAdapter @Inject constructor(
         val TIMER_DECIMAL_PLACES = intPreferencesKey("timer_decimal_places")
         val TIMER_SHOW_FRACTION = booleanPreferencesKey("timer_show_fraction")
         val TIMER_COLOR_MODE = stringPreferencesKey("timer_color_mode")
+        val TIMER_FORMAT_PATTERN = stringPreferencesKey("timer_format_pattern")
+        val TIMER_SHOW_SPLITS = booleanPreferencesKey("timer_show_splits")
+        val TIMER_FULLSCREEN_ORIENTATION = stringPreferencesKey("timer_fullscreen_orientation")
+        val TIMER_SHOW_SPLITS_FRACTION = booleanPreferencesKey("timer_show_splits_fraction")
+        val TIMER_SPLITS_DECIMAL_PLACES = intPreferencesKey("timer_splits_decimal_places")
         val POLLING_DELAY_MS = longPreferencesKey("polling_delay_ms")
         val NETWORK_TIMEOUT_MS = longPreferencesKey("network_timeout_ms")
         val REMOTE_HOST = stringPreferencesKey("remote_host")
@@ -59,8 +64,8 @@ class DataStoreSettingsAdapter @Inject constructor(
 
     override fun observeComparison(): Flow<ComparisonName> {
         return context.dataStore.data.map { preferences ->
-            val compStr = preferences[PreferencesKeys.COMPARISON_NAME] ?: ComparisonName.PERSONAL_BEST.name
-            ComparisonName(compStr)
+            val name = preferences[PreferencesKeys.COMPARISON_NAME] ?: "Personal Best"
+            ComparisonName(name)
         }
     }
 
@@ -84,7 +89,7 @@ class DataStoreSettingsAdapter @Inject constructor(
 
     override fun observeSaveQuickRuns(): Flow<Boolean> {
         return context.dataStore.data.map { preferences ->
-            preferences[PreferencesKeys.SAVE_QUICK_RUNS] ?: true
+            preferences[PreferencesKeys.SAVE_QUICK_RUNS] ?: false
         }
     }
 
@@ -127,13 +132,40 @@ class DataStoreSettingsAdapter @Inject constructor(
             } catch (e: Exception) {
                 TimerColorMode.DELTA
             }
+            val patternStr = preferences[PreferencesKeys.TIMER_FORMAT_PATTERN] ?: com.elg.speedruncompanion.domain.model.TimeFormatPattern.OPT_HH_OPT_MM_SS_SS.name
+            val pattern = try {
+                com.elg.speedruncompanion.domain.model.TimeFormatPattern.valueOf(patternStr)
+            } catch (e: Exception) {
+                com.elg.speedruncompanion.domain.model.TimeFormatPattern.OPT_HH_OPT_MM_SS_SS
+            }
             TimerLayoutPreferences(
                 timeFormat = TimeFormatOptions(
+                    pattern = pattern,
                     showLeadingZeros = preferences[PreferencesKeys.TIMER_SHOW_LEADING_ZEROS] ?: false,
                     decimalPlaces = decimalPlaces.coerceIn(1, 3),
                     showFraction = preferences[PreferencesKeys.TIMER_SHOW_FRACTION] ?: true
                 ),
-                colorMode = colorMode
+                colorMode = colorMode,
+                stateColorRunning = try {
+                    com.elg.speedruncompanion.domain.model.StateColorPreset.valueOf(preferences[stringPreferencesKey("state_color_running")] ?: "GREEN")
+                } catch (e: Exception) { com.elg.speedruncompanion.domain.model.StateColorPreset.GREEN },
+                stateColorPaused = try {
+                    com.elg.speedruncompanion.domain.model.StateColorPreset.valueOf(preferences[stringPreferencesKey("state_color_paused")] ?: "GRAY")
+                } catch (e: Exception) { com.elg.speedruncompanion.domain.model.StateColorPreset.GRAY },
+                stateColorFinished = try {
+                    com.elg.speedruncompanion.domain.model.StateColorPreset.valueOf(preferences[stringPreferencesKey("state_color_finished")] ?: "BLUE")
+                } catch (e: Exception) { com.elg.speedruncompanion.domain.model.StateColorPreset.BLUE },
+                showSplits = preferences[PreferencesKeys.TIMER_SHOW_SPLITS] ?: true,
+                fullscreenOrientation = try {
+                    com.elg.speedruncompanion.domain.model.FullscreenOrientationPreset.valueOf(
+                        preferences[PreferencesKeys.TIMER_FULLSCREEN_ORIENTATION]
+                            ?: com.elg.speedruncompanion.domain.model.FullscreenOrientationPreset.AUTO.name
+                    )
+                } catch (e: Exception) {
+                    com.elg.speedruncompanion.domain.model.FullscreenOrientationPreset.AUTO
+                },
+                showSplitsFraction = preferences[PreferencesKeys.TIMER_SHOW_SPLITS_FRACTION] ?: true,
+                splitsDecimalPlaces = (preferences[PreferencesKeys.TIMER_SPLITS_DECIMAL_PLACES] ?: 2).coerceIn(0, 3)
             )
         }
     }
@@ -144,6 +176,14 @@ class DataStoreSettingsAdapter @Inject constructor(
             prefs[PreferencesKeys.TIMER_DECIMAL_PLACES] = preferences.timeFormat.decimalPlaces
             prefs[PreferencesKeys.TIMER_SHOW_FRACTION] = preferences.timeFormat.showFraction
             prefs[PreferencesKeys.TIMER_COLOR_MODE] = preferences.colorMode.name
+            prefs[PreferencesKeys.TIMER_FORMAT_PATTERN] = preferences.timeFormat.pattern.name
+            prefs[stringPreferencesKey("state_color_running")] = preferences.stateColorRunning.name
+            prefs[stringPreferencesKey("state_color_paused")] = preferences.stateColorPaused.name
+            prefs[stringPreferencesKey("state_color_finished")] = preferences.stateColorFinished.name
+            prefs[PreferencesKeys.TIMER_SHOW_SPLITS] = preferences.showSplits
+            prefs[PreferencesKeys.TIMER_FULLSCREEN_ORIENTATION] = preferences.fullscreenOrientation.name
+            prefs[PreferencesKeys.TIMER_SHOW_SPLITS_FRACTION] = preferences.showSplitsFraction
+            prefs[PreferencesKeys.TIMER_SPLITS_DECIMAL_PLACES] = preferences.splitsDecimalPlaces
         }
     }
 

@@ -57,6 +57,32 @@ class RunsListViewModel @Inject constructor(
         }
     }
 
+    fun importRunFromUrl(url: String, onSuccess: () -> Unit, onFailure: (Throwable) -> Unit) {
+        viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+            try {
+                val connection = java.net.URL(url).openConnection() as java.net.HttpURLConnection
+                connection.connectTimeout = 8000
+                connection.readTimeout = 8000
+                connection.requestMethod = "GET"
+                if (connection.responseCode == 200) {
+                    val bytes = connection.inputStream.use { it.readBytes() }
+                    val result = importRunUseCase(bytes)
+                    if (result.isSuccess) {
+                        launch(kotlinx.coroutines.Dispatchers.Main) { onSuccess() }
+                    } else {
+                        val exception = result.exceptionOrNull() ?: Exception("Failed to parse splits")
+                        launch(kotlinx.coroutines.Dispatchers.Main) { onFailure(exception) }
+                    }
+                } else {
+                    val error = Exception("HTTP error: ${connection.responseCode}")
+                    launch(kotlinx.coroutines.Dispatchers.Main) { onFailure(error) }
+                }
+            } catch (e: Exception) {
+                launch(kotlinx.coroutines.Dispatchers.Main) { onFailure(e) }
+            }
+        }
+    }
+
     fun deleteRun(runId: RunId) {
         viewModelScope.launch {
             deleteRunUseCase(runId)

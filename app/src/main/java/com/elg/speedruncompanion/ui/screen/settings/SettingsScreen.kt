@@ -6,11 +6,15 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -37,6 +41,7 @@ fun SettingsScreen(
     val globalHotkeysEnabled by viewModel.globalHotkeysEnabled.collectAsState()
     val networkPreferences by viewModel.networkPreferences.collectAsState()
     val colors = SpeedrunThemeColors.colors
+    val context = LocalContext.current
 
     var showTimingMenu by remember { mutableStateOf(false) }
     var showComparisonMenu by remember { mutableStateOf(false) }
@@ -249,6 +254,13 @@ fun SettingsScreen(
                 ListItem(
                     headlineContent = { Text(stringResource(R.string.settings_theme)) },
                     supportingContent = { Text(themeLabel) },
+                    leadingContent = {
+                        Icon(
+                            Icons.Default.DarkMode,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    },
                     modifier = Modifier.clickable { showThemeMenu = true },
                     colors = ListItemDefaults.colors(containerColor = colors.elevatedSurface)
                 )
@@ -280,6 +292,13 @@ fun SettingsScreen(
                 ListItem(
                     headlineContent = { Text(stringResource(R.string.settings_language)) },
                     supportingContent = { Text(langLabel) },
+                    leadingContent = {
+                        Icon(
+                            Icons.Default.Language,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    },
                     modifier = Modifier.clickable { showLanguageMenu = true },
                     colors = ListItemDefaults.colors(containerColor = colors.elevatedSurface)
                 )
@@ -308,6 +327,33 @@ fun SettingsScreen(
                 style = MaterialTheme.typography.titleMedium,
                 color = colors.textPrimary,
                 modifier = Modifier.padding(top = 8.dp)
+            )
+
+            ListItem(
+                headlineContent = { Text(stringResource(R.string.settings_rate_app)) },
+                supportingContent = { Text(stringResource(R.string.settings_rate_app_desc)) },
+                leadingContent = {
+                    Icon(
+                        Icons.Default.Star,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                },
+                modifier = Modifier.clickable {
+                    val packageName = context.packageName
+                    val marketUri = android.net.Uri.parse("market://details?id=$packageName")
+                    val webUri = android.net.Uri.parse("https://play.google.com/store/apps/details?id=$packageName")
+                    try {
+                        context.startActivity(
+                            android.content.Intent(android.content.Intent.ACTION_VIEW, marketUri)
+                        )
+                    } catch (e: android.content.ActivityNotFoundException) {
+                        context.startActivity(
+                            android.content.Intent(android.content.Intent.ACTION_VIEW, webUri)
+                        )
+                    }
+                },
+                colors = ListItemDefaults.colors(containerColor = colors.elevatedSurface)
             )
 
             ListItem(

@@ -7,6 +7,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -14,15 +15,116 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.elg.speedruncompanion.R
+import com.elg.speedruncompanion.domain.model.ComparisonName
+import com.elg.speedruncompanion.domain.model.Delta
+import com.elg.speedruncompanion.domain.model.FullscreenOrientationPreset
+import com.elg.speedruncompanion.domain.model.TimeFormatOptions
+import com.elg.speedruncompanion.domain.model.TimeFormatPattern
 import com.elg.speedruncompanion.domain.model.TimeSpan
 import com.elg.speedruncompanion.domain.model.TimerColorMode
 import com.elg.speedruncompanion.domain.model.TimerState
 import com.elg.speedruncompanion.domain.service.TimerDisplayColorResolver
 import com.elg.speedruncompanion.ui.theme.SpeedrunThemeColors
+
+private sealed class LayoutPreviewState {
+    data object Idle : LayoutPreviewState()
+    data object Running : LayoutPreviewState()
+    data object Paused : LayoutPreviewState()
+    data object Finished : LayoutPreviewState()
+    data class DeltaPreview(val status: Delta.Status) : LayoutPreviewState()
+}
+
+private fun previewStatesFor(colorMode: TimerColorMode): List<LayoutPreviewState> = when (colorMode) {
+    TimerColorMode.TIMER_STATE -> listOf(
+        LayoutPreviewState.Idle,
+        LayoutPreviewState.Running,
+        LayoutPreviewState.Paused,
+        LayoutPreviewState.Finished
+    )
+    TimerColorMode.DELTA -> listOf(
+        LayoutPreviewState.DeltaPreview(Delta.Status.AHEAD_GAINING),
+        LayoutPreviewState.DeltaPreview(Delta.Status.AHEAD_LOSING),
+        LayoutPreviewState.DeltaPreview(Delta.Status.BEHIND_LOSING),
+        LayoutPreviewState.DeltaPreview(Delta.Status.BEHIND_GAINING),
+        LayoutPreviewState.DeltaPreview(Delta.Status.BEST_SEGMENT),
+        LayoutPreviewState.DeltaPreview(Delta.Status.EXACT)
+    )
+}
+
+private fun LayoutPreviewState.toTimerState(): TimerState = when (this) {
+    LayoutPreviewState.Idle -> TimerState.Idle
+    LayoutPreviewState.Running -> TimerState.Running(
+        startTime = 0L,
+        pauseAccumulator = 0L,
+        currentSegmentIndex = 0,
+        splitTimes = emptyList(),
+        comparison = ComparisonName.PERSONAL_BEST
+    )
+    LayoutPreviewState.Paused -> TimerState.Paused(
+        elapsedTime = TimeSpan.fromSeconds(330.5),
+        currentSegmentIndex = 0,
+        splitTimes = emptyList(),
+        comparison = ComparisonName.PERSONAL_BEST
+    )
+    LayoutPreviewState.Finished -> TimerState.Finished(
+        finalTime = TimeSpan.fromSeconds(330.5),
+        splitTimes = emptyList(),
+        comparison = ComparisonName.PERSONAL_BEST
+    )
+    is LayoutPreviewState.DeltaPreview -> TimerState.Running(
+        startTime = 0L,
+        pauseAccumulator = 0L,
+        currentSegmentIndex = 0,
+        splitTimes = emptyList(),
+        comparison = ComparisonName.PERSONAL_BEST
+    )
+}
+
+private fun LayoutPreviewState.toDelta(): Delta? = when (this) {
+    is LayoutPreviewState.DeltaPreview -> Delta(TimeSpan.fromSeconds(1.5), status)
+    else -> null
+}
+
+@Composable
+private fun LayoutPreviewState.label(): String = when (this) {
+    LayoutPreviewState.Idle -> stringResource(R.string.layout_editor_state_idle)
+    LayoutPreviewState.Running -> stringResource(R.string.layout_editor_state_running)
+    LayoutPreviewState.Paused -> stringResource(R.string.layout_editor_state_paused)
+    LayoutPreviewState.Finished -> stringResource(R.string.layout_editor_state_finished)
+    is LayoutPreviewState.DeltaPreview -> when (status) {
+        Delta.Status.AHEAD_GAINING -> stringResource(R.string.layout_editor_delta_ahead_gaining)
+        Delta.Status.AHEAD_LOSING -> stringResource(R.string.layout_editor_delta_ahead_losing)
+        Delta.Status.BEHIND_LOSING -> stringResource(R.string.layout_editor_delta_behind_losing)
+        Delta.Status.BEHIND_GAINING -> stringResource(R.string.layout_editor_delta_behind_gaining)
+        Delta.Status.BEST_SEGMENT -> stringResource(R.string.layout_editor_delta_best_segment)
+        Delta.Status.EXACT -> stringResource(R.string.layout_editor_delta_exact)
+    }
+}
+
+private fun getPatternDisplayName(pat: TimeFormatPattern): String = when (pat) {
+    TimeFormatPattern.HH_MM_SS_SS -> "HH:mm:ss.SS"
+    TimeFormatPattern.HH_MM_SS_S -> "HH:mm:ss.S"
+    TimeFormatPattern.HH_MM_SS -> "HH:mm:ss"
+    TimeFormatPattern.OPT_HH_MM_SS_SS -> "[HH:]mm:ss.SS"
+    TimeFormatPattern.OPT_HH_MM_SS_S -> "[HH:]mm:ss.S"
+    TimeFormatPattern.OPT_HH_MM_SS -> "[HH:]mm:ss"
+    TimeFormatPattern.OPT_HH_OPT_MM_SS_SS -> "[HH:][mm:]ss.SS"
+    TimeFormatPattern.OPT_HH_OPT_MM_SS_S -> "[HH:][mm:]ss.S"
+    TimeFormatPattern.MM_SS_SS -> "mm:ss.SS"
+    TimeFormatPattern.MM_SS_S -> "mm:ss.S"
+    TimeFormatPattern.MM_SS -> "mm:ss"
+    TimeFormatPattern.OPT_MM_SS_SS -> "[mm:]ss.SS"
+    TimeFormatPattern.OPT_MM_SS_S -> "[mm:]ss.S"
+    TimeFormatPattern.OPT_MM_SS -> "[mm:]ss"
+    TimeFormatPattern.SS_SS -> "ss.SS"
+    TimeFormatPattern.SS_S -> "ss.S"
+    TimeFormatPattern.SS -> "ss"
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -34,21 +136,24 @@ fun LayoutEditorScreen(
     val preferences by viewModel.layoutPreferences.collectAsState()
     val colors = SpeedrunThemeColors.colors
     var showColorModeMenu by remember { mutableStateOf(false) }
+    var showOrientationMenu by remember { mutableStateOf(false) }
+    var showSplitsDecimalsMenu by remember { mutableStateOf(false) }
+
+    val previewStates = remember(preferences.colorMode) { previewStatesFor(preferences.colorMode) }
+    var previewIndex by remember(preferences.colorMode) { mutableIntStateOf(0) }
+    val previewState = previewStates[previewIndex % previewStates.size]
 
     val previewTime = TimeSpan.fromSeconds(330.5)
     val previewText = previewTime.formatted(preferences.timeFormat)
+    val previewTimerState = previewState.toTimerState()
+    val previewDelta = previewState.toDelta()
 
     val previewColorToken = TimerDisplayColorResolver.resolve(
         colorMode = preferences.colorMode,
-        timerState = TimerState.Running(
-            startTime = 0L,
-            pauseAccumulator = 0L,
-            currentSegmentIndex = 0,
-            splitTimes = emptyList(),
-            comparison = com.elg.speedruncompanion.domain.model.ComparisonName.PERSONAL_BEST
-        ),
-        delta = null
+        timerState = previewTimerState,
+        delta = previewDelta
     )
+    val previewComposeColor = previewColorToken.toComposeColorWithPrefs(colors, preferences)
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -83,6 +188,9 @@ fun LayoutEditorScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(colors.elevatedSurface, MaterialTheme.shapes.medium)
+                    .clickable {
+                        previewIndex = (previewIndex + 1) % previewStates.size
+                    }
                     .padding(vertical = 32.dp),
                 contentAlignment = Alignment.Center
             ) {
@@ -90,10 +198,20 @@ fun LayoutEditorScreen(
                     text = previewText,
                     style = MaterialTheme.typography.displayLarge.copy(fontSize = 48.sp),
                     fontWeight = FontWeight.Bold,
-                    color = previewColorToken.toComposeColor(colors),
-                    textAlign = TextAlign.Center
+                    color = previewComposeColor,
+                    textAlign = TextAlign.Center,
+                    maxLines = 1,
+                    softWrap = false
                 )
             }
+
+            Text(
+                text = stringResource(R.string.layout_editor_preview_tap_hint, previewState.label()),
+                style = MaterialTheme.typography.bodySmall,
+                color = colors.textSecondary,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
 
             Text(
                 stringResource(R.string.layout_editor_format_header),
@@ -101,47 +219,177 @@ fun LayoutEditorScreen(
                 color = colors.textPrimary
             )
 
-            ListItem(
-                headlineContent = { Text(stringResource(R.string.layout_editor_leading_zeros)) },
-                supportingContent = { Text(stringResource(R.string.layout_editor_leading_zeros_desc)) },
-                trailingContent = {
-                    Switch(
-                        checked = preferences.timeFormat.showLeadingZeros,
-                        onCheckedChange = { viewModel.setShowLeadingZeros(it) }
-                    )
-                },
-                colors = ListItemDefaults.colors(containerColor = colors.elevatedSurface)
-            )
+            var showPatternMenu by remember { mutableStateOf(false) }
+            val currentPattern = preferences.timeFormat.pattern
+            val sampleShort = TimeSpan.fromSeconds(1.23)
+            val sampleLong = TimeSpan.fromHours(1.0) + TimeSpan.fromMinutes(5.0) + TimeSpan.fromSeconds(30.45)
 
-            ListItem(
-                headlineContent = { Text(stringResource(R.string.layout_editor_show_fraction)) },
-                supportingContent = { Text(stringResource(R.string.layout_editor_show_fraction_desc)) },
-                trailingContent = {
-                    Switch(
-                        checked = preferences.timeFormat.showFraction,
-                        onCheckedChange = { viewModel.setShowFraction(it) }
-                    )
-                },
-                colors = ListItemDefaults.colors(containerColor = colors.elevatedSurface)
-            )
-
-            if (preferences.timeFormat.showFraction) {
-                Text(
-                    stringResource(R.string.layout_editor_decimal_places),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = colors.textSecondary
+            Box(modifier = Modifier.fillMaxWidth()) {
+                ListItem(
+                    headlineContent = {
+                        Text(
+                            text = stringResource(R.string.layout_editor_timer_format),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    },
+                    supportingContent = {
+                        Column {
+                            Text(
+                                text = getPatternDisplayName(currentPattern),
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                maxLines = 1,
+                                softWrap = false,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                            Text(
+                                text = stringResource(
+                                    R.string.layout_editor_format_examples,
+                                    sampleShort.formatted(preferences.timeFormat),
+                                    sampleLong.formatted(preferences.timeFormat)
+                                ),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = colors.textSecondary,
+                                maxLines = 1,
+                                softWrap = false,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+                    },
+                    modifier = Modifier.clickable { showPatternMenu = true },
+                    colors = ListItemDefaults.colors(containerColor = colors.elevatedSurface)
                 )
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                DropdownMenu(
+                    expanded = showPatternMenu,
+                    onDismissRequest = { showPatternMenu = false }
                 ) {
-                    listOf(1, 2, 3).forEach { places ->
-                        val selected = preferences.timeFormat.decimalPlaces == places
-                        FilterChip(
-                            selected = selected,
-                            onClick = { viewModel.setDecimalPlaces(places) },
-                            label = { Text(stringResource(R.string.layout_editor_decimal_places_value, places)) },
-                            modifier = Modifier.weight(1f)
+                    TimeFormatPattern.entries.forEach { pat ->
+                        DropdownMenuItem(
+                            text = {
+                                Column {
+                                    Text(
+                                        getPatternDisplayName(pat),
+                                        fontWeight = FontWeight.Bold,
+                                        maxLines = 1,
+                                        softWrap = false
+                                    )
+                                    Text(
+                                        text = "${sampleShort.formatted(TimeFormatOptions(pattern = pat))} · ${sampleLong.formatted(TimeFormatOptions(pattern = pat))}",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = colors.textSecondary,
+                                        maxLines = 1,
+                                        softWrap = false,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
+                            },
+                            onClick = {
+                                viewModel.setFormatPattern(pat)
+                                showPatternMenu = false
+                            }
+                        )
+                    }
+                }
+            }
+
+            Text(
+                stringResource(R.string.layout_editor_splits_header),
+                style = MaterialTheme.typography.titleMedium,
+                color = colors.textPrimary,
+                modifier = Modifier.padding(top = 8.dp)
+            )
+
+            ListItem(
+                headlineContent = { Text(stringResource(R.string.layout_editor_show_splits)) },
+                supportingContent = { Text(stringResource(R.string.layout_editor_show_splits_desc)) },
+                trailingContent = {
+                    Switch(
+                        checked = preferences.showSplits,
+                        onCheckedChange = { viewModel.setShowSplits(it) }
+                    )
+                },
+                colors = ListItemDefaults.colors(containerColor = colors.elevatedSurface)
+            )
+
+            Box(modifier = Modifier.fillMaxWidth()) {
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.layout_editor_orientation)) },
+                    supportingContent = {
+                        Text(
+                            text = when (preferences.fullscreenOrientation) {
+                                FullscreenOrientationPreset.PORTRAIT -> stringResource(R.string.layout_editor_orientation_portrait)
+                                FullscreenOrientationPreset.LANDSCAPE -> stringResource(R.string.layout_editor_orientation_landscape)
+                                FullscreenOrientationPreset.AUTO -> stringResource(R.string.layout_editor_orientation_auto)
+                            },
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    },
+                    modifier = Modifier.clickable { showOrientationMenu = true },
+                    colors = ListItemDefaults.colors(containerColor = colors.elevatedSurface)
+                )
+                DropdownMenu(
+                    expanded = showOrientationMenu,
+                    onDismissRequest = { showOrientationMenu = false }
+                ) {
+                    FullscreenOrientationPreset.entries.forEach { preset ->
+                        DropdownMenuItem(
+                            text = {
+                                Text(
+                                    when (preset) {
+                                        FullscreenOrientationPreset.PORTRAIT -> stringResource(R.string.layout_editor_orientation_portrait)
+                                        FullscreenOrientationPreset.LANDSCAPE -> stringResource(R.string.layout_editor_orientation_landscape)
+                                        FullscreenOrientationPreset.AUTO -> stringResource(R.string.layout_editor_orientation_auto)
+                                    }
+                                )
+                            },
+                            onClick = {
+                                viewModel.setFullscreenOrientation(preset)
+                                showOrientationMenu = false
+                            }
+                        )
+                    }
+                }
+            }
+
+            ListItem(
+                headlineContent = { Text(stringResource(R.string.layout_editor_splits_fraction)) },
+                supportingContent = { Text(stringResource(R.string.layout_editor_splits_fraction_desc)) },
+                trailingContent = {
+                    Switch(
+                        checked = preferences.showSplitsFraction,
+                        onCheckedChange = { viewModel.setShowSplitsFraction(it) }
+                    )
+                },
+                colors = ListItemDefaults.colors(containerColor = colors.elevatedSurface)
+            )
+
+            Box(modifier = Modifier.fillMaxWidth()) {
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.layout_editor_splits_decimals)) },
+                    supportingContent = {
+                        Text(
+                            stringResource(
+                                R.string.layout_editor_decimal_places_value,
+                                preferences.splitsDecimalPlaces
+                            )
+                        )
+                    },
+                    modifier = Modifier.clickable { showSplitsDecimalsMenu = true },
+                    colors = ListItemDefaults.colors(containerColor = colors.elevatedSurface)
+                )
+                DropdownMenu(
+                    expanded = showSplitsDecimalsMenu,
+                    onDismissRequest = { showSplitsDecimalsMenu = false }
+                ) {
+                    (0..3).forEach { places ->
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.layout_editor_decimal_places_value, places)) },
+                            onClick = {
+                                viewModel.setSplitsDecimalPlaces(places)
+                                showSplitsDecimalsMenu = false
+                            }
                         )
                     }
                 }
@@ -219,19 +467,27 @@ fun LayoutEditorScreen(
                     )
                     StateColorLegend(
                         label = stringResource(R.string.layout_editor_state_idle),
-                        token = com.elg.speedruncompanion.domain.model.TimerDisplayColorToken.STATE_IDLE
+                        color = colors.timerTextDim,
+                        preset = null,
+                        onPresetSelected = {}
                     )
                     StateColorLegend(
                         label = stringResource(R.string.layout_editor_state_running),
-                        token = com.elg.speedruncompanion.domain.model.TimerDisplayColorToken.STATE_RUNNING
+                        color = preferences.stateColorRunning.toComposeColor(colors),
+                        preset = preferences.stateColorRunning,
+                        onPresetSelected = { viewModel.setRunningStateColor(it) }
                     )
                     StateColorLegend(
                         label = stringResource(R.string.layout_editor_state_paused),
-                        token = com.elg.speedruncompanion.domain.model.TimerDisplayColorToken.STATE_PAUSED
+                        color = preferences.stateColorPaused.toComposeColor(colors),
+                        preset = preferences.stateColorPaused,
+                        onPresetSelected = { viewModel.setPausedStateColor(it) }
                     )
                     StateColorLegend(
                         label = stringResource(R.string.layout_editor_state_finished),
-                        token = com.elg.speedruncompanion.domain.model.TimerDisplayColorToken.STATE_FINISHED
+                        color = preferences.stateColorFinished.toComposeColor(colors),
+                        preset = preferences.stateColorFinished,
+                        onPresetSelected = { viewModel.setFinishedStateColor(it) }
                     )
                 }
             }
@@ -242,18 +498,62 @@ fun LayoutEditorScreen(
 @Composable
 private fun StateColorLegend(
     label: String,
-    token: com.elg.speedruncompanion.domain.model.TimerDisplayColorToken
+    color: androidx.compose.ui.graphics.Color,
+    preset: com.elg.speedruncompanion.domain.model.StateColorPreset?,
+    onPresetSelected: (com.elg.speedruncompanion.domain.model.StateColorPreset) -> Unit
 ) {
     val colors = SpeedrunThemeColors.colors
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        Box(
+    var expanded by remember { mutableStateOf(false) }
+
+    Box {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
             modifier = Modifier
-                .size(16.dp)
-                .background(token.toComposeColor(colors), MaterialTheme.shapes.small)
-        )
-        Text(label, style = MaterialTheme.typography.bodyMedium, color = colors.textPrimary)
+                .fillMaxWidth()
+                .clickable(enabled = preset != null) { expanded = true }
+                .padding(vertical = 8.dp, horizontal = 4.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(20.dp)
+                    .background(color, MaterialTheme.shapes.small)
+            )
+            Column(modifier = Modifier.weight(1f)) {
+                Text(label, style = MaterialTheme.typography.bodyMedium, color = colors.textPrimary)
+                if (preset != null) {
+                    Text(
+                        text = "Preset : ${preset.displayName()}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = colors.textSecondary
+                    )
+                }
+            }
+            if (preset != null) {
+                Icon(
+                    imageVector = Icons.Default.ChevronRight,
+                    contentDescription = "Modifier",
+                    tint = colors.textSecondary,
+                    modifier = Modifier.size(16.dp)
+                )
+            }
+        }
+
+        if (preset != null) {
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false }
+            ) {
+                com.elg.speedruncompanion.domain.model.StateColorPreset.entries.forEach { pr ->
+                    DropdownMenuItem(
+                        text = { Text(pr.displayName()) },
+                        onClick = {
+                            onPresetSelected(pr)
+                            expanded = false
+                        }
+                    )
+                }
+            }
+        }
     }
 }

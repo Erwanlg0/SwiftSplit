@@ -59,7 +59,11 @@ fun TimerControls(
             Icon(
                 Icons.Default.Undo,
                 contentDescription = stringResource(R.string.timer_control_undo),
-                tint = if (timerState !is TimerState.Idle) colors.warning else colors.textDisabled
+                tint = when (timerState) {
+                    is TimerState.Running -> if (timerState.currentSegmentIndex > 0) colors.warning else colors.textDisabled
+                    is TimerState.Paused -> if (timerState.currentSegmentIndex > 0) colors.warning else colors.textDisabled
+                    else -> colors.textDisabled
+                }
             )
         }
 
@@ -107,7 +111,7 @@ fun TimerControls(
             Icon(
                 imageVector = if (timerState is TimerState.Paused) Icons.Default.PlayArrow else Icons.Default.Pause,
                 contentDescription = if (timerState is TimerState.Paused) stringResource(R.string.timer_control_resume) else stringResource(R.string.timer_control_pause),
-                tint = if (timerState !is TimerState.Idle) colors.info else colors.textDisabled
+                tint = if (timerState is TimerState.Running || timerState is TimerState.Paused) colors.info else colors.textDisabled
             )
         }
     }

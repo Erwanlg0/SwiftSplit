@@ -14,9 +14,10 @@ import com.elg.speedruncompanion.domain.model.Delta
 import com.elg.speedruncompanion.domain.model.TimeFormatOptions
 import com.elg.speedruncompanion.domain.model.TimeSpan
 import com.elg.speedruncompanion.domain.model.TimerColorMode
+import com.elg.speedruncompanion.domain.model.TimerLayoutPreferences
 import com.elg.speedruncompanion.domain.model.TimerState
 import com.elg.speedruncompanion.domain.service.TimerDisplayColorResolver
-import com.elg.speedruncompanion.ui.screen.layout.toComposeColor
+import com.elg.speedruncompanion.ui.screen.layout.toComposeColorWithPrefs
 import com.elg.speedruncompanion.ui.theme.SpeedrunThemeColors
 
 @Composable
@@ -27,11 +28,12 @@ fun TimerDisplay(
     timeFormat: TimeFormatOptions,
     colorMode: TimerColorMode,
     modifier: Modifier = Modifier,
-    fontSize: TextUnit = TextUnit.Unspecified
+    fontSize: TextUnit = TextUnit.Unspecified,
+    layoutPreferences: TimerLayoutPreferences = TimerLayoutPreferences.DEFAULT
 ) {
     val colors = SpeedrunThemeColors.colors
     val colorToken = TimerDisplayColorResolver.resolve(colorMode, timerState, delta)
-    val timerColor = colorToken.toComposeColor(colors)
+    val timerColor = colorToken.toComposeColorWithPrefs(colors, layoutPreferences)
 
     val style = if (fontSize != TextUnit.Unspecified) {
         MaterialTheme.typography.displayLarge.copy(fontSize = fontSize)
@@ -45,8 +47,11 @@ fun TimerDisplay(
         fontWeight = FontWeight.Bold,
         textAlign = TextAlign.Center,
         color = timerColor,
+        maxLines = 1,
+        softWrap = false,
         modifier = modifier
             .fillMaxWidth()
             .padding(vertical = 24.dp)
     )
 }
+

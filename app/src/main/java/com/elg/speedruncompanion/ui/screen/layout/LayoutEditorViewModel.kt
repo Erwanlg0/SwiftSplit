@@ -28,6 +28,10 @@ class LayoutEditorViewModel @Inject constructor(
         update { it.copy(timeFormat = it.timeFormat.copy(showLeadingZeros = enabled)) }
     }
 
+    fun setFormatPattern(pattern: com.elg.speedruncompanion.domain.model.TimeFormatPattern) {
+        update { it.copy(timeFormat = it.timeFormat.copy(pattern = pattern)) }
+    }
+
     fun setDecimalPlaces(places: Int) {
         update { it.copy(timeFormat = it.timeFormat.copy(decimalPlaces = places.coerceIn(1, 3))) }
     }
@@ -38,6 +42,34 @@ class LayoutEditorViewModel @Inject constructor(
 
     fun setColorMode(mode: TimerColorMode) {
         update { it.copy(colorMode = mode) }
+    }
+
+    fun setRunningStateColor(color: com.elg.speedruncompanion.domain.model.StateColorPreset) {
+        update { it.copy(stateColorRunning = color) }
+    }
+
+    fun setPausedStateColor(color: com.elg.speedruncompanion.domain.model.StateColorPreset) {
+        update { it.copy(stateColorPaused = color) }
+    }
+
+    fun setFinishedStateColor(color: com.elg.speedruncompanion.domain.model.StateColorPreset) {
+        update { it.copy(stateColorFinished = color) }
+    }
+
+    fun setShowSplits(enabled: Boolean) {
+        update { it.copy(showSplits = enabled) }
+    }
+
+    fun setFullscreenOrientation(orientation: com.elg.speedruncompanion.domain.model.FullscreenOrientationPreset) {
+        update { it.copy(fullscreenOrientation = orientation) }
+    }
+
+    fun setShowSplitsFraction(enabled: Boolean) {
+        update { it.copy(showSplitsFraction = enabled) }
+    }
+
+    fun setSplitsDecimalPlaces(places: Int) {
+        update { it.copy(splitsDecimalPlaces = places.coerceIn(0, 3)) }
     }
 
     private fun update(transform: (TimerLayoutPreferences) -> TimerLayoutPreferences) {

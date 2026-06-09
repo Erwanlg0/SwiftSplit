@@ -618,6 +618,31 @@ fun RemoteScreen(
                                     modifier = Modifier.size(20.dp)
                                 )
                             }
+                                   var showPatternMenu by remember { mutableStateOf(false) }
+                        val currentPattern = layoutPrefs.timeFormat.pattern
+
+                        // Format helper helper functions to show formatting examples:
+                        val sampleShort = TimeSpan.fromSeconds(1.23)
+                        val sampleLong = TimeSpan.fromHours(1.0) + TimeSpan.fromMinutes(5.0) + TimeSpan.fromSeconds(30.45)
+
+                        fun getPatternDisplayName(pat: com.elg.speedruncompanion.domain.model.TimeFormatPattern): String = when (pat) {
+                            com.elg.speedruncompanion.domain.model.TimeFormatPattern.HH_MM_SS_SS -> "HH:mm:ss.SS"
+                            com.elg.speedruncompanion.domain.model.TimeFormatPattern.HH_MM_SS_S -> "HH:mm:ss.S"
+                            com.elg.speedruncompanion.domain.model.TimeFormatPattern.HH_MM_SS -> "HH:mm:ss"
+                            com.elg.speedruncompanion.domain.model.TimeFormatPattern.OPT_HH_MM_SS_SS -> "[HH:]mm:ss.SS"
+                            com.elg.speedruncompanion.domain.model.TimeFormatPattern.OPT_HH_MM_SS_S -> "[HH:]mm:ss.S"
+                            com.elg.speedruncompanion.domain.model.TimeFormatPattern.OPT_HH_MM_SS -> "[HH:]mm:ss"
+                            com.elg.speedruncompanion.domain.model.TimeFormatPattern.OPT_HH_OPT_MM_SS_SS -> "[HH:][mm:]ss.SS"
+                            com.elg.speedruncompanion.domain.model.TimeFormatPattern.OPT_HH_OPT_MM_SS_S -> "[HH:][mm:]ss.S"
+                            com.elg.speedruncompanion.domain.model.TimeFormatPattern.MM_SS_SS -> "mm:ss.SS"
+                            com.elg.speedruncompanion.domain.model.TimeFormatPattern.MM_SS_S -> "mm:ss.S"
+                            com.elg.speedruncompanion.domain.model.TimeFormatPattern.MM_SS -> "mm:ss"
+                            com.elg.speedruncompanion.domain.model.TimeFormatPattern.OPT_MM_SS_SS -> "[mm:]ss.SS"
+                            com.elg.speedruncompanion.domain.model.TimeFormatPattern.OPT_MM_SS_S -> "[mm:]ss.S"
+                            com.elg.speedruncompanion.domain.model.TimeFormatPattern.OPT_MM_SS -> "[mm:]ss"
+                            com.elg.speedruncompanion.domain.model.TimeFormatPattern.SS_SS -> "ss.SS"
+                            com.elg.speedruncompanion.domain.model.TimeFormatPattern.SS_S -> "ss.S"
+                            com.elg.speedruncompanion.domain.model.TimeFormatPattern.SS -> "ss"
                         }
 
                         AnimatedVisibility(visible = isFormatExpanded) {
@@ -625,72 +650,44 @@ fun RemoteScreen(
                                 modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
                                 verticalArrangement = Arrangement.spacedBy(10.dp)
                             ) {
-                                // Compact switches in a single row
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    // Quick Leading Zeros
-                                    Row(
-                                        modifier = Modifier.weight(1f),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                        verticalAlignment = Alignment.CenterVertically
+                                Box(modifier = Modifier.fillMaxWidth()) {
+                                    ListItem(
+                                        headlineContent = { Text("Sélectionner le format") },
+                                        supportingContent = {
+                                            Text(
+                                                text = "${getPatternDisplayName(currentPattern)}\nEx (1s) : ${sampleShort.formatted(layoutPrefs.timeFormat)}\nEx (1h) : ${sampleLong.formatted(layoutPrefs.timeFormat)}",
+                                                style = MaterialTheme.typography.bodySmall
+                                            )
+                                        },
+                                        modifier = Modifier.clickable { showPatternMenu = true },
+                                        colors = ListItemDefaults.colors(containerColor = colors.elevatedSurface)
+                                    )
+                                    DropdownMenu(
+                                        expanded = showPatternMenu,
+                                        onDismissRequest = { showPatternMenu = false }
                                     ) {
-                                        Text(
-                                            text = "Zéros en trop",
-                                            style = MaterialTheme.typography.bodySmall,
-                                            color = colors.textSecondary
-                                        )
-                                        Switch(
-                                            checked = layoutPrefs.timeFormat.showLeadingZeros,
-                                            onCheckedChange = { viewModel.setShowLeadingZeros(it) },
-                                            modifier = Modifier.scale(0.8f)
-                                        )
-                                    }
-
-                                    // Quick Show Fraction
-                                    Row(
-                                        modifier = Modifier.weight(1f),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Text(
-                                            text = "Décimales",
-                                            style = MaterialTheme.typography.bodySmall,
-                                            color = colors.textSecondary
-                                        )
-                                        Switch(
-                                            checked = layoutPrefs.timeFormat.showFraction,
-                                            onCheckedChange = { viewModel.setShowFraction(it) },
-                                            modifier = Modifier.scale(0.8f)
-                                        )
-                                    }
-                                }
-
-                                // Compact Decimal Places Choice
-                                if (layoutPrefs.timeFormat.showFraction) {
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        listOf(1, 2, 3).forEach { places ->
-                                            val selected = layoutPrefs.timeFormat.decimalPlaces == places
-                                            FilterChip(
-                                                selected = selected,
-                                                onClick = { viewModel.setDecimalPlaces(places) },
-                                                label = { Text("$places déc.", style = MaterialTheme.typography.labelSmall) },
-                                                modifier = Modifier.weight(1f),
-                                                colors = FilterChipDefaults.filterChipColors(
-                                                    selectedContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
-                                                )
+                                        com.elg.speedruncompanion.domain.model.TimeFormatPattern.entries.forEach { pat ->
+                                            DropdownMenuItem(
+                                                text = {
+                                                    Column {
+                                                        Text(getPatternDisplayName(pat), fontWeight = FontWeight.Bold)
+                                                        Text(
+                                                            text = "Ex (1s): ${sampleShort.formatted(TimeFormatOptions(pattern = pat))} | (1h): ${sampleLong.formatted(TimeFormatOptions(pattern = pat))}",
+                                                            style = MaterialTheme.typography.bodySmall,
+                                                            color = colors.textSecondary
+                                                        )
+                                                    }
+                                                },
+                                                onClick = {
+                                                    viewModel.setFormatPattern(pat)
+                                                    showPatternMenu = false
+                                                }
                                             )
                                         }
                                     }
                                 }
                             }
-                        }
+                        }                  }
                     }
                 }
 

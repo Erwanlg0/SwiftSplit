@@ -22,6 +22,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.elg.speedruncompanion.R
 import com.elg.speedruncompanion.ui.screen.runs.components.RunCard
 import com.elg.speedruncompanion.ui.theme.SpeedrunThemeColors
+import android.widget.Toast
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -145,6 +147,86 @@ fun RunsListScreen(
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
                                 text = stringResource(R.string.new_run_dialog_import_desc),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = speedrunColors.textSecondary
+                            )
+                        }
+                    }
+
+                    // Option 4: Import via URL
+                    var showUrlImportDialog by remember { mutableStateOf(false) }
+                    var urlToImport by remember { mutableStateOf("") }
+                    var isImportingFromUrl by remember { mutableStateOf(false) }
+
+                    if (showUrlImportDialog) {
+                        AlertDialog(
+                            onDismissRequest = { showUrlImportDialog = false; urlToImport = "" },
+                            title = { Text("Importer via Lien / URL", color = speedrunColors.textPrimary) },
+                            text = {
+                                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    OutlinedTextField(
+                                        value = urlToImport,
+                                        onValueChange = { urlToImport = it },
+                                        placeholder = { Text("https://livesplit.org/splits/...") },
+                                        label = { Text("Adresse URL du fichier LSS") },
+                                        singleLine = true,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+                                    if (isImportingFromUrl) {
+                                        CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+                                    }
+                                }
+                            },
+                            confirmButton = {
+                                Button(
+                                    onClick = {
+                                        isImportingFromUrl = true
+                                        viewModel.importRunFromUrl(
+                                            url = urlToImport,
+                                            onSuccess = {
+                                                isImportingFromUrl = false
+                                                showUrlImportDialog = false
+                                                urlToImport = ""
+                                                Toast.makeText(context, "Fichier LSS importé avec succès !", Toast.LENGTH_SHORT).show()
+                                            },
+                                            onFailure = { err ->
+                                                isImportingFromUrl = false
+                                                Toast.makeText(context, "Erreur : ${err.localizedMessage}", Toast.LENGTH_LONG).show()
+                                            }
+                                        )
+                                    },
+                                    enabled = urlToImport.isNotBlank() && !isImportingFromUrl
+                                ) {
+                                    Text("Télécharger & Importer")
+                                }
+                            },
+                            dismissButton = {
+                                TextButton(onClick = { showUrlImportDialog = false; urlToImport = "" }) {
+                                    Text("Annuler")
+                                }
+                            },
+                            containerColor = speedrunColors.cardBackground
+                        )
+                    }
+
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                showNewRunDialog = false
+                                showUrlImportDialog = true
+                            },
+                        colors = CardDefaults.cardColors(containerColor = speedrunColors.elevatedSurface)
+                    ) {
+                        Column(modifier = Modifier.padding(12.dp)) {
+                            Text(
+                                text = "Importer via Lien URL",
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.tertiary
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = "Télécharger directement un fichier .lss en collant son adresse web",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = speedrunColors.textSecondary
                             )

@@ -11,6 +11,8 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.List
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -29,7 +31,8 @@ import com.elg.speedruncompanion.domain.model.TimerState
 import com.elg.speedruncompanion.domain.model.TimingMethod
 import com.elg.speedruncompanion.domain.model.TimeSpan
 import com.elg.speedruncompanion.domain.service.SplitTimeCalculator
-import com.elg.speedruncompanion.ui.screen.layout.toComposeColor
+import com.elg.speedruncompanion.domain.model.FullscreenOrientationPreset
+import com.elg.speedruncompanion.ui.screen.layout.toComposeColorWithPrefs
 import com.elg.speedruncompanion.domain.service.TimerDisplayColorResolver
 import com.elg.speedruncompanion.ui.screen.timer.components.RunHeader
 import com.elg.speedruncompanion.ui.screen.timer.components.SplitList
@@ -96,6 +99,9 @@ fun TimerScreen(
     val colors = SpeedrunThemeColors.colors
     val context = LocalContext.current
     var isFullscreen by rememberSaveable { mutableStateOf(false) }
+    var showSplitsInFullscreen by rememberSaveable(layoutPreferences.showSplits) {
+        mutableStateOf(layoutPreferences.showSplits)
+    }
 
     // Keep screen wake lock active when running
     DisposableEffect(timerState) {
@@ -110,14 +116,20 @@ fun TimerScreen(
         }
     }
 
+    val requestedOrientation = when (layoutPreferences.fullscreenOrientation) {
+        FullscreenOrientationPreset.PORTRAIT -> android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        FullscreenOrientationPreset.LANDSCAPE -> android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+        FullscreenOrientationPreset.AUTO -> android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+    }
+
     // Manage screen orientation and system bars visibility based on fullscreen state
-    DisposableEffect(isFullscreen) {
+    DisposableEffect(isFullscreen, layoutPreferences.fullscreenOrientation) {
         val activity = context.findActivity()
         val window = activity?.window
         if (window != null) {
             val insetsController = androidx.core.view.WindowCompat.getInsetsController(window, window.decorView)
             if (isFullscreen) {
-                activity.requestedOrientation = android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+                activity.requestedOrientation = requestedOrientation
                 insetsController.hide(androidx.core.view.WindowInsetsCompat.Type.systemBars())
                 insetsController.systemBarsBehavior = androidx.core.view.WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
             } else {
@@ -136,6 +148,14 @@ fun TimerScreen(
 
     if (isFullscreen && run != null) {
         val currentRun = run!!
+        val configuration = androidx.compose.ui.platform.LocalConfiguration.current
+        val isPortrait = when (layoutPreferences.fullscreenOrientation) {
+            FullscreenOrientationPreset.PORTRAIT -> true
+            FullscreenOrientationPreset.LANDSCAPE -> false
+            FullscreenOrientationPreset.AUTO ->
+                configuration.orientation == android.content.res.Configuration.ORIENTATION_PORTRAIT
+        }
+
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -145,122 +165,271 @@ fun TimerScreen(
                     indication = null
                 ) {
                     viewModel.pauseResume()
-                },
-            contentAlignment = Alignment.Center
+                }
         ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
-                modifier = Modifier.padding(24.dp)
-            ) {
-                // Game Name & Category
-                Text(
-                    text = "${currentRun.gameInfo.gameName} — ${currentRun.gameInfo.categoryName}",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.SemiBold,
-                    color = colors.textSecondary,
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                    modifier = Modifier.padding(horizontal = 24.dp)
-                )
-                Spacer(modifier = Modifier.height(16.dp))
+            val currentIndex = when (val state = timerState) {
+                is TimerState.Running -> state.currentSegmentIndex
+                is TimerState.Paused -> state.currentSegmentIndex
+                else -> 0
+            }
+            val activeComp = when (val state = timerState) {
+                is TimerState.Running -> state.comparison.name
+                is TimerState.Paused -> state.comparison.name
+                is TimerState.Finished -> state.comparison.name
+                else -> "Personal Best"
+            }
+            val splitTimes = when (val state = timerState) {
+                is TimerState.Running -> state.splitTimes
+                is TimerState.Paused -> state.splitTimes
+                is TimerState.Finished -> state.splitTimes
+                else -> List(currentRun.segments.size) { null }
+            }
 
-                // Determine delta color indicator for the huge text
-                val currentIndex = when (val state = timerState) {
-                    is TimerState.Running -> state.currentSegmentIndex
-                    is TimerState.Paused -> state.currentSegmentIndex
-                    else -> 0
-                }
-                val activeComp = when (val state = timerState) {
-                    is TimerState.Running -> state.comparison.name
-                    is TimerState.Paused -> state.comparison.name
-                    is TimerState.Finished -> state.comparison.name
-                    else -> "Personal Best"
-                }
+            val currentDelta = computeCurrentDelta(
+                timerState = timerState,
+                currentRun = currentRun,
+                currentIndex = currentIndex,
+                currentElapsed = currentElapsed,
+                activeComp = activeComp
+            )
 
-                val currentDelta = computeCurrentDelta(
-                    timerState = timerState,
-                    currentRun = currentRun,
-                    currentIndex = currentIndex,
-                    currentElapsed = currentElapsed,
-                    activeComp = activeComp
-                )
+            val timerColor = TimerDisplayColorResolver.resolve(
+                colorMode = layoutPreferences.colorMode,
+                timerState = timerState,
+                delta = currentDelta
+            ).toComposeColorWithPrefs(colors, layoutPreferences)
 
-                val timerColor = TimerDisplayColorResolver.resolve(
-                    colorMode = layoutPreferences.colorMode,
-                    timerState = timerState,
-                    delta = currentDelta
-                ).toComposeColor(colors)
-
-                Text(
-                    text = currentElapsed.formatted(layoutPreferences.timeFormat),
-                    style = MaterialTheme.typography.displayLarge.copy(fontSize = 110.sp),
-                    fontWeight = FontWeight.Black,
-                    color = timerColor,
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-                val stateText = when (timerState) {
-                    is TimerState.Running -> stringResource(R.string.phase_running)
-                    is TimerState.Paused -> stringResource(R.string.phase_paused)
-                    is TimerState.Finished -> stringResource(R.string.phase_ended)
-                    else -> stringResource(R.string.phase_not_running)
-                }
-                Surface(
-                    shape = MaterialTheme.shapes.small,
-                    color = when (timerState) {
-                        is TimerState.Running -> colors.success.copy(alpha = 0.2f)
-                        is TimerState.Paused -> colors.warning.copy(alpha = 0.2f)
-                        is TimerState.Finished -> colors.info.copy(alpha = 0.2f)
-                        else -> colors.textDisabled.copy(alpha = 0.2f)
-                    }
+            if (isPortrait) {
+                // Portrait Layout: LiveSplit style
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Top,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(top = 64.dp, bottom = 24.dp, start = 16.dp, end = 16.dp)
                 ) {
+                    // Game Name & Category
                     Text(
-                        text = stateText.uppercase(),
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = when (timerState) {
-                            is TimerState.Running -> colors.success
-                            is TimerState.Paused -> colors.warning
-                            is TimerState.Finished -> colors.info
-                            else -> colors.textSecondary
-                        },
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                        text = "${currentRun.gameInfo.gameName} — ${currentRun.gameInfo.categoryName}",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = colors.textSecondary,
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                        modifier = Modifier.padding(horizontal = 24.dp)
                     )
-                }
 
-                // Current Segment Name or Completed indicator
-                val currentSegmentName = if (timerState is TimerState.Finished) {
-                    stringResource(R.string.timer_finished)
-                } else if (currentIndex < currentRun.segments.size) {
-                    currentRun.segments[currentIndex].name
-                } else {
-                    ""
-                }
-                if (currentSegmentName.isNotEmpty()) {
+                    if (showSplitsInFullscreen) {
+                        Spacer(modifier = Modifier.height(16.dp))
+                        SplitList(
+                            run = currentRun,
+                            currentSegmentIndex = currentIndex,
+                            splitTimes = splitTimes,
+                            comparisonName = activeComp,
+                            timingMethod = TimingMethod.REAL_TIME,
+                            timeFormat = layoutPreferences.timeFormat,
+                            layoutPreferences = layoutPreferences,
+                            modifier = Modifier.weight(1f)
+                        )
+                    } else {
+                        Spacer(modifier = Modifier.weight(1f))
+                    }
+
                     Spacer(modifier = Modifier.height(16.dp))
+
                     Text(
-                        text = currentSegmentName,
-                        style = MaterialTheme.typography.headlineSmall,
-                        color = colors.textTertiary,
-                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                        text = currentElapsed.formatted(layoutPreferences.timeFormat),
+                        style = MaterialTheme.typography.displayLarge.copy(
+                            fontSize = if (showSplitsInFullscreen) 70.sp else 96.sp
+                        ),
+                        fontWeight = FontWeight.Black,
+                        color = timerColor,
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                        maxLines = 1,
+                        softWrap = false
                     )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+                    val stateText = when (timerState) {
+                        is TimerState.Running -> stringResource(R.string.phase_running)
+                        is TimerState.Paused -> stringResource(R.string.phase_paused)
+                        is TimerState.Finished -> stringResource(R.string.phase_ended)
+                        else -> stringResource(R.string.phase_not_running)
+                    }
+                    Surface(
+                        shape = MaterialTheme.shapes.small,
+                        color = when (timerState) {
+                            is TimerState.Running -> colors.success.copy(alpha = 0.2f)
+                            is TimerState.Paused -> colors.warning.copy(alpha = 0.2f)
+                            is TimerState.Finished -> colors.info.copy(alpha = 0.2f)
+                            else -> colors.textDisabled.copy(alpha = 0.2f)
+                        }
+                    ) {
+                        Text(
+                            text = stateText.uppercase(),
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = when (timerState) {
+                                is TimerState.Running -> colors.success
+                                is TimerState.Paused -> colors.warning
+                                is TimerState.Finished -> colors.info
+                                else -> colors.textSecondary
+                            },
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                        )
+                    }
+
+                    // Current Segment Name or Completed indicator
+                    val currentSegmentName = if (timerState is TimerState.Finished) {
+                        stringResource(R.string.timer_finished)
+                    } else if (currentIndex < currentRun.segments.size) {
+                        currentRun.segments[currentIndex].name
+                    } else {
+                        ""
+                    }
+                    if (currentSegmentName.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = currentSegmentName,
+                            style = MaterialTheme.typography.headlineSmall,
+                            color = colors.textTertiary,
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                        )
+                    }
+                }
+            } else {
+                // Landscape Layout: Side-by-Side if splits are enabled
+                Row(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(top = 64.dp, bottom = 16.dp, start = 16.dp, end = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    if (showSplitsInFullscreen) {
+                        Box(modifier = Modifier.weight(1.2f)) {
+                        SplitList(
+                            run = currentRun,
+                            currentSegmentIndex = currentIndex,
+                            splitTimes = splitTimes,
+                            comparisonName = activeComp,
+                            timingMethod = TimingMethod.REAL_TIME,
+                            timeFormat = layoutPreferences.timeFormat,
+                            layoutPreferences = layoutPreferences,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                        }
+                    }
+
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        // Game Name & Category
+                        Text(
+                            text = "${currentRun.gameInfo.gameName} — ${currentRun.gameInfo.categoryName}",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            color = colors.textSecondary,
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Text(
+                            text = currentElapsed.formatted(layoutPreferences.timeFormat),
+                            style = MaterialTheme.typography.displayLarge.copy(
+                                fontSize = if (showSplitsInFullscreen) 56.sp else 80.sp
+                            ),
+                            fontWeight = FontWeight.Black,
+                            color = timerColor,
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                            maxLines = 1,
+                            softWrap = false
+                        )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+                        val stateText = when (timerState) {
+                            is TimerState.Running -> stringResource(R.string.phase_running)
+                            is TimerState.Paused -> stringResource(R.string.phase_paused)
+                            is TimerState.Finished -> stringResource(R.string.phase_ended)
+                            else -> stringResource(R.string.phase_not_running)
+                        }
+                        Surface(
+                            shape = MaterialTheme.shapes.small,
+                            color = when (timerState) {
+                                is TimerState.Running -> colors.success.copy(alpha = 0.2f)
+                                is TimerState.Paused -> colors.warning.copy(alpha = 0.2f)
+                                is TimerState.Finished -> colors.info.copy(alpha = 0.2f)
+                                else -> colors.textDisabled.copy(alpha = 0.2f)
+                            }
+                        ) {
+                            Text(
+                                text = stateText.uppercase(),
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = when (timerState) {
+                                    is TimerState.Running -> colors.success
+                                    is TimerState.Paused -> colors.warning
+                                    is TimerState.Finished -> colors.info
+                                    else -> colors.textSecondary
+                                },
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                            )
+                        }
+
+                        // Current Segment Name or Completed indicator
+                        val currentSegmentName = if (timerState is TimerState.Finished) {
+                            stringResource(R.string.timer_finished)
+                        } else if (currentIndex < currentRun.segments.size) {
+                            currentRun.segments[currentIndex].name
+                        } else {
+                            ""
+                        }
+                        if (currentSegmentName.isNotEmpty()) {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = currentSegmentName,
+                                style = MaterialTheme.typography.titleMedium,
+                                color = colors.textTertiary,
+                                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                            )
+                        }
+                    }
                 }
             }
 
-            // Exit button top-right
-            IconButton(
-                onClick = { isFullscreen = false },
+            // Top action buttons row (Toggle Splits list & Close)
+            Row(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
-                    .padding(16.dp)
-                    .background(androidx.compose.ui.graphics.Color.White.copy(alpha = 0.1f), shape = MaterialTheme.shapes.small)
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    imageVector = Icons.Default.Close,
-                    contentDescription = "Exit Fullscreen",
-                    tint = androidx.compose.ui.graphics.Color.White
-                )
+                IconButton(
+                    onClick = { showSplitsInFullscreen = !showSplitsInFullscreen },
+                    modifier = Modifier.background(
+                        if (showSplitsInFullscreen) colors.success.copy(alpha = 0.2f)
+                        else androidx.compose.ui.graphics.Color.White.copy(alpha = 0.1f),
+                        shape = MaterialTheme.shapes.small
+                    )
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.List,
+                        contentDescription = "Toggle Splits",
+                        tint = androidx.compose.ui.graphics.Color.White
+                    )
+                }
+                IconButton(
+                    onClick = { isFullscreen = false },
+                    modifier = Modifier.background(androidx.compose.ui.graphics.Color.White.copy(alpha = 0.1f), shape = MaterialTheme.shapes.small)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "Exit Fullscreen",
+                        tint = androidx.compose.ui.graphics.Color.White
+                    )
+                }
             }
         }
     } else {
@@ -279,6 +448,39 @@ fun TimerScreen(
                         }
                     },
                     actions = {
+                        IconButton(onClick = {
+                            viewModel.exportCurrentRun(
+                                onSuccess = { bytes ->
+                                    val filename = "${run?.gameInfo?.gameName ?: "splits"}.lss"
+                                    try {
+                                        val cacheFile = java.io.File(context.cacheDir, filename)
+                                        cacheFile.writeBytes(bytes)
+                                        val uri = androidx.core.content.FileProvider.getUriForFile(
+                                            context,
+                                            "${context.packageName}.fileprovider",
+                                            cacheFile
+                                        )
+                                        val shareIntent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+                                            type = "application/octet-stream"
+                                            putExtra(android.content.Intent.EXTRA_STREAM, uri)
+                                            addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                        }
+                                        context.startActivity(android.content.Intent.createChooser(shareIntent, "Exporter LiveSplit (.lss)"))
+                                    } catch (e: Exception) {
+                                        android.widget.Toast.makeText(context, "Erreur export : ${e.localizedMessage}", android.widget.Toast.LENGTH_LONG).show()
+                                    }
+                                },
+                                onFailure = { error ->
+                                    android.widget.Toast.makeText(context, "Erreur export : ${error.localizedMessage}", android.widget.Toast.LENGTH_LONG).show()
+                                }
+                            )
+                        }) {
+                            Icon(
+                                imageVector = Icons.Default.Share,
+                                contentDescription = "Exporter LSS",
+                                tint = colors.textPrimary
+                            )
+                        }
                         IconButton(onClick = onEditLayout) {
                             Icon(
                                 Icons.Default.Palette,
@@ -343,14 +545,20 @@ fun TimerScreen(
 
                     val isLastSplit = currentRun.segments.let { currentIndex == it.size - 1 }
 
-                    SplitList(
-                        run = currentRun,
-                        currentSegmentIndex = currentIndex,
-                        splitTimes = splitTimes,
-                        comparisonName = activeComp,
-                        timingMethod = TimingMethod.REAL_TIME,
-                        modifier = Modifier.weight(1f)
-                    )
+                    if (layoutPreferences.showSplits) {
+                        SplitList(
+                            run = currentRun,
+                            currentSegmentIndex = currentIndex,
+                            splitTimes = splitTimes,
+                            comparisonName = activeComp,
+                            timingMethod = TimingMethod.REAL_TIME,
+                            timeFormat = layoutPreferences.timeFormat,
+                            layoutPreferences = layoutPreferences,
+                            modifier = Modifier.weight(1f)
+                        )
+                    } else {
+                        Spacer(modifier = Modifier.weight(1f))
+                    }
 
                     val currentDelta = computeCurrentDelta(
                         timerState = timerState,
@@ -366,6 +574,7 @@ fun TimerScreen(
                         timerState = timerState,
                         timeFormat = layoutPreferences.timeFormat,
                         colorMode = layoutPreferences.colorMode,
+                        layoutPreferences = layoutPreferences,
                         modifier = Modifier.pointerInput(Unit) {
                             detectTapGestures(
                                 onDoubleTap = {

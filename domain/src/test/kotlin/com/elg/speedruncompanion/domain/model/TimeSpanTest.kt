@@ -21,30 +21,30 @@ class TimeSpanTest {
     @Test
     fun testFormattedDefault() {
         val ts = TimeSpan(330500)
-        assertEquals("5:30.500", ts.formatted())
+        assertEquals("5:30.50", ts.formatted(TimeFormatOptions(TimeFormatPattern.OPT_HH_OPT_MM_SS_SS)))
     }
 
     @Test
     fun testFormattedWithLeadingZeros() {
         val ts = TimeSpan(330500)
-        assertEquals("00:05:30.500", ts.formatted(TimeFormatOptions(showLeadingZeros = true)))
+        assertEquals("00:05:30.50", ts.formatted(TimeFormatOptions(TimeFormatPattern.HH_MM_SS_SS)))
     }
 
     @Test
     fun testFormattedWithOneDecimalPlace() {
         val ts = TimeSpan(330500)
-        assertEquals("5:30.5", ts.formatted(TimeFormatOptions(decimalPlaces = 1)))
+        assertEquals("5:30.5", ts.formatted(TimeFormatOptions(TimeFormatPattern.OPT_HH_OPT_MM_SS_S)))
     }
 
     @Test
     fun testFormattedWithTwoDecimalPlaces() {
         val ts = TimeSpan(330500)
-        assertEquals("5:30.50", ts.formatted(TimeFormatOptions(decimalPlaces = 2)))
+        assertEquals("5:30.50", ts.formatted(TimeFormatOptions(TimeFormatPattern.OPT_HH_OPT_MM_SS_SS)))
     }
 
     @Test
     fun testFormattedWithoutFraction() {
         val ts = TimeSpan(330500)
-        assertEquals("5:30", ts.formatted(TimeFormatOptions(showFraction = false)))
+        assertEquals("5:30", ts.formatted(TimeFormatOptions(TimeFormatPattern.OPT_HH_MM_SS)))
     }
 }

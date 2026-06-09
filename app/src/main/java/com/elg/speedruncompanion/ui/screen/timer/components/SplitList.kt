@@ -8,7 +8,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import com.elg.speedruncompanion.domain.model.Run
+import com.elg.speedruncompanion.domain.model.TimeFormatOptions
 import com.elg.speedruncompanion.domain.model.TimeSpan
+import com.elg.speedruncompanion.domain.model.TimerLayoutPreferences
 import com.elg.speedruncompanion.domain.model.TimingMethod
 
 @Composable
@@ -18,6 +20,8 @@ fun SplitList(
     splitTimes: List<TimeSpan?>,
     comparisonName: String,
     timingMethod: TimingMethod,
+    timeFormat: TimeFormatOptions = TimeFormatOptions.DEFAULT,
+    layoutPreferences: TimerLayoutPreferences = TimerLayoutPreferences.DEFAULT,
     modifier: Modifier = Modifier
 ) {
     val listState = rememberLazyListState()
@@ -49,7 +53,9 @@ fun SplitList(
                 comparisonName = comparisonName,
                 timingMethod = timingMethod,
                 previousCurrentSplit = previousCurrentSplit,
-                previousComparisonSplit = previousComparisonSplit
+                previousComparisonSplit = previousComparisonSplit,
+                timeFormat = timeFormat,
+                layoutPreferences = layoutPreferences
             )
         }
     }

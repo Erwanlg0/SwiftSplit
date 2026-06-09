@@ -13,7 +13,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.elg.speedruncompanion.domain.model.Delta
 import com.elg.speedruncompanion.domain.model.Segment
+import com.elg.speedruncompanion.domain.model.TimeFormatOptions
 import com.elg.speedruncompanion.domain.model.TimeSpan
+import com.elg.speedruncompanion.domain.model.TimerLayoutPreferences
 import com.elg.speedruncompanion.domain.model.TimingMethod
 import com.elg.speedruncompanion.domain.service.SplitTimeCalculator
 import com.elg.speedruncompanion.ui.theme.SpeedrunThemeColors
@@ -28,6 +30,8 @@ fun SplitRow(
     timingMethod: TimingMethod,
     previousCurrentSplit: TimeSpan?,
     previousComparisonSplit: TimeSpan?,
+    timeFormat: TimeFormatOptions = TimeFormatOptions.DEFAULT,
+    layoutPreferences: TimerLayoutPreferences = TimerLayoutPreferences.DEFAULT,
     modifier: Modifier = Modifier
 ) {
     val colors = SpeedrunThemeColors.colors
@@ -78,7 +82,10 @@ fun SplitRow(
         )
 
         Text(
-            text = delta?.time?.formattedWithSign() ?: "",
+            text = delta?.time?.formattedWithSign(
+                showMilliseconds = layoutPreferences.showSplitsFraction,
+                decimalPlaces = layoutPreferences.splitsDecimalPlaces
+            ) ?: "",
             style = MaterialTheme.typography.bodyLarge,
             fontWeight = FontWeight.Bold,
             color = deltaColor,
@@ -87,9 +94,9 @@ fun SplitRow(
         )
 
         val timeToShow = if (isCompleted && elapsedSplit != null) {
-            elapsedSplit.formatted()
+            elapsedSplit.formatted(timeFormat)
         } else {
-            compSplit?.formatted() ?: "-"
+            compSplit?.formatted(timeFormat) ?: "-"
         }
         
         Text(

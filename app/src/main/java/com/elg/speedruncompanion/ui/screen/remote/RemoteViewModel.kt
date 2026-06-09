@@ -120,26 +120,13 @@ class RemoteViewModel @Inject constructor(
         _errorMessage.value = null
     }
 
-    fun setShowLeadingZeros(enabled: Boolean) {
+    fun setFormatPattern(pattern: com.elg.speedruncompanion.domain.model.TimeFormatPattern) {
         viewModelScope.launch {
             val current = timerLayoutPreferences.value
-            updateTimerLayoutPreferencesUseCase(current.copy(timeFormat = current.timeFormat.copy(showLeadingZeros = enabled)))
+            updateTimerLayoutPreferencesUseCase(current.copy(timeFormat = current.timeFormat.copy(pattern = pattern)))
         }
     }
 
-    fun setShowFraction(enabled: Boolean) {
-        viewModelScope.launch {
-            val current = timerLayoutPreferences.value
-            updateTimerLayoutPreferencesUseCase(current.copy(timeFormat = current.timeFormat.copy(showFraction = enabled)))
-        }
-    }
-
-    fun setDecimalPlaces(places: Int) {
-        viewModelScope.launch {
-            val current = timerLayoutPreferences.value
-            updateTimerLayoutPreferencesUseCase(current.copy(timeFormat = current.timeFormat.copy(decimalPlaces = places.coerceIn(1, 3))))
-        }
-    }
 
     fun connect() {
         viewModelScope.launch {
@@ -167,6 +154,23 @@ class RemoteViewModel @Inject constructor(
                 _errorMessage.value = "Erreur commande ($command) : ${e?.localizedMessage ?: "Échec d'envoi."}"
             } else {
                 _lastResponse.value = result.getOrNull()
+                // Update local state immediately on action to prevent lag/delay:
+                val cmdLower = command.trim().lowercase()
+                when (cmdLower) {
+                    "startorsplit", "split", "resume" -> {
+                        _remotePhase.value = "Running"
+                    }
+                    "pause" -> {
+                        _remotePhase.value = "Paused"
+                    }
+                    "reset" -> {
+                        _remotePhase.value = "NotRunning"
+                        _remoteTime.value = "00:00:00.000"
+                        _remoteSplitIndex.value = -1
+                        _remoteSplitName.value = null
+                        _remoteDelta.value = null
+                    }
+                }
             }
         }
     }

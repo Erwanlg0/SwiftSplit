@@ -35,39 +35,79 @@ value class TimeSpan(val totalMilliseconds: Long) : Comparable<TimeSpan> {
         val s = (absoluteMs % 60000) / 1000
         val ms = absoluteMs % 1000
 
+        val pattern = options.pattern
+        val showHours = when (pattern) {
+            TimeFormatPattern.HH_MM_SS_SS, TimeFormatPattern.HH_MM_SS_S, TimeFormatPattern.HH_MM_SS -> true
+            TimeFormatPattern.OPT_HH_MM_SS_SS, TimeFormatPattern.OPT_HH_MM_SS_S, TimeFormatPattern.OPT_HH_MM_SS -> h > 0
+            TimeFormatPattern.OPT_HH_OPT_MM_SS_SS, TimeFormatPattern.OPT_HH_OPT_MM_SS_S -> h > 0
+            else -> false
+        }
+
+        val showMinutes = when (pattern) {
+            TimeFormatPattern.HH_MM_SS_SS, TimeFormatPattern.HH_MM_SS_S, TimeFormatPattern.HH_MM_SS -> true
+            TimeFormatPattern.OPT_HH_MM_SS_SS, TimeFormatPattern.OPT_HH_MM_SS_S, TimeFormatPattern.OPT_HH_MM_SS -> true
+            TimeFormatPattern.OPT_HH_OPT_MM_SS_SS, TimeFormatPattern.OPT_HH_OPT_MM_SS_S -> h > 0 || m > 0
+            TimeFormatPattern.MM_SS_SS, TimeFormatPattern.MM_SS_S, TimeFormatPattern.MM_SS -> true
+            TimeFormatPattern.OPT_MM_SS_SS, TimeFormatPattern.OPT_MM_SS_S, TimeFormatPattern.OPT_MM_SS -> m > 0
+            else -> false
+        }
+
+        val padMinutes = when (pattern) {
+            TimeFormatPattern.HH_MM_SS_SS, TimeFormatPattern.HH_MM_SS_S, TimeFormatPattern.HH_MM_SS -> true
+            TimeFormatPattern.OPT_HH_MM_SS_SS, TimeFormatPattern.OPT_HH_MM_SS_S, TimeFormatPattern.OPT_HH_MM_SS -> h > 0
+            TimeFormatPattern.OPT_HH_OPT_MM_SS_SS, TimeFormatPattern.OPT_HH_OPT_MM_SS_S -> h > 0
+            TimeFormatPattern.MM_SS_SS, TimeFormatPattern.MM_SS_S, TimeFormatPattern.MM_SS -> true
+            TimeFormatPattern.OPT_MM_SS_SS, TimeFormatPattern.OPT_MM_SS_S, TimeFormatPattern.OPT_MM_SS -> false
+            else -> false
+        }
+
+        val padSeconds = showMinutes
+
+        val decimals = when (pattern) {
+            TimeFormatPattern.HH_MM_SS_SS, TimeFormatPattern.OPT_HH_MM_SS_SS, TimeFormatPattern.OPT_HH_OPT_MM_SS_SS,
+            TimeFormatPattern.MM_SS_SS, TimeFormatPattern.OPT_MM_SS_SS, TimeFormatPattern.SS_SS -> 2
+
+            TimeFormatPattern.HH_MM_SS_S, TimeFormatPattern.OPT_HH_MM_SS_S, TimeFormatPattern.OPT_HH_OPT_MM_SS_S,
+            TimeFormatPattern.MM_SS_S, TimeFormatPattern.OPT_MM_SS_S, TimeFormatPattern.SS_S -> 1
+
+            else -> 0
+        }
+
         val timeString = buildString {
-            if (options.showLeadingZeros) {
+            if (showHours) {
                 append(h.toString().padStart(2, '0'))
                 append(":")
-                append(m.toString().padStart(2, '0'))
-                append(":")
-                append(s.toString().padStart(2, '0'))
-            } else {
-                if (h > 0) {
-                    append(h)
-                    append(":")
-                    if (m < 10) append("0")
-                }
-                append(m)
-                append(":")
-                if (s < 10) append("0")
-                append(s)
             }
-            if (options.showFraction && options.decimalPlaces > 0) {
+            if (showMinutes) {
+                val minStr = if (padMinutes) m.toString().padStart(2, '0') else m.toString()
+                append(minStr)
+                append(":")
+            }
+            val secStr = if (padSeconds) s.toString().padStart(2, '0') else s.toString()
+            append(secStr)
+
+            if (decimals > 0) {
                 append(".")
-                val fraction = when (options.decimalPlaces) {
+                val fraction = when (decimals) {
                     1 -> ms / 100
                     2 -> ms / 10
                     else -> ms
                 }
-                append(fraction.toString().padStart(options.decimalPlaces, '0'))
+                append(fraction.toString().padStart(decimals, '0'))
             }
         }
+
         return if (isNegative) "-$timeString" else timeString
     }
 
-    fun formattedWithSign(showMilliseconds: Boolean = true): String {
-        if (isZero) return "0.00"
+    fun formattedWithSign(showMilliseconds: Boolean = true, decimalPlaces: Int = 2): String {
+        if (isZero) {
+            return if (showMilliseconds && decimalPlaces > 0) {
+                "0." + "0".repeat(decimalPlaces)
+            } else {
+                "0"
+            }
+        }
         val sign = if (isNegative) "-" else "+"
         val absoluteMs = abs(totalMilliseconds)
         val h = absoluteMs / 3600000
@@ -90,12 +130,15 @@ value class TimeSpan(val totalMilliseconds: Long) : Comparable<TimeSpan> {
                 if (s < 10) append("0")
             }
             append(s)
-            if (showMilliseconds) {
+            if (showMilliseconds && decimalPlaces > 0) {
                 append(".")
-                // Only show 2 decimal digits for split deltas
-                val hundredths = ms / 10
-                if (hundredths < 10) append("0")
-                append(hundredths)
+                val divisor = when (decimalPlaces) {
+                    1 -> 100
+                    2 -> 10
+                    else -> 1
+                }
+                val fraction = ms / divisor
+                append(fraction.toString().padStart(decimalPlaces, '0'))
             }
         }
         return "$sign$timeString"
