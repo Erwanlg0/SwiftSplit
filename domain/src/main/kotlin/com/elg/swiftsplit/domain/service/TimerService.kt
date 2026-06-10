@@ -5,11 +5,16 @@ import com.elg.swiftsplit.domain.model.*
 class TimerService(private val clock: Clock) {
 
     fun start(run: Run, comparison: ComparisonName, timingMethod: TimingMethod): ActiveRun {
+        val startTime = clock.currentTimeMillis()
+        // Subtracting offset because a negative offset (like -3s) 
+        // means we started 3s before the "real" start.
+        val adjustedStartTime = startTime - run.offset.totalMilliseconds
+        
         return ActiveRun(
             run = run,
             currentSegmentIndex = 0,
             splitTimes = List(run.segments.size) { null },
-            startTime = clock.currentTimeMillis(),
+            startTime = adjustedStartTime,
             pauseAccumulator = 0L,
             pauseStart = null,
             comparison = comparison,
@@ -48,26 +53,28 @@ class TimerService(private val clock: Clock) {
     }
 
     fun skip(activeRun: ActiveRun): Pair<ActiveRun, TimerEvent> {
+        val currentTimeMillis = clock.currentTimeMillis()
         if (activeRun.startTime == 0L || activeRun.pauseStart != null) return activeRun to TimerEvent.Paused
 
         val currentIndex = activeRun.currentSegmentIndex
         val newSplitTimes = activeRun.splitTimes.toMutableList()
-        newSplitTimes[currentIndex] = null 
-
+        
         val nextIndex = currentIndex + 1
         val isFinished = nextIndex >= activeRun.run.segments.size
+
+        val event = if (isFinished) {
+            val elapsed = getElapsedTime(activeRun, currentTimeMillis)
+            newSplitTimes[currentIndex] = elapsed
+            TimerEvent.Finished(elapsed)
+        } else {
+            newSplitTimes[currentIndex] = null
+            TimerEvent.Skipped(currentIndex)
+        }
 
         val updatedRun = activeRun.copy(
             currentSegmentIndex = nextIndex,
             splitTimes = newSplitTimes
         )
-
-        val event = if (isFinished) {
-            val lastValidSplit = newSplitTimes.lastOrNull { it != null } ?: TimeSpan.ZERO
-            TimerEvent.Finished(lastValidSplit)
-        } else {
-            TimerEvent.Skipped(currentIndex)
-        }
 
         return updatedRun to event
     }

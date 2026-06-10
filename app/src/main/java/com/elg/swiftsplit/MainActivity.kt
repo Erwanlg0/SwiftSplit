@@ -18,11 +18,14 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.rememberNavController
 import com.elg.swiftsplit.application.port.input.ImportRunUseCase
+import com.elg.swiftsplit.application.port.input.SplitUseCase
+import com.elg.swiftsplit.application.port.input.UndoSplitUseCase
 import com.elg.swiftsplit.application.port.output.SettingsPort
 import com.elg.swiftsplit.navigation.AppNavigation
 import com.elg.swiftsplit.ui.theme.SwiftSplitTheme
-import com.elg.swiftsplit.R
+import android.view.KeyEvent
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -31,6 +34,12 @@ class MainActivity : AppCompatActivity() {
 
     @Inject
     lateinit var importRunUseCase: ImportRunUseCase
+
+    @Inject
+    lateinit var splitUseCase: SplitUseCase
+
+    @Inject
+    lateinit var undoSplitUseCase: UndoSplitUseCase
 
     @Inject
     lateinit var settingsPort: SettingsPort
@@ -48,8 +57,6 @@ class MainActivity : AppCompatActivity() {
                 else -> isSystemInDarkTheme()
             }
 
-            
-            
             LaunchedEffect(language) {
                 val lang = language ?: return@LaunchedEffect
                 val appLocales = if (lang == "auto") {
@@ -67,6 +74,23 @@ class MainActivity : AppCompatActivity() {
             }
         }
         handleIntent(intent)
+    }
+
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        if (keyCode == KeyEvent.KEYCODE_VOLUME_UP || keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
+            lifecycleScope.launch {
+                if (settingsPort.observeGlobalHotkeysEnabled().first()) {
+                    if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
+                        splitUseCase()
+                    } else {
+                        undoSplitUseCase()
+                    }
+                }
+            }
+            return true 
+        }
+        
+        return super.onKeyDown(keyCode, event)
     }
 
     override fun onNewIntent(intent: Intent) {

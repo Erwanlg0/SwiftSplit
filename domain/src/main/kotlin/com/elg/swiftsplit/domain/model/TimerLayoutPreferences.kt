@@ -14,7 +14,11 @@ data class TimerLayoutPreferences(
     val splitApproachThresholdSeconds: Int = 30,
     val showUndoButton: Boolean = true,
     val showSkipButton: Boolean = true,
-    val showPauseButton: Boolean = true
+    val showPauseButton: Boolean = true,
+    val enableVibration: Boolean = true,
+    val showSumOfBest: Boolean = true,
+    val showSegmentDurations: Boolean = false,
+    val isMinimalistMode: Boolean = false
 ) {
     companion object {
         val DEFAULT = TimerLayoutPreferences()

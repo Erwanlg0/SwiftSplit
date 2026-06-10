@@ -1,6 +1,7 @@
 package com.elg.swiftsplit.ui.screen.timer.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -17,7 +18,9 @@ import androidx.compose.ui.res.stringResource
 @Composable
 fun RunHeader(
     run: Run,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    activeComparison: String? = null,
+    onComparisonClick: (() -> Unit)? = null
 ) {
     val swiftSplitColors = SwiftSplitThemeColors.colors
  
@@ -39,11 +42,27 @@ fun RunHeader(
                     fontWeight = FontWeight.Bold,
                     color = swiftSplitColors.textPrimary
                 )
-                Text(
-                    text = run.gameInfo.categoryName,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = swiftSplitColors.textSecondary
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.then(
+                        if (onComparisonClick != null) Modifier.clickable { onComparisonClick() }
+                        else Modifier
+                    )
+                ) {
+                    Text(
+                        text = run.gameInfo.categoryName,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = swiftSplitColors.textSecondary
+                    )
+                    if (activeComparison != null) {
+                        Text(
+                            text = " • $activeComparison",
+                            style = MaterialTheme.typography.titleSmall,
+                            color = swiftSplitColors.textTertiary,
+                            modifier = Modifier.padding(start = 4.dp)
+                        )
+                    }
+                }
             }
              
             Column(horizontalAlignment = Alignment.End) {

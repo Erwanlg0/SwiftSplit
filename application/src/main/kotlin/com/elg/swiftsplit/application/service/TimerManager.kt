@@ -1,5 +1,6 @@
 package com.elg.swiftsplit.application.service
 
+import com.elg.swiftsplit.application.port.output.HapticFeedbackPort
 import com.elg.swiftsplit.application.port.output.RunRepository
 import com.elg.swiftsplit.application.port.output.SettingsPort
 import com.elg.swiftsplit.domain.model.*
@@ -8,6 +9,7 @@ import com.elg.swiftsplit.domain.service.TimerService
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -19,7 +21,8 @@ class TimerManager @Inject constructor(
     private val runRepository: RunRepository,
     private val timerService: TimerService,
     private val settingsPort: SettingsPort,
-    private val clock: Clock
+    private val clock: Clock,
+    private val hapticFeedbackPort: HapticFeedbackPort
 ) {
     private val _timerState = MutableStateFlow<TimerState>(TimerState.Idle)
     val timerState: Flow<TimerState> = _timerState.asStateFlow()
@@ -48,6 +51,19 @@ class TimerManager @Inject constructor(
         val current = activeRun ?: return
         val (updated, event) = timerService.split(current)
         activeRun = updated
+
+        val layoutPrefs = settingsPort.observeTimerLayoutPreferences().first()
+        if (layoutPrefs.enableVibration) {
+            val isGold = event is TimerEvent.Split && current.run.segments[event.segmentIndex].bestSegmentTime?.getTime(current.timingMethod)?.let {
+                event.splitTime <= it
+            } ?: false
+            
+            if (isGold) {
+                hapticFeedbackPort.vibrate(150) // Longer for gold
+            } else {
+                hapticFeedbackPort.vibrate(50)
+            }
+        }
 
         when (event) {
             is TimerEvent.Finished -> {

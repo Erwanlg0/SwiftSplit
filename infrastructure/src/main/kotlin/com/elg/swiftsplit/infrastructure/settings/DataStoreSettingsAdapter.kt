@@ -46,6 +46,10 @@ class DataStoreSettingsAdapter @Inject constructor(
         val TIMER_SHOW_UNDO_BUTTON = booleanPreferencesKey("timer_show_undo_button")
         val TIMER_SHOW_SKIP_BUTTON = booleanPreferencesKey("timer_show_skip_button")
         val TIMER_SHOW_PAUSE_BUTTON = booleanPreferencesKey("timer_show_pause_button")
+        val TIMER_ENABLE_VIBRATION = booleanPreferencesKey("timer_enable_vibration")
+        val TIMER_SHOW_SUM_OF_BEST = booleanPreferencesKey("timer_show_sum_of_best")
+        val TIMER_SHOW_SEGMENT_DURATIONS = booleanPreferencesKey("timer_show_segment_durations")
+        val TIMER_IS_MINIMALIST_MODE = booleanPreferencesKey("timer_is_minimalist_mode")
         val POLLING_DELAY_MS = longPreferencesKey("polling_delay_ms")
         val NETWORK_TIMEOUT_MS = longPreferencesKey("network_timeout_ms")
         val REMOTE_HOST = stringPreferencesKey("remote_host")
@@ -177,7 +181,11 @@ class DataStoreSettingsAdapter @Inject constructor(
                     ?: 30).coerceIn(0, 120),
                 showUndoButton = preferences[PreferencesKeys.TIMER_SHOW_UNDO_BUTTON] ?: true,
                 showSkipButton = preferences[PreferencesKeys.TIMER_SHOW_SKIP_BUTTON] ?: true,
-                showPauseButton = preferences[PreferencesKeys.TIMER_SHOW_PAUSE_BUTTON] ?: true
+                showPauseButton = preferences[PreferencesKeys.TIMER_SHOW_PAUSE_BUTTON] ?: true,
+                enableVibration = preferences[PreferencesKeys.TIMER_ENABLE_VIBRATION] ?: true,
+                showSumOfBest = preferences[PreferencesKeys.TIMER_SHOW_SUM_OF_BEST] ?: true,
+                showSegmentDurations = preferences[PreferencesKeys.TIMER_SHOW_SEGMENT_DURATIONS] ?: false,
+                isMinimalistMode = preferences[PreferencesKeys.TIMER_IS_MINIMALIST_MODE] ?: false
             )
         }
     }
@@ -200,6 +208,10 @@ class DataStoreSettingsAdapter @Inject constructor(
             prefs[PreferencesKeys.TIMER_SHOW_UNDO_BUTTON] = preferences.showUndoButton
             prefs[PreferencesKeys.TIMER_SHOW_SKIP_BUTTON] = preferences.showSkipButton
             prefs[PreferencesKeys.TIMER_SHOW_PAUSE_BUTTON] = preferences.showPauseButton
+            prefs[PreferencesKeys.TIMER_ENABLE_VIBRATION] = preferences.enableVibration
+            prefs[PreferencesKeys.TIMER_SHOW_SUM_OF_BEST] = preferences.showSumOfBest
+            prefs[PreferencesKeys.TIMER_SHOW_SEGMENT_DURATIONS] = preferences.showSegmentDurations
+            prefs[PreferencesKeys.TIMER_IS_MINIMALIST_MODE] = preferences.isMinimalistMode
         }
     }
 

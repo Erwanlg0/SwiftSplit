@@ -8,6 +8,8 @@ import com.elg.swiftsplit.infrastructure.remote.LiveSplitTcpClient
 import com.elg.swiftsplit.infrastructure.settings.DataStoreSettingsAdapter
 import com.elg.swiftsplit.domain.service.Clock
 import com.elg.swiftsplit.infrastructure.ClockImpl
+import com.elg.swiftsplit.application.port.output.HapticFeedbackPort
+import com.elg.swiftsplit.infrastructure.HapticFeedbackAdapter
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -21,6 +23,10 @@ abstract class InfrastructureModule {
     @Binds
     @Singleton
     abstract fun bindClock(impl: ClockImpl): Clock
+
+    @Binds
+    @Singleton
+    abstract fun bindHapticFeedbackPort(impl: HapticFeedbackAdapter): HapticFeedbackPort
 
     @Binds
     @Singleton

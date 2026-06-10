@@ -6,9 +6,11 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.elg.swiftsplit.domain.model.Delta
@@ -81,6 +83,24 @@ fun SplitRow(
                 .background(if (isActive) activeBrush else androidx.compose.ui.graphics.Brush.horizontalGradient(listOf(Color.Transparent, Color.Transparent)))
                 .padding(horizontal = 16.dp, vertical = 8.dp)
         ) {
+            if (!segment.iconData.isNullOrBlank()) {
+                val bitmap = remember(segment.iconData) {
+                    try {
+                        val bytes = android.util.Base64.decode(segment.iconData, android.util.Base64.DEFAULT)
+                        android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.size)?.let {
+                            it.asImageBitmap()
+                        }
+                    } catch (e: Exception) { null }
+                }
+                bitmap?.let {
+                    androidx.compose.foundation.Image(
+                        bitmap = it,
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp).padding(end = 8.dp)
+                    )
+                }
+            }
+
             Text(
                 text = segment.name,
                 style = MaterialTheme.typography.bodyLarge,
@@ -105,7 +125,13 @@ fun SplitRow(
 
             val timeToShow = when {
                 liveElapsed != null -> liveElapsed.formatted(timeFormat)
-                isCompleted && elapsedSplit != null -> elapsedSplit.formatted(timeFormat)
+                isCompleted && elapsedSplit != null -> {
+                    if (layoutPreferences.showSegmentDurations) {
+                        (previousCurrentSplit?.let { elapsedSplit - it } ?: elapsedSplit).formatted(timeFormat)
+                    } else {
+                        elapsedSplit.formatted(timeFormat)
+                    }
+                }
                 else -> compSplit?.formatted(timeFormat) ?: "-"
             }
 

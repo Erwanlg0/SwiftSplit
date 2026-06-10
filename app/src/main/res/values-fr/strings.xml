@@ -153,6 +153,13 @@
     <string name="layout_editor_show_undo">Afficher le bouton annuler</string>
     <string name="layout_editor_show_skip">Afficher le bouton passer</string>
     <string name="layout_editor_show_pause">Afficher le bouton pause</string>
+    <string name="layout_editor_enable_vibration">Retour haptique</string>
+    <string name="layout_editor_enable_vibration_desc">Vibrer lors d\'un split</string>
+    <string name="layout_editor_show_sob">Afficher la somme des meilleurs</string>
+    <string name="layout_editor_show_durations">Afficher durée des segments</string>
+    <string name="layout_editor_show_durations_desc">Affiche le temps de chaque section</string>
+    <string name="layout_editor_minimalist">Mode minimaliste</string>
+    <string name="layout_editor_minimalist_desc">Masque en-têtes et bas de page</string>
 
     <!-- Timer Control Labels -->
     <string name="timer_control_start">Démarrer</string>
@@ -235,6 +242,7 @@
     <string name="timer_export_error">Erreur export : %1$s</string>
     <string name="timer_desc_share">Exporter LSS</string>
     <string name="timer_desc_stats">Statistiques de course</string>
+    <string name="timer_sum_of_best">Somme des meilleurs</string>
 
     <string name="stats_title">Statistiques &amp; Historique</string>
     <string name="stats_no_segments">Aucun segment défini.</string>

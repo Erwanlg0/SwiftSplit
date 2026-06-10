@@ -579,6 +579,61 @@ fun LayoutEditorScreen(
                         },
                         colors = ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent)
                     )
+
+                    HorizontalDivider(color = colors.deepBackground.copy(alpha = 0.5f), thickness = 0.5.dp)
+
+                    ListItem(
+                        headlineContent = { Text(stringResource(R.string.layout_editor_enable_vibration), color = colors.textPrimary) },
+                        supportingContent = { Text(stringResource(R.string.layout_editor_enable_vibration_desc), color = colors.textSecondary) },
+                        trailingContent = {
+                            Switch(
+                                checked = preferences.enableVibration,
+                                onCheckedChange = { viewModel.setEnableVibration(it) }
+                            )
+                        },
+                        colors = ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent)
+                    )
+
+                    HorizontalDivider(color = colors.deepBackground.copy(alpha = 0.5f), thickness = 0.5.dp)
+
+                    ListItem(
+                        headlineContent = { Text(stringResource(R.string.layout_editor_show_sob), color = colors.textPrimary) },
+                        trailingContent = {
+                            Switch(
+                                checked = preferences.showSumOfBest,
+                                onCheckedChange = { viewModel.setShowSumOfBest(it) }
+                            )
+                        },
+                        colors = ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent)
+                    )
+
+                    HorizontalDivider(color = colors.deepBackground.copy(alpha = 0.5f), thickness = 0.5.dp)
+
+                    ListItem(
+                        headlineContent = { Text(stringResource(R.string.layout_editor_show_durations), color = colors.textPrimary) },
+                        supportingContent = { Text(stringResource(R.string.layout_editor_show_durations_desc), color = colors.textSecondary) },
+                        trailingContent = {
+                            Switch(
+                                checked = preferences.showSegmentDurations,
+                                onCheckedChange = { viewModel.setShowSegmentDurations(it) }
+                            )
+                        },
+                        colors = ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent)
+                    )
+
+                    HorizontalDivider(color = colors.deepBackground.copy(alpha = 0.5f), thickness = 0.5.dp)
+
+                    ListItem(
+                        headlineContent = { Text(stringResource(R.string.layout_editor_minimalist), color = colors.textPrimary) },
+                        supportingContent = { Text(stringResource(R.string.layout_editor_minimalist_desc), color = colors.textSecondary) },
+                        trailingContent = {
+                            Switch(
+                                checked = preferences.isMinimalistMode,
+                                onCheckedChange = { viewModel.setIsMinimalistMode(it) }
+                            )
+                        },
+                        colors = ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent)
+                    )
                 }
             }
 

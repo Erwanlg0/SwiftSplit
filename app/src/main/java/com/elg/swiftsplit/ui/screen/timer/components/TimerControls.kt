@@ -102,12 +102,12 @@ fun TimerControls(
         if (showSkip) {
             IconButton(
                 onClick = onSkip,
-                enabled = timerState is TimerState.Running
+                enabled = timerState is TimerState.Running || timerState is TimerState.Paused
             ) {
                 Icon(
                     Icons.Default.SkipNext,
                     contentDescription = stringResource(R.string.timer_control_skip),
-                    tint = if (timerState is TimerState.Running) colors.textPrimary else colors.textDisabled
+                    tint = if (timerState is TimerState.Running || timerState is TimerState.Paused) colors.textPrimary else colors.textDisabled
                 )
             }
         }

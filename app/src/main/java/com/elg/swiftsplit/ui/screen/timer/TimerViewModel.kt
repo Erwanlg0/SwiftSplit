@@ -128,4 +128,26 @@ class TimerViewModel @Inject constructor(
             resetTimerUseCase(saveAttempt)
         }
     }
+
+    fun cycleComparison() {
+        viewModelScope.launch {
+            val current = timerState.value
+            val currentComp = when (current) {
+                is TimerState.Running -> current.comparison
+                is TimerState.Paused -> current.comparison
+                is TimerState.Finished -> current.comparison
+                else -> ComparisonName.PERSONAL_BEST
+            }
+            
+            val comparisons = listOf(
+                ComparisonName.PERSONAL_BEST,
+                ComparisonName.BEST_SEGMENTS,
+                ComparisonName.AVERAGE_SEGMENTS
+            )
+            
+            val nextComp = comparisons[(comparisons.indexOf(currentComp) + 1) % comparisons.size]
+            settingsPort.setComparison(nextComp)
+            // The timer state will update automatically if ObserveTimerUseCase reacts to settings
+        }
+    }
 }

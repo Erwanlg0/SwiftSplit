@@ -88,6 +88,22 @@ class LayoutEditorViewModel @Inject constructor(
         update { it.copy(showPauseButton = enabled) }
     }
 
+    fun setEnableVibration(enabled: Boolean) {
+        update { it.copy(enableVibration = enabled) }
+    }
+
+    fun setShowSumOfBest(enabled: Boolean) {
+        update { it.copy(showSumOfBest = enabled) }
+    }
+
+    fun setShowSegmentDurations(enabled: Boolean) {
+        update { it.copy(showSegmentDurations = enabled) }
+    }
+
+    fun setIsMinimalistMode(enabled: Boolean) {
+        update { it.copy(isMinimalistMode = enabled) }
+    }
+
     private fun update(transform: (TimerLayoutPreferences) -> TimerLayoutPreferences) {
         viewModelScope.launch {
             val current = layoutPreferences.value

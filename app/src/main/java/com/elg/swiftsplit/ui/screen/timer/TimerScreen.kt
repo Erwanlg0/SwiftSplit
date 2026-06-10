@@ -163,15 +163,28 @@ fun TimerScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .background(androidx.compose.ui.graphics.Color.Black)
-                .clickable(
-                    interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
-                    indication = null
-                ) {
-                    if (timerState is TimerState.Idle) {
-                        viewModel.startTimer()
-                    } else {
-                        viewModel.pauseResume()
-                    }
+                .pointerInput(timerState, layoutPreferences.isMinimalistMode) {
+                    detectTapGestures(
+                        onTap = {
+                            when (timerState) {
+                                is TimerState.Idle -> viewModel.startTimer()
+                                is TimerState.Running -> {
+                                    if (layoutPreferences.isMinimalistMode) {
+                                        viewModel.split()
+                                    } else {
+                                        viewModel.pauseResume()
+                                    }
+                                }
+                                is TimerState.Paused -> viewModel.pauseResume()
+                                else -> {}
+                            }
+                        },
+                        onLongPress = {
+                            if (layoutPreferences.isMinimalistMode && timerState is TimerState.Running) {
+                                viewModel.pauseResume()
+                            }
+                        }
+                    )
                 }
         ) {
             val currentIndex = when (val state = timerState) {
@@ -217,14 +230,16 @@ fun TimerScreen(
                         .padding(top = 64.dp, bottom = 24.dp, start = 16.dp, end = 16.dp)
                 ) {
                     
-                    Text(
-                        text = "${currentRun.gameInfo.gameName} — ${currentRun.gameInfo.categoryName}",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        color = colors.textSecondary,
-                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                        modifier = Modifier.padding(horizontal = 24.dp)
-                    )
+                    if (!layoutPreferences.isMinimalistMode) {
+                        Text(
+                            text = "${currentRun.gameInfo.gameName} — ${currentRun.gameInfo.categoryName}",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            color = colors.textSecondary,
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                            modifier = Modifier.padding(horizontal = 24.dp)
+                        )
+                    }
 
                     if (showSplitsInFullscreen) {
                         Spacer(modifier = Modifier.height(16.dp))
@@ -251,7 +266,7 @@ fun TimerScreen(
                     Text(
                         text = currentElapsed.formatted(layoutPreferences.timeFormat),
                         style = MaterialTheme.typography.displayLarge.copy(
-                            fontSize = if (showSplitsInFullscreen) 70.sp else 96.sp
+                            fontSize = if (showSplitsInFullscreen) 80.sp else 120.sp
                         ),
                         fontWeight = FontWeight.Black,
                         color = timerColor,
@@ -260,82 +275,70 @@ fun TimerScreen(
                         softWrap = false
                     )
 
-                    Spacer(modifier = Modifier.height(8.dp))
-                    val stateText = when (timerState) {
-                        is TimerState.Running -> stringResource(R.string.phase_running)
-                        is TimerState.Paused -> stringResource(R.string.phase_paused)
-                        is TimerState.Finished -> stringResource(R.string.phase_ended)
-                        else -> stringResource(R.string.phase_not_running)
-                    }
-                    Surface(
-                        shape = MaterialTheme.shapes.small,
-                        color = when (timerState) {
-                            is TimerState.Running -> colors.success.copy(alpha = 0.2f)
-                            is TimerState.Paused -> colors.warning.copy(alpha = 0.2f)
-                            is TimerState.Finished -> colors.info.copy(alpha = 0.2f)
-                            else -> colors.textDisabled.copy(alpha = 0.2f)
-                        }
-                    ) {
-                        Text(
-                            text = stateText.uppercase(),
-                            style = MaterialTheme.typography.labelMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = when (timerState) {
-                                is TimerState.Running -> colors.success
-                                is TimerState.Paused -> colors.warning
-                                is TimerState.Finished -> colors.info
-                                else -> colors.textSecondary
-                            },
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
-                        )
-                    }
-
-                    
-                    val currentSegmentName = if (timerState is TimerState.Finished) {
-                        stringResource(R.string.timer_finished)
-                    } else if (currentIndex < currentRun.segments.size) {
-                        currentRun.segments[currentIndex].name
-                    } else {
-                        ""
-                    }
-                    if (currentSegmentName.isNotEmpty()) {
+                    if (!layoutPreferences.isMinimalistMode) {
                         Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = currentSegmentName,
-                            style = MaterialTheme.typography.headlineSmall,
-                            color = colors.textTertiary,
-                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
-                        )
+                        val stateText = when (timerState) {
+                            is TimerState.Running -> stringResource(R.string.phase_running)
+                            is TimerState.Paused -> stringResource(R.string.phase_paused)
+                            is TimerState.Finished -> stringResource(R.string.phase_ended)
+                            else -> stringResource(R.string.phase_not_running)
+                        }
+                        Surface(
+                            shape = MaterialTheme.shapes.small,
+                            color = when (timerState) {
+                                is TimerState.Running -> colors.success.copy(alpha = 0.2f)
+                                is TimerState.Paused -> colors.warning.copy(alpha = 0.2f)
+                                is TimerState.Finished -> colors.info.copy(alpha = 0.2f)
+                                else -> colors.textDisabled.copy(alpha = 0.2f)
+                            }
+                        ) {
+                            Text(
+                                text = stateText.uppercase(),
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = when (timerState) {
+                                    is TimerState.Running -> colors.success
+                                    is TimerState.Paused -> colors.warning
+                                    is TimerState.Finished -> colors.info
+                                    else -> colors.textSecondary
+                                },
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                            )
+                        }
                     }
 
-                    Spacer(modifier = Modifier.height(8.dp))
-                    val isLastSplit = currentRun.segments.let { currentIndex == it.size - 1 }
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable(
-                                interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
-                                indication = null
-                            ) { /* Consume click */ }
-                    ) {
-                        TimerControls(
-                            timerState = timerState,
-                            isLastSplit = isLastSplit,
-                            onStartSplit = {
-                                if (timerState is TimerState.Idle) {
-                                    viewModel.startTimer()
-                                } else {
-                                    viewModel.split()
-                                }
-                            },
-                            onPauseResume = { viewModel.pauseResume() },
-                            onUndo = { viewModel.undoSplit() },
-                            onSkip = { viewModel.skipSplit() },
-                            onReset = { viewModel.reset(saveAttempt = true) },
-                            showUndo = layoutPreferences.showUndoButton,
-                            showSkip = layoutPreferences.showSkipButton,
-                            showPause = layoutPreferences.showPauseButton
-                        )
+                    if (!layoutPreferences.isMinimalistMode) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        if (!layoutPreferences.isMinimalistMode) {
+                            val isLastSplit = currentRun.segments.let { currentIndex == it.size - 1 }
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable(
+                                        interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
+                                        indication = null
+                                    ) { /* Consume click */ }
+                            ) {
+                                TimerControls(
+                                    timerState = timerState,
+                                    isLastSplit = isLastSplit,
+                                    onStartSplit = {
+                                        if (timerState is TimerState.Idle) {
+                                            viewModel.startTimer()
+                                        } else {
+                                            viewModel.split()
+                                        }
+                                    },
+                                    onPauseResume = { viewModel.pauseResume() },
+                                    onUndo = { viewModel.undoSplit() },
+                                    onSkip = { viewModel.skipSplit() },
+                                    onReset = { viewModel.reset(saveAttempt = true) },
+                                    showUndo = layoutPreferences.showUndoButton,
+                                    showSkip = layoutPreferences.showSkipButton,
+                                    showPause = layoutPreferences.showPauseButton
+                                )
+                            }
+                        }
                     }
                 }
             } else {
@@ -373,20 +376,22 @@ fun TimerScreen(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Top
                     ) {
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = "${currentRun.gameInfo.gameName} — ${currentRun.gameInfo.categoryName}",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.SemiBold,
-                            color = colors.textSecondary,
-                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
-                        )
+                        if (!layoutPreferences.isMinimalistMode) {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "${currentRun.gameInfo.gameName} — ${currentRun.gameInfo.categoryName}",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                color = colors.textSecondary,
+                                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                            )
+                        }
                         Spacer(modifier = Modifier.weight(1f))
 
                         Text(
                             text = currentElapsed.formatted(layoutPreferences.timeFormat),
                             style = MaterialTheme.typography.displayLarge.copy(
-                                fontSize = if (showSplitsInFullscreen) 56.sp else 80.sp
+                                fontSize = if (showSplitsInFullscreen) 70.sp else 110.sp
                             ),
                             fontWeight = FontWeight.Black,
                             color = timerColor,
@@ -395,122 +400,113 @@ fun TimerScreen(
                             softWrap = false
                         )
 
-                        Spacer(modifier = Modifier.height(8.dp))
-                        val stateText = when (timerState) {
-                            is TimerState.Running -> stringResource(R.string.phase_running)
-                            is TimerState.Paused -> stringResource(R.string.phase_paused)
-                            is TimerState.Finished -> stringResource(R.string.phase_ended)
-                            else -> stringResource(R.string.phase_not_running)
-                        }
-                        Surface(
-                            shape = MaterialTheme.shapes.small,
-                            color = when (timerState) {
-                                is TimerState.Running -> colors.success.copy(alpha = 0.2f)
-                                is TimerState.Paused -> colors.warning.copy(alpha = 0.2f)
-                                is TimerState.Finished -> colors.info.copy(alpha = 0.2f)
-                                else -> colors.textDisabled.copy(alpha = 0.2f)
+                        if (!layoutPreferences.isMinimalistMode) {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            val stateText = when (timerState) {
+                                is TimerState.Running -> stringResource(R.string.phase_running)
+                                is TimerState.Paused -> stringResource(R.string.phase_paused)
+                                is TimerState.Finished -> stringResource(R.string.phase_ended)
+                                else -> stringResource(R.string.phase_not_running)
                             }
-                        ) {
-                            Text(
-                                text = stateText.uppercase(),
-                                style = MaterialTheme.typography.labelMedium,
-                                fontWeight = FontWeight.Bold,
+                            Surface(
+                                shape = MaterialTheme.shapes.small,
                                 color = when (timerState) {
-                                    is TimerState.Running -> colors.success
-                                    is TimerState.Paused -> colors.warning
-                                    is TimerState.Finished -> colors.info
-                                    else -> colors.textSecondary
-                                },
-                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
-                            )
+                                    is TimerState.Running -> colors.success.copy(alpha = 0.2f)
+                                    is TimerState.Paused -> colors.warning.copy(alpha = 0.2f)
+                                    is TimerState.Finished -> colors.info.copy(alpha = 0.2f)
+                                    else -> colors.textDisabled.copy(alpha = 0.2f)
+                                }
+                            ) {
+                                Text(
+                                    text = stateText.uppercase(),
+                                    style = MaterialTheme.typography.labelMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = when (timerState) {
+                                        is TimerState.Running -> colors.success
+                                        is TimerState.Paused -> colors.warning
+                                        is TimerState.Finished -> colors.info
+                                        else -> colors.textSecondary
+                                    },
+                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                                )
+                            }
                         }
 
-                        
-                        val currentSegmentName = if (timerState is TimerState.Finished) {
-                            stringResource(R.string.timer_finished)
-                        } else if (currentIndex < currentRun.segments.size) {
-                            currentRun.segments[currentIndex].name
-                        } else {
-                            ""
-                        }
-                        if (currentSegmentName.isNotEmpty()) {
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = currentSegmentName,
-                                style = MaterialTheme.typography.titleMedium,
-                                color = colors.textTertiary,
-                                textAlign = androidx.compose.ui.text.style.TextAlign.Center
-                            )
-                        }
                         Spacer(modifier = Modifier.weight(1f))
 
-                        val isLastSplit = currentRun.segments.let { currentIndex == it.size - 1 }
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable(
-                                    interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
-                                    indication = null
-                                ) { /* Consume click */ }
-                        ) {
-                            TimerControls(
-                                timerState = timerState,
-                                isLastSplit = isLastSplit,
-                                onStartSplit = {
-                                    if (timerState is TimerState.Idle) {
-                                        viewModel.startTimer()
-                                    } else {
-                                        viewModel.split()
-                                    }
-                                },
-                                onPauseResume = { viewModel.pauseResume() },
-                                onUndo = { viewModel.undoSplit() },
-                                onSkip = { viewModel.skipSplit() },
-                                onReset = { viewModel.reset(saveAttempt = true) },
-                                showUndo = layoutPreferences.showUndoButton,
-                                showSkip = layoutPreferences.showSkipButton,
-                                showPause = layoutPreferences.showPauseButton
-                            )
+                        if (!layoutPreferences.isMinimalistMode) {
+                            val isLastSplit = currentRun.segments.let { currentIndex == it.size - 1 }
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable(
+                                        interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
+                                        indication = null
+                                    ) { /* Consume click */ }
+                            ) {
+                                TimerControls(
+                                    timerState = timerState,
+                                    isLastSplit = isLastSplit,
+                                    onStartSplit = {
+                                        if (timerState is TimerState.Idle) {
+                                            viewModel.startTimer()
+                                        } else {
+                                            viewModel.split()
+                                        }
+                                    },
+                                    onPauseResume = { viewModel.pauseResume() },
+                                    onUndo = { viewModel.undoSplit() },
+                                    onSkip = { viewModel.skipSplit() },
+                                    onReset = { viewModel.reset(saveAttempt = true) },
+                                    showUndo = layoutPreferences.showUndoButton,
+                                    showSkip = layoutPreferences.showSkipButton,
+                                    showPause = layoutPreferences.showPauseButton
+                                )
+                            }
                         }
                     }
                 }
             }
 
             
-            Row(
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(16.dp)
-                    .clickable(
-                        interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
-                        indication = null
-                    ) { /* Consume click */ },
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(
-                    onClick = { showSplitsInFullscreen = !showSplitsInFullscreen },
-                    modifier = Modifier.background(
-                        if (showSplitsInFullscreen) colors.success.copy(alpha = 0.2f)
-                        else androidx.compose.ui.graphics.Color.White.copy(alpha = 0.1f),
-                        shape = MaterialTheme.shapes.small
-                    )
+            val showFullscreenControls = !layoutPreferences.isMinimalistMode || timerState !is TimerState.Running
+
+            if (showFullscreenControls) {
+                Row(
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(16.dp)
+                        .clickable(
+                            interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
+                            indication = null
+                        ) { /* Consume click */ },
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.List,
-                        contentDescription = "Toggle Splits",
-                        tint = androidx.compose.ui.graphics.Color.White
-                    )
-                }
-                IconButton(
-                    onClick = { isFullscreen = false },
-                    modifier = Modifier.background(androidx.compose.ui.graphics.Color.White.copy(alpha = 0.1f), shape = MaterialTheme.shapes.small)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Close,
-                        contentDescription = "Exit Fullscreen",
-                        tint = androidx.compose.ui.graphics.Color.White
-                    )
+                    IconButton(
+                        onClick = { showSplitsInFullscreen = !showSplitsInFullscreen },
+                        modifier = Modifier.background(
+                            if (showSplitsInFullscreen) colors.success.copy(alpha = 0.2f)
+                            else androidx.compose.ui.graphics.Color.White.copy(alpha = 0.1f),
+                            shape = MaterialTheme.shapes.small
+                        )
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.List,
+                            contentDescription = "Toggle Splits",
+                            tint = androidx.compose.ui.graphics.Color.White
+                        )
+                    }
+                    IconButton(
+                        onClick = { isFullscreen = false },
+                        modifier = Modifier.background(androidx.compose.ui.graphics.Color.White.copy(alpha = 0.1f), shape = MaterialTheme.shapes.small)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Exit Fullscreen",
+                            tint = androidx.compose.ui.graphics.Color.White
+                        )
+                    }
                 }
             }
         }
@@ -608,10 +604,6 @@ fun TimerScreen(
                         .fillMaxSize()
                         .padding(innerPadding)
                 ) {
-                    
-                    RunHeader(run = currentRun)
-
-                    
                     val splitTimes = when (val state = timerState) {
                         is TimerState.Running -> state.splitTimes
                         is TimerState.Paused -> state.splitTimes
@@ -633,6 +625,12 @@ fun TimerScreen(
                         else -> "Personal Best"
                     }
 
+                    RunHeader(
+                        run = currentRun,
+                        activeComparison = activeComp,
+                        onComparisonClick = { viewModel.cycleComparison() }
+                    )
+
                     val isLastSplit = currentRun.segments.let { currentIndex == it.size - 1 }
                     val currentDelta = computeCurrentDelta(
                         timerState = timerState,
@@ -641,6 +639,8 @@ fun TimerScreen(
                         currentElapsed = currentElapsed,
                         activeComp = activeComp
                     )
+
+                    val sob = currentRun.sumOfBest
 
                     if (layoutPreferences.showSplits) {
                         SplitList(
@@ -660,6 +660,7 @@ fun TimerScreen(
                         Spacer(modifier = Modifier.weight(1f))
                     }
 
+
                     TimerDisplay(
                         elapsedTime = currentElapsed,
                         delta = currentDelta,
@@ -675,6 +676,29 @@ fun TimerScreen(
                             )
                         }
                     )
+
+                    if (layoutPreferences.showSumOfBest) {
+                        sob?.let {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp, vertical = 4.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.timer_sum_of_best),
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = colors.textTertiary
+                                )
+                                Text(
+                                    text = it.formatted(layoutPreferences.timeFormat),
+                                    style = MaterialTheme.typography.labelMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = colors.textSecondary
+                                )
+                            }
+                        }
+                    }
 
                     
                     TimerControls(

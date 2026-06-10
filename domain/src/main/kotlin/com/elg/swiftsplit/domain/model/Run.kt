@@ -13,6 +13,20 @@ data class Run(
     val personalBest: SplitTime?
         get() = segments.lastOrNull()?.splitTimes?.get(ComparisonName.PERSONAL_BEST)
 
+    val sumOfBest: TimeSpan?
+        get() {
+            var sum = 0L
+            var anyValid = false
+            for (segment in segments) {
+                val best = segment.bestSegmentTime?.realTime
+                if (best != null) {
+                    sum += best.totalMilliseconds
+                    anyValid = true
+                }
+            }
+            return if (anyValid) TimeSpan(sum) else null
+        }
+
     fun withCompletedAttempt(
         attemptId: Int,
         startedAt: String?,

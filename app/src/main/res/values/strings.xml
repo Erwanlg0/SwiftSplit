@@ -153,6 +153,13 @@
     <string name="layout_editor_show_undo">Show undo button</string>
     <string name="layout_editor_show_skip">Show skip button</string>
     <string name="layout_editor_show_pause">Show pause button</string>
+    <string name="layout_editor_enable_vibration">Enable haptic feedback</string>
+    <string name="layout_editor_enable_vibration_desc">Vibrate on split</string>
+    <string name="layout_editor_show_sob">Show Sum of Best</string>
+    <string name="layout_editor_show_durations">Show segment durations</string>
+    <string name="layout_editor_show_durations_desc">Display time for each section</string>
+    <string name="layout_editor_minimalist">Minimalist mode</string>
+    <string name="layout_editor_minimalist_desc">Hide headers and footers</string>
 
     <!-- Timer Control Labels -->
     <string name="timer_control_start">Start</string>
@@ -235,6 +242,7 @@
     <string name="timer_export_error">Export error: %1$s</string>
     <string name="timer_desc_share">Export LSS</string>
     <string name="timer_desc_stats">Run statistics</string>
+    <string name="timer_sum_of_best">Sum of Best</string>
 
     <string name="stats_title">Statistics &amp; History</string>
     <string name="stats_no_segments">No segments defined.</string>
