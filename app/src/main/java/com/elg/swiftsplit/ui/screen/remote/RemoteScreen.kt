@@ -184,7 +184,7 @@ fun RemoteScreen(
     
     LaunchedEffect(lastResponse) {
         if (!lastResponse.isNullOrBlank()) {
-            android.widget.Toast.makeText(context, "Response: $lastResponse", android.widget.Toast.LENGTH_SHORT).show()
+            android.widget.Toast.makeText(context, context.getString(R.string.remote_toast_response, lastResponse), android.widget.Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -224,7 +224,7 @@ fun RemoteScreen(
             onDismissRequest = { showTutorial = false },
             title = {
                 Text(
-                    text = "Tutoriel Connexion PC (Étape $currentStep / 6)",
+                    text = stringResource(R.string.remote_tuto_title, currentStep),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = colors.textPrimary
@@ -246,7 +246,7 @@ fun RemoteScreen(
                                 .background(Color.Black.copy(alpha = 0.2f), shape = MaterialTheme.shapes.small)
                         )
                         Text(
-                            text = "1. Téléchargez LiveSplit depuis le site officiel :",
+                            text = stringResource(R.string.remote_tuto_step_1),
                             style = MaterialTheme.typography.bodyMedium,
                             color = colors.textPrimary,
                             textAlign = TextAlign.Center
@@ -270,7 +270,7 @@ fun RemoteScreen(
                                 .padding(8.dp)
                         )
                         Text(
-                            text = "(cliquez sur le lien pour l'ouvrir dans votre navigateur)",
+                            text = stringResource(R.string.remote_tuto_step_1_hint),
                             style = MaterialTheme.typography.bodySmall,
                             color = colors.textTertiary,
                             textAlign = TextAlign.Center
@@ -291,29 +291,23 @@ fun RemoteScreen(
                             )
                         }
                         Text(
-                            text = "6. Enfin, cliquez sur le bouton 'Se connecter' (ou 'Connect') pour établir la connexion avec LiveSplit sur votre PC !",
+                            text = stringResource(R.string.remote_tuto_step_6),
                             style = MaterialTheme.typography.bodyMedium,
                             color = colors.textPrimary,
                             textAlign = TextAlign.Center
                         )
                     } else {
-                        val (imageRes, stepDesc) = when (currentStep) {
-                            2 -> Pair(
-                                R.drawable.tuto_2,
-                                "2. Faites un clic droit sur LiveSplit puis cliquez sur le bouton 'Settings'."
-                            )
-                            3 -> Pair(
-                                R.drawable.tuto_3,
-                                "3. Dans les paramètres, réglez 'Startup Behavior' à 'Start TCP Server' pour que la communication puisse se faire dès le démarrage."
-                            )
-                            4 -> Pair(
-                                R.drawable.tuto_4,
-                                "4. Si le serveur n'est pas lancé, faites un clic droit -> Control -> Start TCP Server."
-                            )
-                            else -> Pair(
-                                R.drawable.tuto_5,
-                                "5. Renseignez l'adresse IP locale de votre PC et modifiez le port si vous l'avez changé."
-                            )
+                        val stepDesc = when (currentStep) {
+                            2 -> stringResource(R.string.remote_tuto_step_2)
+                            3 -> stringResource(R.string.remote_tuto_step_3)
+                            4 -> stringResource(R.string.remote_tuto_step_4)
+                            else -> stringResource(R.string.remote_tuto_step_5)
+                        }
+                        val imageRes = when (currentStep) {
+                            2 -> R.drawable.tuto_2
+                            3 -> R.drawable.tuto_3
+                            4 -> R.drawable.tuto_4
+                            else -> R.drawable.tuto_5
                         }
 
                         Image(
@@ -344,17 +338,17 @@ fun RemoteScreen(
                         }
                     }
                 ) {
-                    Text(if (currentStep < 6) "Suivant" else "Terminer")
+                    Text(if (currentStep < 6) stringResource(R.string.remote_tuto_btn_next) else stringResource(R.string.remote_tuto_btn_finish))
                 }
             },
             dismissButton = {
                 if (currentStep > 1) {
                     TextButton(onClick = { currentStep-- }) {
-                        Text("Précédent", color = colors.textSecondary)
+                        Text(stringResource(R.string.remote_tuto_btn_prev), color = colors.textSecondary)
                     }
                 } else {
                     TextButton(onClick = { showTutorial = false }) {
-                        Text("Fermer", color = colors.textSecondary)
+                        Text(stringResource(R.string.remote_tuto_btn_close), color = colors.textSecondary)
                     }
                 }
             },
@@ -767,7 +761,7 @@ fun RemoteScreen(
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text(
-                                    text = "Format du Chronomètre",
+                                    text = stringResource(R.string.remote_format_header),
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Bold,
                                     color = colors.textPrimary
@@ -826,10 +820,10 @@ fun RemoteScreen(
                             ) {
                                 Box(modifier = Modifier.fillMaxWidth()) {
                                     ListItem(
-                                        headlineContent = { Text("Sélectionner le format") },
+                                        headlineContent = { Text(stringResource(R.string.remote_format_select)) },
                                         supportingContent = {
                                             Text(
-                                                text = "${getPatternDisplayName(currentPattern)}\nEx (1s) : ${sampleShort.formatted(layoutPrefs.timeFormat)}\nEx (1h) : ${sampleLong.formatted(layoutPrefs.timeFormat)}",
+                                                text = getPatternDisplayName(currentPattern) + "\n" + stringResource(R.string.layout_editor_format_examples, sampleShort.formatted(layoutPrefs.timeFormat), sampleLong.formatted(layoutPrefs.timeFormat)),
                                                 style = MaterialTheme.typography.bodySmall
                                             )
                                         },
@@ -846,7 +840,7 @@ fun RemoteScreen(
                                                     Column {
                                                         Text(getPatternDisplayName(pat), fontWeight = FontWeight.Bold)
                                                         Text(
-                                                            text = "Ex (1s): ${sampleShort.formatted(TimeFormatOptions(pattern = pat))} | (1h): ${sampleLong.formatted(TimeFormatOptions(pattern = pat))}",
+                                                            text = stringResource(R.string.layout_editor_format_examples, sampleShort.formatted(TimeFormatOptions(pattern = pat)), sampleLong.formatted(TimeFormatOptions(pattern = pat))),
                                                             style = MaterialTheme.typography.bodySmall,
                                                             color = colors.textSecondary
                                                         )

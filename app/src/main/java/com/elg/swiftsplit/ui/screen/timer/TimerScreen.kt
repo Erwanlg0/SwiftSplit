@@ -468,19 +468,19 @@ fun TimerScreen(
                                             putExtra(android.content.Intent.EXTRA_STREAM, uri)
                                             addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
                                         }
-                                        context.startActivity(android.content.Intent.createChooser(shareIntent, "Exporter LiveSplit (.lss)"))
+                                        context.startActivity(android.content.Intent.createChooser(shareIntent, context.getString(R.string.timer_export_chooser_title)))
                                     } catch (e: Exception) {
-                                        android.widget.Toast.makeText(context, "Erreur export : ${e.localizedMessage}", android.widget.Toast.LENGTH_LONG).show()
+                                        android.widget.Toast.makeText(context, context.getString(R.string.timer_export_error, e.localizedMessage), android.widget.Toast.LENGTH_LONG).show()
                                     }
                                 },
                                 onFailure = { error ->
-                                    android.widget.Toast.makeText(context, "Erreur export : ${error.localizedMessage}", android.widget.Toast.LENGTH_LONG).show()
+                                    android.widget.Toast.makeText(context, context.getString(R.string.timer_export_error, error.localizedMessage), android.widget.Toast.LENGTH_LONG).show()
                                 }
                             )
                         }) {
                             Icon(
                                 imageVector = Icons.Default.Share,
-                                contentDescription = "Exporter LSS",
+                                contentDescription = stringResource(R.string.timer_desc_share),
                                 tint = colors.textPrimary
                             )
                         }
@@ -501,7 +501,7 @@ fun TimerScreen(
                         IconButton(onClick = { onNavigateToStats(runId) }) {
                             Icon(
                                 imageVector = Icons.Default.ShowChart,
-                                contentDescription = "Statistiques de course",
+                                contentDescription = stringResource(R.string.timer_desc_stats),
                                 tint = colors.textPrimary
                             )
                         }

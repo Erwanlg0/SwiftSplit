@@ -103,7 +103,7 @@ fun SettingsScreen(
                     Box {
                         ListItem(
                             headlineContent = { Text(stringResource(R.string.settings_timing_method), color = colors.textPrimary) },
-                            supportingContent = { Text(timingMethod.name, color = colors.textSecondary) },
+                            supportingContent = { Text(getTimingMethodDisplayName(timingMethod), color = colors.textSecondary) },
                             leadingContent = {
                                 Icon(
                                     Icons.Default.Timer,
@@ -121,7 +121,7 @@ fun SettingsScreen(
                         ) {
                             TimingMethod.values().forEach { method ->
                                 DropdownMenuItem(
-                                    text = { Text(method.name) },
+                                    text = { Text(getTimingMethodDisplayName(method)) },
                                     onClick = {
                                         viewModel.setTimingMethod(method)
                                         showTimingMenu = false
@@ -136,7 +136,7 @@ fun SettingsScreen(
                     Box {
                         ListItem(
                             headlineContent = { Text(stringResource(R.string.settings_active_comparison), color = colors.textPrimary) },
-                            supportingContent = { Text(comparison.name, color = colors.textSecondary) },
+                            supportingContent = { Text(getComparisonDisplayName(comparison.name), color = colors.textSecondary) },
                             leadingContent = {
                                 Icon(
                                     Icons.AutoMirrored.Filled.CompareArrows,
@@ -159,7 +159,7 @@ fun SettingsScreen(
                             )
                             comps.forEach { comp ->
                                 DropdownMenuItem(
-                                    text = { Text(comp.name) },
+                                    text = { Text(getComparisonDisplayName(comp.name)) },
                                     onClick = {
                                         viewModel.setComparison(comp)
                                         showComparisonMenu = false
@@ -382,6 +382,7 @@ fun SettingsScreen(
                         val langLabel = when(language) {
                             "en" -> stringResource(R.string.settings_language_en)
                             "fr" -> stringResource(R.string.settings_language_fr)
+                            "es" -> stringResource(R.string.settings_language_es)
                             else -> stringResource(R.string.settings_language_auto)
                         }
                         ListItem(
@@ -413,6 +414,10 @@ fun SettingsScreen(
                             DropdownMenuItem(
                                 text = { Text(stringResource(R.string.settings_language_fr)) },
                                 onClick = { viewModel.setLanguage("fr"); showLanguageMenu = false }
+                            )
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.settings_language_es)) },
+                                onClick = { viewModel.setLanguage("es"); showLanguageMenu = false }
                             )
                         }
                     }
@@ -479,5 +484,26 @@ fun SettingsScreen(
                 }
             }
         }
+    }
+}
+
+@Composable
+fun getTimingMethodDisplayName(method: TimingMethod): String {
+    return when (method) {
+        TimingMethod.REAL_TIME -> stringResource(R.string.timing_method_real_time)
+        TimingMethod.GAME_TIME -> stringResource(R.string.timing_method_game_time)
+    }
+}
+
+@Composable
+fun getComparisonDisplayName(name: String): String {
+    return when (name) {
+        "Personal Best" -> stringResource(R.string.comparison_pb)
+        "Best Segments" -> stringResource(R.string.comparison_best_segments)
+        "Average Segments" -> stringResource(R.string.comparison_average_segments)
+        "Worst Segments" -> stringResource(R.string.comparison_worst_segments)
+        "Median Segments" -> stringResource(R.string.comparison_median_segments)
+        "Latest Run" -> stringResource(R.string.comparison_latest_run)
+        else -> name
     }
 }

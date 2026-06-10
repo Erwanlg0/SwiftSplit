@@ -238,14 +238,14 @@ fun RunsListScreen(
     if (showUrlImportDialog) {
         AlertDialog(
             onDismissRequest = { showUrlImportDialog = false; urlToImport = "" },
-            title = { Text("Importer via Lien / URL", color = swiftSplitColors.textPrimary) },
+            title = { Text(stringResource(R.string.runs_list_import_url_title), color = swiftSplitColors.textPrimary) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     OutlinedTextField(
                         value = urlToImport,
                         onValueChange = { urlToImport = it },
-                        placeholder = { Text("https://livesplit.org/splits/...") },
-                        label = { Text("Adresse URL du fichier LSS") },
+                        placeholder = { Text(stringResource(R.string.runs_list_import_url_placeholder)) },
+                        label = { Text(stringResource(R.string.runs_list_import_url_label)) },
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -264,22 +264,22 @@ fun RunsListScreen(
                                 isImportingFromUrl = false
                                 showUrlImportDialog = false
                                 urlToImport = ""
-                                Toast.makeText(context, "Fichier LSS importé avec succès !", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, context.getString(R.string.runs_list_import_success), Toast.LENGTH_SHORT).show()
                             },
                             onFailure = { err ->
                                 isImportingFromUrl = false
-                                Toast.makeText(context, "Erreur : ${err.localizedMessage}", Toast.LENGTH_LONG).show()
+                                Toast.makeText(context, context.getString(R.string.runs_list_import_error, err.localizedMessage), Toast.LENGTH_LONG).show()
                             }
                         )
                     },
                     enabled = urlToImport.isNotBlank() && !isImportingFromUrl
                 ) {
-                    Text("Télécharger & Importer")
+                    Text(stringResource(R.string.runs_list_import_url_btn))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showUrlImportDialog = false; urlToImport = "" }) {
-                    Text("Annuler")
+                    Text(stringResource(R.string.cancel))
                 }
             },
             containerColor = swiftSplitColors.cardBackground
@@ -298,7 +298,7 @@ fun RunsListScreen(
             },
             title = {
                 Text(
-                    text = "Import Speedrun.com",
+                    text = stringResource(R.string.runs_list_speedrun_dialog_title),
                     color = swiftSplitColors.textPrimary,
                     fontWeight = FontWeight.Bold
                 )
@@ -312,8 +312,8 @@ fun RunsListScreen(
                         OutlinedTextField(
                             value = speedrunQuery,
                             onValueChange = { speedrunQuery = it },
-                            placeholder = { Text("Ex: Celeste, Portal...") },
-                            label = { Text("Rechercher un jeu") },
+                            placeholder = { Text(stringResource(R.string.runs_list_speedrun_game_placeholder)) },
+                            label = { Text(stringResource(R.string.runs_list_speedrun_game_label)) },
                             singleLine = true,
                             modifier = Modifier.fillMaxWidth(),
                             trailingIcon = {
@@ -351,7 +351,7 @@ fun RunsListScreen(
                             }
                         }
                     } else if (selectedCategoryId == null) {
-                        Text("Jeu : $selectedGameName", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold, color = swiftSplitColors.textPrimary)
+                        Text(stringResource(R.string.runs_list_speedrun_selected_game, selectedGameName ?: ""), style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold, color = swiftSplitColors.textPrimary)
                         Spacer(modifier = Modifier.height(4.dp))
                         if (isSpeedrunLoading) {
                             CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
@@ -381,8 +381,8 @@ fun RunsListScreen(
                             }
                         }
                     } else {
-                        Text("Jeu : $selectedGameName", style = MaterialTheme.typography.bodySmall, color = swiftSplitColors.textSecondary)
-                        Text("Catégorie : $selectedCategoryName", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold, color = swiftSplitColors.textPrimary)
+                        Text(stringResource(R.string.runs_list_speedrun_selected_game, selectedGameName ?: ""), style = MaterialTheme.typography.bodySmall, color = swiftSplitColors.textSecondary)
+                        Text(stringResource(R.string.runs_list_speedrun_selected_category, selectedCategoryName ?: ""), style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold, color = swiftSplitColors.textPrimary)
                         Spacer(modifier = Modifier.height(8.dp))
                         if (isSpeedrunLoading) {
                             CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
@@ -410,7 +410,7 @@ fun RunsListScreen(
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
-                                    text = "Avec splits uniquement",
+                                    text = stringResource(R.string.runs_list_speedrun_only_splits),
                                     color = swiftSplitColors.textPrimary,
                                     style = MaterialTheme.typography.bodyMedium
                                 )
@@ -419,7 +419,7 @@ fun RunsListScreen(
                             Spacer(modifier = Modifier.height(8.dp))
 
                             if (filteredRuns.isEmpty()) {
-                                Text("Aucun run trouvé.", style = MaterialTheme.typography.bodyMedium, color = swiftSplitColors.textSecondary)
+                                Text(stringResource(R.string.runs_list_speedrun_no_runs), style = MaterialTheme.typography.bodyMedium, color = swiftSplitColors.textSecondary)
                             } else {
                                 LazyColumn(
                                     modifier = Modifier.weight(1f),
@@ -432,17 +432,17 @@ fun RunsListScreen(
                                                 .fillMaxWidth()
                                                 .clickable {
                                                     if (!hasSplits) {
-                                                        Toast.makeText(context, "Ce run n'a pas de splits associés sur splits.io", Toast.LENGTH_LONG).show()
+                                                        Toast.makeText(context, context.getString(R.string.runs_list_speedrun_no_splits_toast), Toast.LENGTH_LONG).show()
                                                     } else {
                                                         showSpeedrunDialog = false
                                                         viewModel.importSpeedrunRun(
                                                             runId = placement.run.id,
                                                             onSuccess = {
-                                                                Toast.makeText(context, "Splits Speedrun.com importés !", Toast.LENGTH_SHORT).show()
+                                                                Toast.makeText(context, context.getString(R.string.runs_list_speedrun_import_success), Toast.LENGTH_SHORT).show()
                                                                 viewModel.clearSpeedrunSearch()
                                                             },
                                                             onFailure = { err ->
-                                                                Toast.makeText(context, "Erreur : ${err.localizedMessage}", Toast.LENGTH_LONG).show()
+                                                                Toast.makeText(context, context.getString(R.string.runs_list_import_error, err.localizedMessage), Toast.LENGTH_LONG).show()
                                                                 viewModel.clearSpeedrunSearch()
                                                             }
                                                         )
@@ -462,12 +462,12 @@ fun RunsListScreen(
                                                         String.format("%02d:%02d", (timeSec / 60).toInt(), (timeSec % 60).toInt())
                                                     }
                                                     Text(
-                                                        text = "${placement.place}e place — $formattedTime",
+                                                        text = stringResource(R.string.runs_list_speedrun_place_format, placement.place, formattedTime),
                                                         fontWeight = FontWeight.Bold,
                                                         color = if (hasSplits) swiftSplitColors.textPrimary else swiftSplitColors.textDisabled
                                                     )
                                                     Text(
-                                                        text = "Run ID : " + placement.run.id,
+                                                        text = stringResource(R.string.runs_list_speedrun_run_id_format, placement.run.id),
                                                         style = MaterialTheme.typography.bodySmall,
                                                         color = swiftSplitColors.textSecondary
                                                     )
@@ -478,7 +478,7 @@ fun RunsListScreen(
                                                         shape = MaterialTheme.shapes.small
                                                     ) {
                                                         Text(
-                                                            text = "Importable",
+                                                            text = stringResource(R.string.runs_list_speedrun_badge_importable),
                                                             color = MaterialTheme.colorScheme.primary,
                                                             style = MaterialTheme.typography.labelSmall,
                                                             modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
@@ -490,7 +490,7 @@ fun RunsListScreen(
                                                         shape = MaterialTheme.shapes.small
                                                     ) {
                                                         Text(
-                                                            text = "Sans splits",
+                                                            text = stringResource(R.string.runs_list_speedrun_badge_no_splits),
                                                             color = swiftSplitColors.textDisabled,
                                                             style = MaterialTheme.typography.labelSmall,
                                                             modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)

@@ -21,6 +21,7 @@ import com.elg.swiftsplit.application.port.input.ImportRunUseCase
 import com.elg.swiftsplit.application.port.output.SettingsPort
 import com.elg.swiftsplit.navigation.AppNavigation
 import com.elg.swiftsplit.ui.theme.SwiftSplitTheme
+import com.elg.swiftsplit.R
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -85,14 +86,14 @@ class MainActivity : AppCompatActivity() {
                         .onSuccess { run ->
                             Toast.makeText(
                                 this@MainActivity,
-                                "Imported: ${run.gameInfo.gameName} - ${run.gameInfo.categoryName}",
+                                getString(R.string.main_import_success, run.gameInfo.gameName, run.gameInfo.categoryName),
                                 Toast.LENGTH_LONG
                             ).show()
                         }
                         .onFailure { error ->
                             Toast.makeText(
                                 this@MainActivity,
-                                "Failed to parse .lss: ${error.localizedMessage}",
+                                getString(R.string.main_import_parse_failed, error.localizedMessage),
                                 Toast.LENGTH_LONG
                             ).show()
                         }
@@ -100,7 +101,7 @@ class MainActivity : AppCompatActivity() {
             } catch (e: Exception) {
                 Toast.makeText(
                     this@MainActivity,
-                    "Error importing file: ${e.localizedMessage}",
+                    getString(R.string.main_import_error, e.localizedMessage),
                     Toast.LENGTH_LONG
                 ).show()
             }

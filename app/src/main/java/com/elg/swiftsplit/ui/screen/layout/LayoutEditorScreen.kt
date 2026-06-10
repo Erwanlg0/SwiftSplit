@@ -575,7 +575,7 @@ private fun StateColorLegend(
                 Text(label, style = MaterialTheme.typography.bodyMedium, color = colors.textPrimary)
                 if (preset != null) {
                     Text(
-                        text = "Preset : ${preset.displayName()}",
+                        text = stringResource(R.string.layout_editor_preset_format, preset.localName()),
                         style = MaterialTheme.typography.bodySmall,
                         color = colors.textSecondary
                     )
@@ -599,7 +599,7 @@ private fun StateColorLegend(
             ) {
                 com.elg.swiftsplit.domain.model.StateColorPreset.entries.forEach { pr ->
                     DropdownMenuItem(
-                        text = { Text(pr.displayName()) },
+                        text = { Text(pr.localName()) },
                         onClick = {
                             onPresetSelected(pr)
                             expanded = false
@@ -610,3 +610,15 @@ private fun StateColorLegend(
         }
     }
 }
+
+@Composable
+private fun com.elg.swiftsplit.domain.model.StateColorPreset.localName(): String = when (this) {
+    com.elg.swiftsplit.domain.model.StateColorPreset.GREEN -> stringResource(R.string.color_preset_green)
+    com.elg.swiftsplit.domain.model.StateColorPreset.BLUE -> stringResource(R.string.color_preset_blue)
+    com.elg.swiftsplit.domain.model.StateColorPreset.GRAY -> stringResource(R.string.color_preset_gray)
+    com.elg.swiftsplit.domain.model.StateColorPreset.RED -> stringResource(R.string.color_preset_red)
+    com.elg.swiftsplit.domain.model.StateColorPreset.ORANGE -> stringResource(R.string.color_preset_orange)
+    com.elg.swiftsplit.domain.model.StateColorPreset.GOLD -> stringResource(R.string.color_preset_gold)
+    com.elg.swiftsplit.domain.model.StateColorPreset.WHITE -> stringResource(R.string.color_preset_white)
+}
+

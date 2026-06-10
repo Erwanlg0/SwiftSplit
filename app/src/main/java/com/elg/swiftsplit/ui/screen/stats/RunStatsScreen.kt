@@ -44,7 +44,7 @@ fun RunStatsScreen(
         modifier = modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
-                title = { Text("Statistiques & Historique", color = colors.textPrimary) },
+                title = { Text(stringResource(R.string.stats_title), color = colors.textPrimary) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
@@ -102,16 +102,16 @@ fun RunStatsScreen(
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     StatCard(
-                        title = "Tentatives",
+                        title = stringResource(R.string.stats_attempts),
                         value = "${uiState.totalAttempts}",
-                        description = "Resets : ${uiState.resetCount}",
+                        description = stringResource(R.string.stats_resets_format, uiState.resetCount),
                         modifier = Modifier.weight(1f),
                         colors = colors
                     )
                     StatCard(
-                        title = "Complétés",
+                        title = stringResource(R.string.stats_completed),
                         value = "${uiState.completedAttemptsCount}",
-                        description = "Taux : %.1f%%".format(uiState.completionRate),
+                        description = stringResource(R.string.stats_rate_format, uiState.completionRate),
                         modifier = Modifier.weight(1f),
                         colors = colors
                     )
@@ -123,17 +123,17 @@ fun RunStatsScreen(
                 ) {
                     val pbStr = run.personalBest?.realTime?.formatted() ?: run.personalBest?.gameTime?.formatted() ?: "--:--"
                     StatCard(
-                        title = "Record Perso (PB)",
+                        title = stringResource(R.string.stats_pb_title),
                         value = pbStr,
-                        description = "Meilleur temps final",
+                        description = stringResource(R.string.stats_pb_desc),
                         modifier = Modifier.weight(1f),
                         colors = colors
                     )
                     val sobStr = if (uiState.sumOfBest.totalMilliseconds > 0) uiState.sumOfBest.formatted() else "--:--"
                     StatCard(
-                        title = "Sum of Best (SOB)",
+                        title = stringResource(R.string.stats_sob_title),
                         value = sobStr,
-                        description = "Somme des golds",
+                        description = stringResource(R.string.stats_sob_desc),
                         modifier = Modifier.weight(1f),
                         colors = colors
                     )
@@ -146,7 +146,7 @@ fun RunStatsScreen(
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text(
-                            text = "Progression du Record Personnel",
+                            text = stringResource(R.string.stats_pb_progression),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             color = colors.textPrimary
@@ -160,7 +160,7 @@ fun RunStatsScreen(
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
-                                    text = "Complétez au moins 2 runs pour tracer le graphique de progression.",
+                                    text = stringResource(R.string.stats_chart_hint),
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = colors.textTertiary,
                                     textAlign = TextAlign.Center,
@@ -186,7 +186,7 @@ fun RunStatsScreen(
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text(
-                            text = "Analyse de régularité par segment",
+                            text = stringResource(R.string.stats_regularity_analysis),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             color = colors.textPrimary
@@ -194,7 +194,7 @@ fun RunStatsScreen(
                         Spacer(modifier = Modifier.height(16.dp))
 
                         if (uiState.segmentStats.isEmpty()) {
-                            Text("Aucun segment défini.", color = colors.textTertiary)
+                            Text(stringResource(R.string.stats_no_segments), color = colors.textTertiary)
                         } else {
                             uiState.segmentStats.forEach { stat ->
                                 SegmentCompareRow(
@@ -338,7 +338,7 @@ fun SegmentCompareRow(
             val avgStr = stat.averageTime?.formatted() ?: "--:--"
             val bestStr = stat.bestTime?.formatted() ?: "--:--"
             Text(
-                text = "Moy : $avgStr | Or : $bestStr",
+                text = stringResource(R.string.stats_segment_stats_summary, avgStr, bestStr),
                 style = MaterialTheme.typography.bodySmall,
                 color = colors.textSecondary
             )

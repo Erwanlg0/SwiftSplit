@@ -43,14 +43,14 @@ fun SplitEditorScreen(
             onDismissRequest = { showResetDialog = false },
             title = {
                 Text(
-                    "Réinitialiser les statistiques",
+                    stringResource(R.string.editor_reset_dialog_title),
                     color = colors.textPrimary,
                     fontWeight = FontWeight.Bold
                 )
             },
             text = {
                 Text(
-                    "Cela va remettre à zéro le nombre de tentatives, l'historique, les PB et les meilleurs segments. Les noms des splits seront conservés.\n\nCette action est irréversible.",
+                    stringResource(R.string.editor_reset_dialog_text),
                     color = colors.textSecondary
                 )
             },
@@ -58,18 +58,18 @@ fun SplitEditorScreen(
                 Button(
                     onClick = {
                         viewModel.resetStats {
-                            Toast.makeText(context, "Statistiques réinitialisées", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, context.getString(R.string.editor_reset_stats_success), Toast.LENGTH_SHORT).show()
                         }
                         showResetDialog = false
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = colors.error)
                 ) {
-                    Text("Réinitialiser")
+                    Text(stringResource(R.string.editor_reset_dialog_confirm))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showResetDialog = false }) {
-                    Text("Annuler")
+                    Text(stringResource(R.string.cancel))
                 }
             },
             containerColor = colors.cardBackground
@@ -161,7 +161,7 @@ fun SplitEditorScreen(
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Réinitialiser les statistiques")
+                    Text(stringResource(R.string.editor_reset_stats_button))
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))

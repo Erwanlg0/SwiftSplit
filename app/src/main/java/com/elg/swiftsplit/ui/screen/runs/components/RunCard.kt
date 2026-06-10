@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import com.elg.swiftsplit.domain.model.Run
 import com.elg.swiftsplit.domain.model.TimingMethod
 import com.elg.swiftsplit.ui.theme.SwiftSplitThemeColors
+import com.elg.swiftsplit.R
 
 import androidx.compose.ui.res.stringResource
 
@@ -76,7 +77,7 @@ fun RunCard(
                         contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                 ) {
-                    Icon(Icons.Default.PlayArrow, contentDescription = "Start Run")
+                    Icon(Icons.Default.PlayArrow, contentDescription = stringResource(R.string.timer_control_start))
                 }
             }
  
@@ -121,14 +122,14 @@ fun RunCard(
                 IconButton(onClick = onEditClick) {
                     Icon(
                         Icons.Default.Edit,
-                        contentDescription = "Edit splits",
+                        contentDescription = stringResource(R.string.edit),
                         tint = swiftSplitColors.textSecondary
                     )
                 }
                 IconButton(onClick = onDeleteClick) {
                     Icon(
                         Icons.Default.Delete,
-                        contentDescription = "Delete run",
+                        contentDescription = stringResource(R.string.delete),
                         tint = swiftSplitColors.error
                     )
                 }
