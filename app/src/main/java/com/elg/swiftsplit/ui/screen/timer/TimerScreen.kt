@@ -331,7 +331,10 @@ fun TimerScreen(
                             onPauseResume = { viewModel.pauseResume() },
                             onUndo = { viewModel.undoSplit() },
                             onSkip = { viewModel.skipSplit() },
-                            onReset = { viewModel.reset(saveAttempt = true) }
+                            onReset = { viewModel.reset(saveAttempt = true) },
+                            showUndo = layoutPreferences.showUndoButton,
+                            showSkip = layoutPreferences.showSkipButton,
+                            showPause = layoutPreferences.showPauseButton
                         )
                     }
                 }
@@ -463,7 +466,10 @@ fun TimerScreen(
                                 onPauseResume = { viewModel.pauseResume() },
                                 onUndo = { viewModel.undoSplit() },
                                 onSkip = { viewModel.skipSplit() },
-                                onReset = { viewModel.reset(saveAttempt = true) }
+                                onReset = { viewModel.reset(saveAttempt = true) },
+                                showUndo = layoutPreferences.showUndoButton,
+                                showSkip = layoutPreferences.showSkipButton,
+                                showPause = layoutPreferences.showPauseButton
                             )
                         }
                     }
@@ -628,6 +634,13 @@ fun TimerScreen(
                     }
 
                     val isLastSplit = currentRun.segments.let { currentIndex == it.size - 1 }
+                    val currentDelta = computeCurrentDelta(
+                        timerState = timerState,
+                        currentRun = currentRun,
+                        currentIndex = currentIndex,
+                        currentElapsed = currentElapsed,
+                        activeComp = activeComp
+                    )
 
                     if (layoutPreferences.showSplits) {
                         SplitList(
@@ -638,19 +651,14 @@ fun TimerScreen(
                             timingMethod = TimingMethod.REAL_TIME,
                             timeFormat = layoutPreferences.timeFormat,
                             layoutPreferences = layoutPreferences,
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier.weight(1f),
+                            currentElapsed = currentElapsed,
+                            activeSegmentDelta = currentDelta,
+                            isTimerRunning = timerState is TimerState.Running
                         )
                     } else {
                         Spacer(modifier = Modifier.weight(1f))
                     }
-
-                    val currentDelta = computeCurrentDelta(
-                        timerState = timerState,
-                        currentRun = currentRun,
-                        currentIndex = currentIndex,
-                        currentElapsed = currentElapsed,
-                        activeComp = activeComp
-                    )
 
                     TimerDisplay(
                         elapsedTime = currentElapsed,
@@ -682,7 +690,10 @@ fun TimerScreen(
                         onPauseResume = { viewModel.pauseResume() },
                         onUndo = { viewModel.undoSplit() },
                         onSkip = { viewModel.skipSplit() },
-                        onReset = { viewModel.reset(saveAttempt = true) }
+                        onReset = { viewModel.reset(saveAttempt = true) },
+                        showUndo = layoutPreferences.showUndoButton,
+                        showSkip = layoutPreferences.showSkipButton,
+                        showPause = layoutPreferences.showPauseButton
                     )
                 }
             }

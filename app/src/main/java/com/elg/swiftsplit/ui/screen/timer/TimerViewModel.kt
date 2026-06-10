@@ -80,13 +80,22 @@ class TimerViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
+            _run.value = getRunByIdUseCase(RunId(runId))?.let {
+                if (it.segments.isEmpty()) {
+                    it.copy(segments = listOf(Segment(name = "Finish")))
+                } else {
+                    it
+                }
+            }
+
+            // Also keep it updated if the DB changes
             getRunsUseCase().collect { runs ->
                 val loaded = runs.firstOrNull { it.id.value == runId }
-                _run.value = loaded?.let {
-                    if (it.segments.isEmpty()) {
-                        it.copy(segments = listOf(Segment(name = "Finish")))
+                if (loaded != null) {
+                    _run.value = if (loaded.segments.isEmpty()) {
+                        loaded.copy(segments = listOf(Segment(name = "Finish")))
                     } else {
-                        it
+                        loaded
                     }
                 }
             }
@@ -126,22 +135,6 @@ class TimerViewModel @Inject constructor(
     fun reset(saveAttempt: Boolean = true) {
         viewModelScope.launch {
             resetTimerUseCase(saveAttempt)
-        }
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        viewModelScope.launch {
-            val currentRun = _run.value
-            if (currentRun != null &&
-                currentRun.gameInfo.gameName == "Quick Run" &&
-                currentRun.gameInfo.categoryName == "Stopwatch"
-            ) {
-                val shouldSaveQuickRun = settingsPort.observeSaveQuickRuns().first()
-                if (!shouldSaveQuickRun) {
-                    deleteRunUseCase(RunId(runId))
-                }
-            }
         }
     }
 }

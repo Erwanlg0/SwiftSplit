@@ -529,6 +529,60 @@ fun LayoutEditorScreen(
             }
 
             Text(
+                stringResource(R.string.layout_editor_controls_header),
+                style = MaterialTheme.typography.titleMedium,
+                color = colors.textPrimary,
+                modifier = Modifier.padding(top = 8.dp)
+            )
+
+            Card(
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(containerColor = colors.elevatedSurface),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+            ) {
+                Column {
+                    ListItem(
+                        headlineContent = { Text(stringResource(R.string.layout_editor_show_undo), color = colors.textPrimary) },
+                        trailingContent = {
+                            Switch(
+                                checked = preferences.showUndoButton,
+                                onCheckedChange = { viewModel.setShowUndoButton(it) }
+                            )
+                        },
+                        colors = ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent)
+                    )
+
+                    HorizontalDivider(color = colors.deepBackground.copy(alpha = 0.5f), thickness = 0.5.dp)
+
+                    ListItem(
+                        headlineContent = { Text(stringResource(R.string.layout_editor_show_skip), color = colors.textPrimary) },
+                        trailingContent = {
+                            Switch(
+                                checked = preferences.showSkipButton,
+                                onCheckedChange = { viewModel.setShowSkipButton(it) }
+                            )
+                        },
+                        colors = ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent)
+                    )
+
+                    HorizontalDivider(color = colors.deepBackground.copy(alpha = 0.5f), thickness = 0.5.dp)
+
+                    ListItem(
+                        headlineContent = { Text(stringResource(R.string.layout_editor_show_pause), color = colors.textPrimary) },
+                        trailingContent = {
+                            Switch(
+                                checked = preferences.showPauseButton,
+                                onCheckedChange = { viewModel.setShowPauseButton(it) }
+                            )
+                        },
+                        colors = ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent)
+                    )
+                }
+            }
+
+            Text(
                 stringResource(R.string.layout_editor_color_header),
                 style = MaterialTheme.typography.titleMedium,
                 color = colors.textPrimary,

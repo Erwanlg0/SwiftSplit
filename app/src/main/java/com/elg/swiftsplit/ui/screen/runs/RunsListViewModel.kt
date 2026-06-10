@@ -38,20 +38,6 @@ class RunsListViewModel @Inject constructor(
     private val speedrunClient: SpeedrunClient
 ) : ViewModel() {
 
-    init {
-        viewModelScope.launch {
-            settingsPort.observeSaveQuickRuns().collect { saveQuickRuns ->
-                if (!saveQuickRuns) {
-                    getRunsUseCase().first().forEach { run ->
-                        if (run.gameInfo.gameName == "Quick Run" && run.gameInfo.categoryName == "Stopwatch") {
-                            deleteRunUseCase(run.id)
-                        }
-                    }
-                }
-            }
-        }
-    }
-
     // Speedrun.com Integration States
     private val _speedrunGames = MutableStateFlow<List<SpeedrunGame>>(emptyList())
     val speedrunGames = _speedrunGames.asStateFlow()

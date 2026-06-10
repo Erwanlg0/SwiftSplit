@@ -76,6 +76,18 @@ class LayoutEditorViewModel @Inject constructor(
         update { it.copy(splitApproachThresholdSeconds = seconds.coerceIn(0, 120)) }
     }
 
+    fun setShowUndoButton(enabled: Boolean) {
+        update { it.copy(showUndoButton = enabled) }
+    }
+
+    fun setShowSkipButton(enabled: Boolean) {
+        update { it.copy(showSkipButton = enabled) }
+    }
+
+    fun setShowPauseButton(enabled: Boolean) {
+        update { it.copy(showPauseButton = enabled) }
+    }
+
     private fun update(transform: (TimerLayoutPreferences) -> TimerLayoutPreferences) {
         viewModelScope.launch {
             val current = layoutPreferences.value

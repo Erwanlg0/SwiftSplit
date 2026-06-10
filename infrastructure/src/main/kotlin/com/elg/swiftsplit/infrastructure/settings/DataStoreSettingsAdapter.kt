@@ -40,6 +40,12 @@ class DataStoreSettingsAdapter @Inject constructor(
         val TIMER_SHOW_SPLITS_FRACTION = booleanPreferencesKey("timer_show_splits_fraction")
         val TIMER_SPLITS_DECIMAL_PLACES = intPreferencesKey("timer_splits_decimal_places")
         val TIMER_SPLIT_APPROACH_THRESHOLD_SECONDS = intPreferencesKey("timer_split_approach_threshold_seconds")
+        val TIMER_STATE_COLOR_RUNNING = stringPreferencesKey("timer_state_color_running")
+        val TIMER_STATE_COLOR_PAUSED = stringPreferencesKey("timer_state_color_paused")
+        val TIMER_STATE_COLOR_FINISHED = stringPreferencesKey("timer_state_color_finished")
+        val TIMER_SHOW_UNDO_BUTTON = booleanPreferencesKey("timer_show_undo_button")
+        val TIMER_SHOW_SKIP_BUTTON = booleanPreferencesKey("timer_show_skip_button")
+        val TIMER_SHOW_PAUSE_BUTTON = booleanPreferencesKey("timer_show_pause_button")
         val POLLING_DELAY_MS = longPreferencesKey("polling_delay_ms")
         val NETWORK_TIMEOUT_MS = longPreferencesKey("network_timeout_ms")
         val REMOTE_HOST = stringPreferencesKey("remote_host")
@@ -148,13 +154,13 @@ class DataStoreSettingsAdapter @Inject constructor(
                 ),
                 colorMode = colorMode,
                 stateColorRunning = try {
-                    com.elg.swiftsplit.domain.model.StateColorPreset.valueOf(preferences[stringPreferencesKey("state_color_running")] ?: "GREEN")
+                    com.elg.swiftsplit.domain.model.StateColorPreset.valueOf(preferences[PreferencesKeys.TIMER_STATE_COLOR_RUNNING] ?: "GREEN")
                 } catch (e: Exception) { com.elg.swiftsplit.domain.model.StateColorPreset.GREEN },
                 stateColorPaused = try {
-                    com.elg.swiftsplit.domain.model.StateColorPreset.valueOf(preferences[stringPreferencesKey("state_color_paused")] ?: "GRAY")
+                    com.elg.swiftsplit.domain.model.StateColorPreset.valueOf(preferences[PreferencesKeys.TIMER_STATE_COLOR_PAUSED] ?: "GRAY")
                 } catch (e: Exception) { com.elg.swiftsplit.domain.model.StateColorPreset.GRAY },
                 stateColorFinished = try {
-                    com.elg.swiftsplit.domain.model.StateColorPreset.valueOf(preferences[stringPreferencesKey("state_color_finished")] ?: "BLUE")
+                    com.elg.swiftsplit.domain.model.StateColorPreset.valueOf(preferences[PreferencesKeys.TIMER_STATE_COLOR_FINISHED] ?: "BLUE")
                 } catch (e: Exception) { com.elg.swiftsplit.domain.model.StateColorPreset.BLUE },
                 showSplits = preferences[PreferencesKeys.TIMER_SHOW_SPLITS] ?: true,
                 fullscreenOrientation = try {
@@ -168,7 +174,10 @@ class DataStoreSettingsAdapter @Inject constructor(
                 showSplitsFraction = preferences[PreferencesKeys.TIMER_SHOW_SPLITS_FRACTION] ?: true,
                 splitsDecimalPlaces = (preferences[PreferencesKeys.TIMER_SPLITS_DECIMAL_PLACES] ?: 2).coerceIn(0, 3),
                 splitApproachThresholdSeconds = (preferences[PreferencesKeys.TIMER_SPLIT_APPROACH_THRESHOLD_SECONDS]
-                    ?: 30).coerceIn(0, 120)
+                    ?: 30).coerceIn(0, 120),
+                showUndoButton = preferences[PreferencesKeys.TIMER_SHOW_UNDO_BUTTON] ?: true,
+                showSkipButton = preferences[PreferencesKeys.TIMER_SHOW_SKIP_BUTTON] ?: true,
+                showPauseButton = preferences[PreferencesKeys.TIMER_SHOW_PAUSE_BUTTON] ?: true
             )
         }
     }
@@ -180,14 +189,17 @@ class DataStoreSettingsAdapter @Inject constructor(
             prefs[PreferencesKeys.TIMER_SHOW_FRACTION] = preferences.timeFormat.showFraction
             prefs[PreferencesKeys.TIMER_COLOR_MODE] = preferences.colorMode.name
             prefs[PreferencesKeys.TIMER_FORMAT_PATTERN] = preferences.timeFormat.pattern.name
-            prefs[stringPreferencesKey("state_color_running")] = preferences.stateColorRunning.name
-            prefs[stringPreferencesKey("state_color_paused")] = preferences.stateColorPaused.name
-            prefs[stringPreferencesKey("state_color_finished")] = preferences.stateColorFinished.name
+            prefs[PreferencesKeys.TIMER_STATE_COLOR_RUNNING] = preferences.stateColorRunning.name
+            prefs[PreferencesKeys.TIMER_STATE_COLOR_PAUSED] = preferences.stateColorPaused.name
+            prefs[PreferencesKeys.TIMER_STATE_COLOR_FINISHED] = preferences.stateColorFinished.name
             prefs[PreferencesKeys.TIMER_SHOW_SPLITS] = preferences.showSplits
             prefs[PreferencesKeys.TIMER_FULLSCREEN_ORIENTATION] = preferences.fullscreenOrientation.name
             prefs[PreferencesKeys.TIMER_SHOW_SPLITS_FRACTION] = preferences.showSplitsFraction
             prefs[PreferencesKeys.TIMER_SPLITS_DECIMAL_PLACES] = preferences.splitsDecimalPlaces
             prefs[PreferencesKeys.TIMER_SPLIT_APPROACH_THRESHOLD_SECONDS] = preferences.splitApproachThresholdSeconds
+            prefs[PreferencesKeys.TIMER_SHOW_UNDO_BUTTON] = preferences.showUndoButton
+            prefs[PreferencesKeys.TIMER_SHOW_SKIP_BUTTON] = preferences.showSkipButton
+            prefs[PreferencesKeys.TIMER_SHOW_PAUSE_BUTTON] = preferences.showPauseButton
         }
     }
 

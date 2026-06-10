@@ -11,7 +11,10 @@ data class TimerLayoutPreferences(
     val showSplitsFraction: Boolean = true,
     val splitsDecimalPlaces: Int = 2,
     /** Seconds before a comparison split when live delta appears in the active split row (fullscreen). */
-    val splitApproachThresholdSeconds: Int = 30
+    val splitApproachThresholdSeconds: Int = 30,
+    val showUndoButton: Boolean = true,
+    val showSkipButton: Boolean = true,
+    val showPauseButton: Boolean = true
 ) {
     companion object {
         val DEFAULT = TimerLayoutPreferences()

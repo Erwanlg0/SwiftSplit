@@ -149,6 +149,11 @@
     <string name="layout_editor_delta_best_segment">Meilleur segment</string>
     <string name="layout_editor_delta_exact">Exact</string>
 
+    <string name="layout_editor_controls_header">Visibilité des boutons</string>
+    <string name="layout_editor_show_undo">Afficher le bouton annuler</string>
+    <string name="layout_editor_show_skip">Afficher le bouton passer</string>
+    <string name="layout_editor_show_pause">Afficher le bouton pause</string>
+
     <!-- Timer Control Labels -->
     <string name="timer_control_start">Démarrer</string>
     <string name="timer_control_split">Split</string>

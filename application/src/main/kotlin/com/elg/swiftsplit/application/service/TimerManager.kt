@@ -8,7 +8,6 @@ import com.elg.swiftsplit.domain.service.TimerService
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -136,12 +135,7 @@ class TimerManager @Inject constructor(
         val current = activeRun ?: return
         val timerStateVal = _timerState.value
 
-        val isQuickRun = current.run.gameInfo.gameName == "Quick Run" && current.run.gameInfo.categoryName == "Stopwatch"
-        val shouldSaveQuickRun = settingsPort.observeSaveQuickRuns().first()
-
-        if (isQuickRun && !shouldSaveQuickRun) {
-            
-        } else if (saveAttempt) {
+        if (saveAttempt) {
             val nowStr = SimpleDateFormat("MM/dd/yyyy HH:mm:ss", Locale.US).format(Date())
             val attemptId = current.run.attemptCount + 1
 

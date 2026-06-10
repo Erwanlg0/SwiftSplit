@@ -27,7 +27,10 @@ fun TimerControls(
     onSkip: () -> Unit,
     onReset: () -> Unit,
     modifier: Modifier = Modifier,
-    isLastSplit: Boolean = false
+    isLastSplit: Boolean = false,
+    showUndo: Boolean = true,
+    showSkip: Boolean = true,
+    showPause: Boolean = true
 ) {
     val colors = SwiftSplitThemeColors.colors
 
@@ -49,23 +52,25 @@ fun TimerControls(
             )
         }
 
-        IconButton(
-            onClick = onUndo,
-            enabled = when (timerState) {
-                is TimerState.Running -> timerState.currentSegmentIndex > 0
-                is TimerState.Paused -> timerState.currentSegmentIndex > 0
-                else -> false
-            }
-        ) {
-            Icon(
-                Icons.AutoMirrored.Filled.Undo,
-                contentDescription = stringResource(R.string.timer_control_undo),
-                tint = when (timerState) {
-                    is TimerState.Running -> if (timerState.currentSegmentIndex > 0) colors.warning else colors.textDisabled
-                    is TimerState.Paused -> if (timerState.currentSegmentIndex > 0) colors.warning else colors.textDisabled
-                    else -> colors.textDisabled
+        if (showUndo) {
+            IconButton(
+                onClick = onUndo,
+                enabled = when (timerState) {
+                    is TimerState.Running -> timerState.currentSegmentIndex > 0
+                    is TimerState.Paused -> timerState.currentSegmentIndex > 0
+                    else -> false
                 }
-            )
+            ) {
+                Icon(
+                    Icons.AutoMirrored.Filled.Undo,
+                    contentDescription = stringResource(R.string.timer_control_undo),
+                    tint = when (timerState) {
+                        is TimerState.Running -> if (timerState.currentSegmentIndex > 0) colors.warning else colors.textDisabled
+                        is TimerState.Paused -> if (timerState.currentSegmentIndex > 0) colors.warning else colors.textDisabled
+                        else -> colors.textDisabled
+                    }
+                )
+            }
         }
 
         FilledIconButton(
@@ -94,26 +99,30 @@ fun TimerControls(
             )
         }
 
-        IconButton(
-            onClick = onSkip,
-            enabled = timerState is TimerState.Running
-        ) {
-            Icon(
-                Icons.Default.SkipNext,
-                contentDescription = stringResource(R.string.timer_control_skip),
-                tint = if (timerState is TimerState.Running) colors.textPrimary else colors.textDisabled
-            )
+        if (showSkip) {
+            IconButton(
+                onClick = onSkip,
+                enabled = timerState is TimerState.Running
+            ) {
+                Icon(
+                    Icons.Default.SkipNext,
+                    contentDescription = stringResource(R.string.timer_control_skip),
+                    tint = if (timerState is TimerState.Running) colors.textPrimary else colors.textDisabled
+                )
+            }
         }
 
-        IconButton(
-            onClick = onPauseResume,
-            enabled = timerState is TimerState.Running || timerState is TimerState.Paused
-        ) {
-            Icon(
-                imageVector = if (timerState is TimerState.Paused) Icons.Default.PlayArrow else Icons.Default.Pause,
-                contentDescription = if (timerState is TimerState.Paused) stringResource(R.string.timer_control_resume) else stringResource(R.string.timer_control_pause),
-                tint = if (timerState is TimerState.Running || timerState is TimerState.Paused) colors.info else colors.textDisabled
-            )
+        if (showPause) {
+            IconButton(
+                onClick = onPauseResume,
+                enabled = timerState is TimerState.Running || timerState is TimerState.Paused
+            ) {
+                Icon(
+                    imageVector = if (timerState is TimerState.Paused) Icons.Default.PlayArrow else Icons.Default.Pause,
+                    contentDescription = if (timerState is TimerState.Paused) stringResource(R.string.timer_control_resume) else stringResource(R.string.timer_control_pause),
+                    tint = if (timerState is TimerState.Running || timerState is TimerState.Paused) colors.info else colors.textDisabled
+                )
+            }
         }
     }
 }
