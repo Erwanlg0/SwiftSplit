@@ -227,7 +227,12 @@ fun TimerScreen(
                     verticalArrangement = Arrangement.Top,
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(top = 64.dp, bottom = 24.dp, start = 16.dp, end = 16.dp)
+                        .padding(
+                            top = if (layoutPreferences.isMinimalistMode) 16.dp else 64.dp,
+                            bottom = 24.dp,
+                            start = 16.dp,
+                            end = 16.dp
+                        )
                 ) {
                     
                     if (!layoutPreferences.isMinimalistMode) {
@@ -266,13 +271,14 @@ fun TimerScreen(
                     Text(
                         text = currentElapsed.formatted(layoutPreferences.timeFormat),
                         style = MaterialTheme.typography.displayLarge.copy(
-                            fontSize = if (showSplitsInFullscreen) 80.sp else 120.sp
+                            fontSize = if (showSplitsInFullscreen) 80.sp else 120.sp,
+                            lineHeight = if (showSplitsInFullscreen) 88.sp else 132.sp
                         ),
                         fontWeight = FontWeight.Black,
                         color = timerColor,
                         textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                        maxLines = 1,
-                        softWrap = false
+                        maxLines = 2,
+                        softWrap = true
                     )
 
                     if (!layoutPreferences.isMinimalistMode) {
@@ -346,7 +352,12 @@ fun TimerScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(top = 64.dp, bottom = 16.dp, start = 16.dp, end = 16.dp),
+                        .padding(
+                            top = if (layoutPreferences.isMinimalistMode) 16.dp else 64.dp,
+                            bottom = 16.dp,
+                            start = 16.dp,
+                            end = 16.dp
+                        ),
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -391,13 +402,14 @@ fun TimerScreen(
                         Text(
                             text = currentElapsed.formatted(layoutPreferences.timeFormat),
                             style = MaterialTheme.typography.displayLarge.copy(
-                                fontSize = if (showSplitsInFullscreen) 70.sp else 110.sp
+                                fontSize = if (showSplitsInFullscreen) 70.sp else 110.sp,
+                                lineHeight = if (showSplitsInFullscreen) 77.sp else 121.sp
                             ),
                             fontWeight = FontWeight.Black,
                             color = timerColor,
                             textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                            maxLines = 1,
-                            softWrap = false
+                            maxLines = 2,
+                            softWrap = true
                         )
 
                         if (!layoutPreferences.isMinimalistMode) {
