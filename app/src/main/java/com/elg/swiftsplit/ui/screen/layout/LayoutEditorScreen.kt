@@ -5,6 +5,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ChevronRight
@@ -189,7 +191,8 @@ fun LayoutEditorScreen(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(colors.elevatedSurface, MaterialTheme.shapes.medium)
+                    .clip(MaterialTheme.shapes.medium)
+                    .background(colors.elevatedSurface)
                     .clickable {
                         previewIndex = (previewIndex + 1) % previewStates.size
                     }
@@ -226,46 +229,56 @@ fun LayoutEditorScreen(
             val sampleShort = TimeSpan.fromSeconds(1.23)
             val sampleLong = TimeSpan.fromHours(1.0) + TimeSpan.fromMinutes(5.0) + TimeSpan.fromSeconds(30.45)
 
-            Box(modifier = Modifier.fillMaxWidth()) {
-                ListItem(
-                    headlineContent = {
-                        Text(
-                            text = stringResource(R.string.layout_editor_timer_format),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    },
-                    supportingContent = {
-                        Column {
+            Card(
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(containerColor = colors.elevatedSurface),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+            ) {
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    ListItem(
+                        headlineContent = {
                             Text(
-                                text = getPatternDisplayName(currentPattern),
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.SemiBold,
+                                text = stringResource(R.string.layout_editor_timer_format),
                                 maxLines = 1,
-                                softWrap = false,
-                                overflow = TextOverflow.Ellipsis
+                                overflow = TextOverflow.Ellipsis,
+                                color = colors.textPrimary
                             )
-                            Text(
-                                text = stringResource(
-                                    R.string.layout_editor_format_examples,
-                                    sampleShort.formatted(preferences.timeFormat),
-                                    sampleLong.formatted(preferences.timeFormat)
-                                ),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = colors.textSecondary,
-                                maxLines = 1,
-                                softWrap = false,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        }
-                    },
-                    modifier = Modifier.clickable { showPatternMenu = true },
-                    colors = ListItemDefaults.colors(containerColor = colors.elevatedSurface)
-                )
-                DropdownMenu(
-                    expanded = showPatternMenu,
-                    onDismissRequest = { showPatternMenu = false }
-                ) {
+                        },
+                        supportingContent = {
+                            Column {
+                                Text(
+                                    text = getPatternDisplayName(currentPattern),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontWeight = FontWeight.SemiBold,
+                                    maxLines = 1,
+                                    softWrap = false,
+                                    overflow = TextOverflow.Ellipsis,
+                                    color = colors.textPrimary
+                                )
+                                Text(
+                                    text = stringResource(
+                                        R.string.layout_editor_format_examples,
+                                        sampleShort.formatted(preferences.timeFormat),
+                                        sampleLong.formatted(preferences.timeFormat)
+                                    ),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = colors.textSecondary,
+                                    maxLines = 1,
+                                    softWrap = false,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
+                        },
+                        modifier = Modifier.clickable { showPatternMenu = true },
+                        colors = ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent)
+                    )
+                    DropdownMenu(
+                        expanded = showPatternMenu,
+                        onDismissRequest = { showPatternMenu = false },
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
                     TimeFormatPattern.entries.forEach { pat ->
                         DropdownMenuItem(
                             text = {
@@ -294,6 +307,7 @@ fun LayoutEditorScreen(
                     }
                 }
             }
+        }
 
             Text(
                 stringResource(R.string.layout_editor_splits_header),
@@ -302,97 +316,117 @@ fun LayoutEditorScreen(
                 modifier = Modifier.padding(top = 8.dp)
             )
 
-            ListItem(
-                headlineContent = { Text(stringResource(R.string.layout_editor_show_splits)) },
-                supportingContent = { Text(stringResource(R.string.layout_editor_show_splits_desc)) },
-                trailingContent = {
-                    Switch(
-                        checked = preferences.showSplits,
-                        onCheckedChange = { viewModel.setShowSplits(it) }
+            Card(
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(containerColor = colors.elevatedSurface),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+            ) {
+                Column {
+                    ListItem(
+                        headlineContent = { Text(stringResource(R.string.layout_editor_show_splits), color = colors.textPrimary) },
+                        supportingContent = { Text(stringResource(R.string.layout_editor_show_splits_desc), color = colors.textSecondary) },
+                        trailingContent = {
+                            Switch(
+                                checked = preferences.showSplits,
+                                onCheckedChange = { viewModel.setShowSplits(it) }
+                            )
+                        },
+                        colors = ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent)
                     )
-                },
-                colors = ListItemDefaults.colors(containerColor = colors.elevatedSurface)
-            )
 
-            Box(modifier = Modifier.fillMaxWidth()) {
-                ListItem(
-                    headlineContent = { Text(stringResource(R.string.layout_editor_orientation)) },
-                    supportingContent = {
-                        Text(
-                            text = when (preferences.fullscreenOrientation) {
-                                FullscreenOrientationPreset.PORTRAIT -> stringResource(R.string.layout_editor_orientation_portrait)
-                                FullscreenOrientationPreset.LANDSCAPE -> stringResource(R.string.layout_editor_orientation_landscape)
-                                FullscreenOrientationPreset.AUTO -> stringResource(R.string.layout_editor_orientation_auto)
-                            },
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    },
-                    modifier = Modifier.clickable { showOrientationMenu = true },
-                    colors = ListItemDefaults.colors(containerColor = colors.elevatedSurface)
-                )
-                DropdownMenu(
-                    expanded = showOrientationMenu,
-                    onDismissRequest = { showOrientationMenu = false }
-                ) {
-                    FullscreenOrientationPreset.entries.forEach { preset ->
-                        DropdownMenuItem(
-                            text = {
+                    HorizontalDivider(color = colors.deepBackground.copy(alpha = 0.5f), thickness = 0.5.dp)
+
+                    Box(modifier = Modifier.fillMaxWidth()) {
+                        ListItem(
+                            headlineContent = { Text(stringResource(R.string.layout_editor_orientation), color = colors.textPrimary) },
+                            supportingContent = {
                                 Text(
-                                    when (preset) {
+                                    text = when (preferences.fullscreenOrientation) {
                                         FullscreenOrientationPreset.PORTRAIT -> stringResource(R.string.layout_editor_orientation_portrait)
                                         FullscreenOrientationPreset.LANDSCAPE -> stringResource(R.string.layout_editor_orientation_landscape)
                                         FullscreenOrientationPreset.AUTO -> stringResource(R.string.layout_editor_orientation_auto)
-                                    }
+                                    },
+                                    color = colors.textSecondary,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
                                 )
                             },
-                            onClick = {
-                                viewModel.setFullscreenOrientation(preset)
-                                showOrientationMenu = false
-                            }
+                            modifier = Modifier.clickable { showOrientationMenu = true },
+                            colors = ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent)
                         )
+                        DropdownMenu(
+                            expanded = showOrientationMenu,
+                            onDismissRequest = { showOrientationMenu = false },
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            FullscreenOrientationPreset.entries.forEach { preset ->
+                                DropdownMenuItem(
+                                    text = {
+                                        Text(
+                                            when (preset) {
+                                                FullscreenOrientationPreset.PORTRAIT -> stringResource(R.string.layout_editor_orientation_portrait)
+                                                FullscreenOrientationPreset.LANDSCAPE -> stringResource(R.string.layout_editor_orientation_landscape)
+                                                FullscreenOrientationPreset.AUTO -> stringResource(R.string.layout_editor_orientation_auto)
+                                            }
+                                        )
+                                    },
+                                    onClick = {
+                                        viewModel.setFullscreenOrientation(preset)
+                                        showOrientationMenu = false
+                                    }
+                                )
+                            }
+                        }
                     }
-                }
-            }
 
-            ListItem(
-                headlineContent = { Text(stringResource(R.string.layout_editor_splits_fraction)) },
-                supportingContent = { Text(stringResource(R.string.layout_editor_splits_fraction_desc)) },
-                trailingContent = {
-                    Switch(
-                        checked = preferences.showSplitsFraction,
-                        onCheckedChange = { viewModel.setShowSplitsFraction(it) }
-                    )
-                },
-                colors = ListItemDefaults.colors(containerColor = colors.elevatedSurface)
-            )
+                    HorizontalDivider(color = colors.deepBackground.copy(alpha = 0.5f), thickness = 0.5.dp)
 
-            Box(modifier = Modifier.fillMaxWidth()) {
-                ListItem(
-                    headlineContent = { Text(stringResource(R.string.layout_editor_splits_decimals)) },
-                    supportingContent = {
-                        Text(
-                            stringResource(
-                                R.string.layout_editor_decimal_places_value,
-                                preferences.splitsDecimalPlaces
+                    ListItem(
+                        headlineContent = { Text(stringResource(R.string.layout_editor_splits_fraction), color = colors.textPrimary) },
+                        supportingContent = { Text(stringResource(R.string.layout_editor_splits_fraction_desc), color = colors.textSecondary) },
+                        trailingContent = {
+                            Switch(
+                                checked = preferences.showSplitsFraction,
+                                onCheckedChange = { viewModel.setShowSplitsFraction(it) }
                             )
+                        },
+                        colors = ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent)
+                    )
+
+                    HorizontalDivider(color = colors.deepBackground.copy(alpha = 0.5f), thickness = 0.5.dp)
+
+                    Box(modifier = Modifier.fillMaxWidth()) {
+                        ListItem(
+                            headlineContent = { Text(stringResource(R.string.layout_editor_splits_decimals), color = colors.textPrimary) },
+                            supportingContent = {
+                                Text(
+                                    text = stringResource(
+                                        R.string.layout_editor_decimal_places_value,
+                                        preferences.splitsDecimalPlaces
+                                    ),
+                                    color = colors.textSecondary
+                                )
+                            },
+                            modifier = Modifier.clickable { showSplitsDecimalsMenu = true },
+                            colors = ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent)
                         )
-                    },
-                    modifier = Modifier.clickable { showSplitsDecimalsMenu = true },
-                    colors = ListItemDefaults.colors(containerColor = colors.elevatedSurface)
-                )
-                DropdownMenu(
-                    expanded = showSplitsDecimalsMenu,
-                    onDismissRequest = { showSplitsDecimalsMenu = false }
-                ) {
-                    (0..3).forEach { places ->
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.layout_editor_decimal_places_value, places)) },
-                            onClick = {
-                                viewModel.setSplitsDecimalPlaces(places)
-                                showSplitsDecimalsMenu = false
+                        DropdownMenu(
+                            expanded = showSplitsDecimalsMenu,
+                            onDismissRequest = { showSplitsDecimalsMenu = false },
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            (0..3).forEach { places ->
+                                DropdownMenuItem(
+                                    text = { Text(stringResource(R.string.layout_editor_decimal_places_value, places)) },
+                                    onClick = {
+                                        viewModel.setSplitsDecimalPlaces(places)
+                                        showSplitsDecimalsMenu = false
+                                    }
+                                )
                             }
-                        )
+                        }
                     }
                 }
             }
@@ -404,93 +438,109 @@ fun LayoutEditorScreen(
                 modifier = Modifier.padding(top = 8.dp)
             )
 
-            Box {
-                val colorModeLabel = when (preferences.colorMode) {
-                    TimerColorMode.DELTA -> stringResource(R.string.layout_editor_color_delta)
-                    TimerColorMode.TIMER_STATE -> stringResource(R.string.layout_editor_color_state)
-                }
-                ListItem(
-                    headlineContent = { Text(stringResource(R.string.layout_editor_color_mode)) },
-                    supportingContent = { Text(colorModeLabel) },
-                    modifier = Modifier.clickable { showColorModeMenu = true },
-                    colors = ListItemDefaults.colors(containerColor = colors.elevatedSurface)
-                )
-                DropdownMenu(
-                    expanded = showColorModeMenu,
-                    onDismissRequest = { showColorModeMenu = false }
-                ) {
-                    DropdownMenuItem(
-                        text = {
-                            Column {
-                                Text(stringResource(R.string.layout_editor_color_delta))
-                                Text(
-                                    stringResource(R.string.layout_editor_color_delta_desc),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = colors.textSecondary
-                                )
-                            }
-                        },
-                        onClick = {
-                            viewModel.setColorMode(TimerColorMode.DELTA)
-                            showColorModeMenu = false
-                        }
+            Card(
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(containerColor = colors.elevatedSurface),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+            ) {
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    val colorModeLabel = when (preferences.colorMode) {
+                        TimerColorMode.DELTA -> stringResource(R.string.layout_editor_color_delta)
+                        TimerColorMode.TIMER_STATE -> stringResource(R.string.layout_editor_color_state)
+                    }
+                    ListItem(
+                        headlineContent = { Text(stringResource(R.string.layout_editor_color_mode), color = colors.textPrimary) },
+                        supportingContent = { Text(colorModeLabel, color = colors.textSecondary) },
+                        modifier = Modifier.clickable { showColorModeMenu = true },
+                        colors = ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent)
                     )
-                    DropdownMenuItem(
-                        text = {
-                            Column {
-                                Text(stringResource(R.string.layout_editor_color_state))
-                                Text(
-                                    stringResource(R.string.layout_editor_color_state_desc),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = colors.textSecondary
-                                )
+                    DropdownMenu(
+                        expanded = showColorModeMenu,
+                        onDismissRequest = { showColorModeMenu = false },
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        DropdownMenuItem(
+                            text = {
+                                Column {
+                                    Text(stringResource(R.string.layout_editor_color_delta))
+                                    Text(
+                                        stringResource(R.string.layout_editor_color_delta_desc),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = colors.textSecondary
+                                    )
+                                }
+                            },
+                            onClick = {
+                                viewModel.setColorMode(TimerColorMode.DELTA)
+                                showColorModeMenu = false
                             }
-                        },
-                        onClick = {
-                            viewModel.setColorMode(TimerColorMode.TIMER_STATE)
-                            showColorModeMenu = false
-                        }
-                    )
+                        )
+                        DropdownMenuItem(
+                            text = {
+                                Column {
+                                    Text(stringResource(R.string.layout_editor_color_state))
+                                    Text(
+                                        stringResource(R.string.layout_editor_color_state_desc),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = colors.textSecondary
+                                    )
+                                }
+                            },
+                            onClick = {
+                                viewModel.setColorMode(TimerColorMode.TIMER_STATE)
+                                showColorModeMenu = false
+                            }
+                        )
+                    }
                 }
             }
 
             if (preferences.colorMode == TimerColorMode.TIMER_STATE) {
-                Column(
+                Card(
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(containerColor = colors.elevatedSurface),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(colors.elevatedSurface, MaterialTheme.shapes.medium)
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                        .clip(RoundedCornerShape(12.dp))
                 ) {
-                    Text(
-                        stringResource(R.string.layout_editor_state_colors_legend),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = colors.textSecondary
-                    )
-                    StateColorLegend(
-                        label = stringResource(R.string.layout_editor_state_idle),
-                        color = colors.timerTextDim,
-                        preset = null,
-                        onPresetSelected = {}
-                    )
-                    StateColorLegend(
-                        label = stringResource(R.string.layout_editor_state_running),
-                        color = preferences.stateColorRunning.toComposeColor(colors),
-                        preset = preferences.stateColorRunning,
-                        onPresetSelected = { viewModel.setRunningStateColor(it) }
-                    )
-                    StateColorLegend(
-                        label = stringResource(R.string.layout_editor_state_paused),
-                        color = preferences.stateColorPaused.toComposeColor(colors),
-                        preset = preferences.stateColorPaused,
-                        onPresetSelected = { viewModel.setPausedStateColor(it) }
-                    )
-                    StateColorLegend(
-                        label = stringResource(R.string.layout_editor_state_finished),
-                        color = preferences.stateColorFinished.toComposeColor(colors),
-                        preset = preferences.stateColorFinished,
-                        onPresetSelected = { viewModel.setFinishedStateColor(it) }
-                    )
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            stringResource(R.string.layout_editor_state_colors_legend),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = colors.textSecondary
+                        )
+                        StateColorLegend(
+                            label = stringResource(R.string.layout_editor_state_idle),
+                            color = colors.timerTextDim,
+                            preset = null,
+                            onPresetSelected = {}
+                        )
+                        StateColorLegend(
+                            label = stringResource(R.string.layout_editor_state_running),
+                            color = preferences.stateColorRunning.toComposeColor(colors),
+                            preset = preferences.stateColorRunning,
+                            onPresetSelected = { viewModel.setRunningStateColor(it) }
+                        )
+                        StateColorLegend(
+                            label = stringResource(R.string.layout_editor_state_paused),
+                            color = preferences.stateColorPaused.toComposeColor(colors),
+                            preset = preferences.stateColorPaused,
+                            onPresetSelected = { viewModel.setPausedStateColor(it) }
+                        )
+                        StateColorLegend(
+                            label = stringResource(R.string.layout_editor_state_finished),
+                            color = preferences.stateColorFinished.toComposeColor(colors),
+                            preset = preferences.stateColorFinished,
+                            onPresetSelected = { viewModel.setFinishedStateColor(it) }
+                        )
+                    }
                 }
             }
         }
@@ -544,7 +594,8 @@ private fun StateColorLegend(
         if (preset != null) {
             DropdownMenu(
                 expanded = expanded,
-                onDismissRequest = { expanded = false }
+                onDismissRequest = { expanded = false },
+                shape = RoundedCornerShape(12.dp)
             ) {
                 com.elg.swiftsplit.domain.model.StateColorPreset.entries.forEach { pr ->
                     DropdownMenuItem(

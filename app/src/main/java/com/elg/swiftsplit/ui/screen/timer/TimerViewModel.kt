@@ -18,6 +18,7 @@ import javax.inject.Inject
 class TimerViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val getRunByIdUseCase: GetRunByIdUseCase,
+    private val getRunsUseCase: GetRunsUseCase,
     private val observeTimerUseCase: ObserveTimerUseCase,
     private val startTimerUseCase: StartTimerUseCase,
     private val splitUseCase: SplitUseCase,
@@ -78,25 +79,15 @@ class TimerViewModel @Inject constructor(
     }
 
     init {
-        loadRun()
-        
         viewModelScope.launch {
-            observeTimerUseCase().collect { state ->
-                if (state is TimerState.Idle) {
-                    loadRun()
-                }
-            }
-        }
-    }
-
-    private fun loadRun() {
-        viewModelScope.launch {
-            val loaded = getRunByIdUseCase(RunId(runId))
-            _run.value = loaded?.let {
-                if (it.segments.isEmpty()) {
-                    it.copy(segments = listOf(Segment(name = "Finish")))
-                } else {
-                    it
+            getRunsUseCase().collect { runs ->
+                val loaded = runs.firstOrNull { it.id.value == runId }
+                _run.value = loaded?.let {
+                    if (it.segments.isEmpty()) {
+                        it.copy(segments = listOf(Segment(name = "Finish")))
+                    } else {
+                        it
+                    }
                 }
             }
         }
