@@ -17,7 +17,6 @@ import javax.inject.Inject
 @HiltViewModel
 class TimerViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val getRunByIdUseCase: GetRunByIdUseCase,
     private val getRunsUseCase: GetRunsUseCase,
     private val observeTimerUseCase: ObserveTimerUseCase,
     private val startTimerUseCase: StartTimerUseCase,
@@ -29,13 +28,28 @@ class TimerViewModel @Inject constructor(
     private val deleteRunUseCase: DeleteRunUseCase,
     private val exportRunUseCase: ExportRunUseCase,
     private val settingsPort: SettingsPort,
+    private val clock: com.elg.swiftsplit.domain.service.Clock,
     observeTimerLayoutPreferencesUseCase: ObserveTimerLayoutPreferencesUseCase
 ) : ViewModel() {
 
     val runId: String = checkNotNull(savedStateHandle["runId"])
 
-    private val _run = MutableStateFlow<Run?>(null)
-    val run = _run.asStateFlow()
+    val run: StateFlow<Run?> = getRunsUseCase()
+        .map { runs ->
+            val loaded = runs.firstOrNull { it.id.value == runId }
+            loaded?.let {
+                if (it.segments.isEmpty()) {
+                    it.copy(segments = listOf(Segment(name = "Finish")))
+                } else {
+                    it
+                }
+            }
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = null
+        )
 
     val timerState = observeTimerUseCase().stateIn(
         scope = viewModelScope,
@@ -48,7 +62,7 @@ class TimerViewModel @Inject constructor(
         when (state) {
             is TimerState.Running -> flow {
                 while (true) {
-                    val now = System.currentTimeMillis()
+                    val now = clock.currentTimeMillis()
                     val elapsed = now - state.startTime - state.pauseAccumulator
                     emit(TimeSpan(elapsed))
                     delay(16)
@@ -78,29 +92,6 @@ class TimerViewModel @Inject constructor(
         }
     }
 
-    init {
-        viewModelScope.launch {
-            _run.value = getRunByIdUseCase(RunId(runId))?.let {
-                if (it.segments.isEmpty()) {
-                    it.copy(segments = listOf(Segment(name = "Finish")))
-                } else {
-                    it
-                }
-            }
-
-            // Also keep it updated if the DB changes
-            getRunsUseCase().collect { runs ->
-                val loaded = runs.firstOrNull { it.id.value == runId }
-                if (loaded != null) {
-                    _run.value = if (loaded.segments.isEmpty()) {
-                        loaded.copy(segments = listOf(Segment(name = "Finish")))
-                    } else {
-                        loaded
-                    }
-                }
-            }
-        }
-    }
 
     fun startTimer() {
         viewModelScope.launch {

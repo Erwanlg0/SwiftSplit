@@ -3,6 +3,7 @@ package com.elg.swiftsplit.di
 import com.elg.swiftsplit.domain.service.ComparisonCalculator
 import com.elg.swiftsplit.domain.service.SplitTimeCalculator
 import com.elg.swiftsplit.domain.service.TimerService
+import com.elg.swiftsplit.domain.service.Clock
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -15,8 +16,8 @@ object DomainModule {
 
     @Provides
     @Singleton
-    fun provideTimerService(): TimerService {
-        return TimerService()
+    fun provideTimerService(clock: Clock): TimerService {
+        return TimerService(clock)
     }
 
     @Provides

@@ -3,7 +3,7 @@ package com.elg.swiftsplit.application.service
 import com.elg.swiftsplit.application.port.output.RunRepository
 import com.elg.swiftsplit.application.port.output.SettingsPort
 import com.elg.swiftsplit.domain.model.*
-import com.elg.swiftsplit.domain.service.SplitTimeCalculator
+import com.elg.swiftsplit.domain.service.Clock
 import com.elg.swiftsplit.domain.service.TimerService
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,7 +18,8 @@ import javax.inject.Singleton
 class TimerManager @Inject constructor(
     private val runRepository: RunRepository,
     private val timerService: TimerService,
-    private val settingsPort: SettingsPort
+    private val settingsPort: SettingsPort,
+    private val clock: Clock
 ) {
     private val _timerState = MutableStateFlow<TimerState>(TimerState.Idle)
     val timerState: Flow<TimerState> = _timerState.asStateFlow()
@@ -45,8 +46,7 @@ class TimerManager @Inject constructor(
 
     suspend fun split() {
         val current = activeRun ?: return
-        val now = System.currentTimeMillis()
-        val (updated, event) = timerService.split(current, now)
+        val (updated, event) = timerService.split(current)
         activeRun = updated
 
         when (event) {
@@ -108,18 +108,18 @@ class TimerManager @Inject constructor(
     suspend fun pauseResume() {
         val current = activeRun ?: return
         if (current.currentSegmentIndex >= current.run.segments.size) return
-        val now = System.currentTimeMillis()
+        
         if (current.pauseStart == null) {
-            val (updated, _) = timerService.pause(current, now)
+            val (updated, _) = timerService.pause(current)
             activeRun = updated
             _timerState.value = TimerState.Paused(
-                elapsedTime = timerService.getElapsedTime(current, now),
+                elapsedTime = timerService.getElapsedTime(current),
                 currentSegmentIndex = updated.currentSegmentIndex,
                 splitTimes = updated.splitTimes,
                 comparison = updated.comparison
             )
         } else {
-            val (updated, _) = timerService.resume(current, now)
+            val (updated, _) = timerService.resume(current)
             activeRun = updated
             _timerState.value = TimerState.Running(
                 startTime = updated.startTime,
@@ -136,72 +136,17 @@ class TimerManager @Inject constructor(
         val timerStateVal = _timerState.value
 
         if (saveAttempt) {
-            val nowStr = SimpleDateFormat("MM/dd/yyyy HH:mm:ss", Locale.US).format(Date())
-            val attemptId = current.run.attemptCount + 1
-
-            val isCompleted = timerStateVal is TimerState.Finished
-            val finalTime = if (timerStateVal is TimerState.Finished) timerStateVal.finalTime else null
-
-            val attempt = Attempt(
-                id = attemptId,
-                startedAt = SimpleDateFormat("MM/dd/yyyy HH:mm:ss", Locale.US).format(Date(current.startTime)),
-                endedAt = nowStr,
-                realTime = if (current.timingMethod == TimingMethod.REAL_TIME) finalTime else null,
-                gameTime = if (current.timingMethod == TimingMethod.GAME_TIME) finalTime else null,
-                pauseTime = TimeSpan.fromMilliseconds(current.pauseAccumulator)
-            )
-
-            val updatedSegments = current.run.segments.mapIndexed { idx, segment ->
-                val splitVal = current.splitTimes[idx]
-                val segmentVal = SplitTimeCalculator.getSegmentTime(current.splitTimes, idx)
-
-                val newSplitTimes = segment.splitTimes.toMutableMap()
-                
-                
-                
-                if (isCompleted && splitVal != null && finalTime != null) {
-                    val pbTime = current.run.personalBest?.getTime(current.timingMethod)
-                    if (pbTime == null || finalTime < pbTime) {
-                        newSplitTimes[ComparisonName.PERSONAL_BEST] = SplitTime(
-                            realTime = if (current.timingMethod == TimingMethod.REAL_TIME) splitVal else segment.splitTimes[ComparisonName.PERSONAL_BEST]?.realTime,
-                            gameTime = if (current.timingMethod == TimingMethod.GAME_TIME) splitVal else segment.splitTimes[ComparisonName.PERSONAL_BEST]?.gameTime
-                        )
-                    }
-                }
-
-                if (segmentVal != null) {
-                    val newHistoryEntry = SegmentHistoryEntry(
-                        attemptId = attemptId,
-                        time = SplitTime(
-                            realTime = if (current.timingMethod == TimingMethod.REAL_TIME) segmentVal else null,
-                            gameTime = if (current.timingMethod == TimingMethod.GAME_TIME) segmentVal else null
-                        )
-                    )
-
-                    val bestTimeSpan = segment.bestSegmentTime?.getTime(current.timingMethod)
-                    val newBest = if (bestTimeSpan == null || segmentVal < bestTimeSpan) {
-                        SplitTime(
-                            realTime = if (current.timingMethod == TimingMethod.REAL_TIME) segmentVal else segment.bestSegmentTime?.realTime,
-                            gameTime = if (current.timingMethod == TimingMethod.GAME_TIME) segmentVal else segment.bestSegmentTime?.gameTime
-                        )
-                    } else {
-                        segment.bestSegmentTime
-                    }
-
-                    segment.copy(
-                        bestSegmentTime = newBest,
-                        segmentHistory = segment.segmentHistory + newHistoryEntry,
-                        splitTimes = newSplitTimes
-                    )
-                } else {
-                    segment.copy(splitTimes = newSplitTimes)
-                }
-            }
-
-            val updatedRun = current.run.copy(
-                attemptCount = attemptId,
-                attemptHistory = current.run.attemptHistory + attempt,
-                segments = updatedSegments
+            val now = clock.currentTimeMillis()
+            val dateFormat = SimpleDateFormat("MM/dd/yyyy HH:mm:ss", Locale.US)
+            
+            val updatedRun = current.run.withCompletedAttempt(
+                attemptId = current.run.attemptCount + 1,
+                startedAt = dateFormat.format(Date(current.startTime)),
+                endedAt = dateFormat.format(Date(now)),
+                pauseTime = TimeSpan.fromMilliseconds(current.pauseAccumulator),
+                timingMethod = current.timingMethod,
+                finalTime = if (timerStateVal is TimerState.Finished) timerStateVal.finalTime else null,
+                splitTimes = current.splitTimes
             )
             runRepository.update(updatedRun)
         }

@@ -6,6 +6,8 @@ import com.elg.swiftsplit.infrastructure.parser.LssFileParser
 import com.elg.swiftsplit.infrastructure.persistence.RoomRunRepository
 import com.elg.swiftsplit.infrastructure.remote.LiveSplitTcpClient
 import com.elg.swiftsplit.infrastructure.settings.DataStoreSettingsAdapter
+import com.elg.swiftsplit.domain.service.Clock
+import com.elg.swiftsplit.infrastructure.ClockImpl
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -15,6 +17,10 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class InfrastructureModule {
+
+    @Binds
+    @Singleton
+    abstract fun bindClock(impl: ClockImpl): Clock
 
     @Binds
     @Singleton

@@ -2,14 +2,14 @@ package com.elg.swiftsplit.domain.service
 
 import com.elg.swiftsplit.domain.model.*
 
-class TimerService {
+class TimerService(private val clock: Clock) {
 
     fun start(run: Run, comparison: ComparisonName, timingMethod: TimingMethod): ActiveRun {
         return ActiveRun(
             run = run,
             currentSegmentIndex = 0,
             splitTimes = List(run.segments.size) { null },
-            startTime = System.currentTimeMillis(),
+            startTime = clock.currentTimeMillis(),
             pauseAccumulator = 0L,
             pauseStart = null,
             comparison = comparison,
@@ -17,7 +17,8 @@ class TimerService {
         )
     }
 
-    fun split(activeRun: ActiveRun, currentTimeMillis: Long): Pair<ActiveRun, TimerEvent> {
+    fun split(activeRun: ActiveRun): Pair<ActiveRun, TimerEvent> {
+        val currentTimeMillis = clock.currentTimeMillis()
         if (activeRun.startTime == 0L || activeRun.pauseStart != null) return activeRun to TimerEvent.Paused 
 
         val currentIndex = activeRun.currentSegmentIndex
@@ -87,7 +88,8 @@ class TimerService {
         return updatedRun to TimerEvent.Undone(prevIndex)
     }
 
-    fun pause(activeRun: ActiveRun, currentTimeMillis: Long): Pair<ActiveRun, TimerEvent> {
+    fun pause(activeRun: ActiveRun): Pair<ActiveRun, TimerEvent> {
+        val currentTimeMillis = clock.currentTimeMillis()
         if (activeRun.startTime == 0L || activeRun.pauseStart != null) return activeRun to TimerEvent.Paused
 
         val updatedRun = activeRun.copy(
@@ -96,7 +98,8 @@ class TimerService {
         return updatedRun to TimerEvent.Paused
     }
 
-    fun resume(activeRun: ActiveRun, currentTimeMillis: Long): Pair<ActiveRun, TimerEvent> {
+    fun resume(activeRun: ActiveRun): Pair<ActiveRun, TimerEvent> {
+        val currentTimeMillis = clock.currentTimeMillis()
         val pauseStart = activeRun.pauseStart ?: return activeRun to TimerEvent.Resumed
         val pauseDuration = currentTimeMillis - pauseStart
 
@@ -111,7 +114,7 @@ class TimerService {
         return TimerEvent.Reset(saveAttempt = activeRun.currentSegmentIndex > 0)
     }
 
-    fun getElapsedTime(activeRun: ActiveRun, currentTimeMillis: Long): TimeSpan {
+    fun getElapsedTime(activeRun: ActiveRun, currentTimeMillis: Long = clock.currentTimeMillis()): TimeSpan {
         if (activeRun.startTime == 0L) return TimeSpan.ZERO
         val pauseStart = activeRun.pauseStart
         val activeTime = if (pauseStart != null) {
