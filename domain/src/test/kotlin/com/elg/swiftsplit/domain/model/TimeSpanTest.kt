@@ -19,6 +19,15 @@ class TimeSpanTest {
     }
 
     @Test
+    fun testParseShortTimeWithoutColons() {
+        val parsed = TimeSpan.fromTimeString("0.17")
+        assertEquals(170L, parsed?.totalMilliseconds)
+
+        val parsedSec = TimeSpan.fromTimeString("15")
+        assertEquals(15000L, parsedSec?.totalMilliseconds)
+    }
+
+    @Test
     fun testFormattedDefault() {
         val ts = TimeSpan(330500)
         assertEquals("5:30.50", ts.formatted(TimeFormatOptions(TimeFormatPattern.OPT_HH_OPT_MM_SS_SS)))

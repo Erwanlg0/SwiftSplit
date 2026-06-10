@@ -139,6 +139,9 @@
     <string name="layout_editor_split_approach_threshold">Delta à l\'approche du split</string>
     <string name="layout_editor_split_approach_threshold_disabled">Désactivé</string>
     <string name="layout_editor_split_approach_threshold_value">%1$d s avant le split</string>
+    <string name="layout_editor_split_approach_threshold_custom">Valeur personnalisée…</string>
+    <string name="layout_editor_split_approach_threshold_custom_title">Seuil personnalisé</string>
+    <string name="layout_editor_split_approach_threshold_custom_hint">Secondes (0 = désactivé, max 120)</string>
     <string name="layout_editor_delta_ahead_gaining">En avance (gagne)</string>
     <string name="layout_editor_delta_ahead_losing">En avance (perd)</string>
     <string name="layout_editor_delta_behind_losing">En retard (perd)</string>

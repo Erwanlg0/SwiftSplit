@@ -176,20 +176,24 @@ value class TimeSpan(val totalMilliseconds: Long) : Comparable<TimeSpan> {
                 val fractionPart = if (parts.size > 1) parts[1] else "0"
 
                 val timeTokens = timePart.split(':')
-                if (timeTokens.size < 2) return null
+                if (timeTokens.isEmpty() || timeTokens.any { it.isBlank() }) return null
 
                 val hours: Long
                 val minutes: Long
                 val seconds: Long
 
-                if (timeTokens.size == 2) {
+                if (timeTokens.size == 1) {
                     hours = 0
-                    minutes = timeTokens[0].toLong()
-                    seconds = timeTokens[1].toLong()
+                    minutes = 0
+                    seconds = timeTokens[0].toLongOrNull() ?: return null
+                } else if (timeTokens.size == 2) {
+                    hours = 0
+                    minutes = timeTokens[0].toLongOrNull() ?: return null
+                    seconds = timeTokens[1].toLongOrNull() ?: return null
                 } else {
-                    hours = timeTokens[0].toLong()
-                    minutes = timeTokens[1].toLong()
-                    seconds = timeTokens[2].toLong()
+                    hours = timeTokens[0].toLongOrNull() ?: return null
+                    minutes = timeTokens[1].toLongOrNull() ?: return null
+                    seconds = timeTokens[2].toLongOrNull() ?: return null
                 }
 
                 

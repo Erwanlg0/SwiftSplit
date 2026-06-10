@@ -45,7 +45,15 @@ import com.elg.swiftsplit.R
 
 import androidx.compose.ui.res.stringResource
 import androidx.compose.runtime.withFrameMillis
+import android.view.WindowManager
+import com.elg.swiftsplit.domain.model.ComparisonName
+import com.elg.swiftsplit.domain.model.Delta
 import com.elg.swiftsplit.domain.model.TimeSpan
+import com.elg.swiftsplit.domain.model.TimerState
+import com.elg.swiftsplit.domain.service.TimerDisplayColorResolver
+import com.elg.swiftsplit.ui.screen.layout.toComposeColorWithPrefs
+import com.elg.swiftsplit.ui.screen.timer.components.TimerControls
+import androidx.compose.runtime.DisposableEffect
 
 private fun android.content.Context.findActivity(): android.app.Activity? {
     var context = this
@@ -79,28 +87,23 @@ private fun rememberAnimatedRemoteTime(
 
     LaunchedEffect(phase) {
         if (phase == "Running") {
-            var lastParsedTimeSpan = TimeSpan.fromTimeString(latestRawTime.value) ?: TimeSpan.ZERO
-            var lastRawValue = latestRawTime.value
-            var baseFrameTime = -1L
-            var timeSpanAtBase = lastParsedTimeSpan
+            var remoteRunStartPhoneTime = -1L
 
             while (true) {
                 withFrameMillis { frameTime ->
-                    if (latestRawTime.value != lastRawValue) {
-                        lastRawValue = latestRawTime.value
-                        lastParsedTimeSpan = TimeSpan.fromTimeString(lastRawValue) ?: TimeSpan.ZERO
-                        baseFrameTime = frameTime
-                        timeSpanAtBase = lastParsedTimeSpan
+                    val now = System.currentTimeMillis()
+                    val rawTimeSpan = TimeSpan.fromTimeString(latestRawTime.value) ?: TimeSpan.ZERO
+                    val rawTimeMs = rawTimeSpan.totalMilliseconds
+
+                    if (remoteRunStartPhoneTime == -1L || kotlin.math.abs((now - remoteRunStartPhoneTime) - rawTimeMs) > 200) {
+                        remoteRunStartPhoneTime = now - rawTimeMs
+                    } else {
+                        val targetStart = now - rawTimeMs
+                        remoteRunStartPhoneTime = (remoteRunStartPhoneTime * 0.95 + targetStart * 0.05).toLong()
                     }
 
-                    if (baseFrameTime == -1L) {
-                        baseFrameTime = frameTime
-                        timeSpanAtBase = lastParsedTimeSpan
-                    }
-
-                    val elapsedMs = frameTime - baseFrameTime
-                    val currentElapsed = if (elapsedMs > 0) elapsedMs else 0L
-                    val interpolatedTime = TimeSpan(timeSpanAtBase.totalMilliseconds + currentElapsed)
+                    val currentElapsed = now - remoteRunStartPhoneTime
+                    val interpolatedTime = TimeSpan(if (currentElapsed > 0) currentElapsed else 0L)
                     displayTimeStr = interpolatedTime.formatted(formatOptions)
                 }
             }
@@ -121,6 +124,61 @@ private fun getTranslatedPhase(phase: String): String {
         "Paused" -> stringResource(R.string.phase_paused)
         "Ended" -> stringResource(R.string.phase_ended)
         else -> stringResource(R.string.phase_not_running)
+    }
+}
+
+internal fun resolveRemoteTapCommand(phase: String): String? = when {
+    phase.equals("NotRunning", ignoreCase = true) -> "startorsplit"
+    phase.equals("Paused", ignoreCase = true) -> "resume"
+    phase.equals("Running", ignoreCase = true) -> "pause"
+    else -> null
+}
+
+internal fun resolveRemotePauseResumeCommand(phase: String): String? = when {
+    phase.equals("Paused", ignoreCase = true) -> "resume"
+    phase.equals("Running", ignoreCase = true) -> "pause"
+    else -> null
+}
+
+internal fun parseRemoteDelta(deltaStr: String?): Delta? {
+    if (deltaStr.isNullOrBlank()) return null
+    val trimmed = deltaStr.trim()
+    val isAhead = trimmed.startsWith("-")
+    val numericPart = trimmed.removePrefix("+").removePrefix("-").trim()
+    val time = TimeSpan.fromTimeString(numericPart) ?: return null
+    val signedTime = if (isAhead) -time else time
+    val status = if (isAhead) Delta.Status.AHEAD_GAINING else Delta.Status.BEHIND_LOSING
+    return Delta(signedTime, status)
+}
+
+internal fun mapRemotePhaseToTimerState(
+    phase: String,
+    splitIndex: Int,
+    splitTimes: List<TimeSpan?>,
+    elapsed: TimeSpan
+): TimerState {
+    val comparison = ComparisonName.PERSONAL_BEST
+    val index = splitIndex.coerceAtLeast(0)
+    return when {
+        phase.equals("Running", ignoreCase = true) -> TimerState.Running(
+            startTime = 0L,
+            pauseAccumulator = 0L,
+            currentSegmentIndex = index,
+            splitTimes = splitTimes,
+            comparison = comparison
+        )
+        phase.equals("Paused", ignoreCase = true) -> TimerState.Paused(
+            elapsedTime = elapsed,
+            currentSegmentIndex = index,
+            splitTimes = splitTimes,
+            comparison = comparison
+        )
+        phase.equals("Ended", ignoreCase = true) -> TimerState.Finished(
+            finalTime = elapsed,
+            splitTimes = splitTimes,
+            comparison = comparison
+        )
+        else -> TimerState.Idle
     }
 }
 
@@ -147,6 +205,10 @@ fun RemoteScreen(
     val remoteSplitTimes by viewModel.remoteSplitTimes.collectAsStateWithLifecycle()
     val layoutPrefs by viewModel.timerLayoutPreferences.collectAsStateWithLifecycle()
     val smoothRemoteTime = rememberAnimatedRemoteTime(remoteTime, remotePhase, layoutPrefs.timeFormat)
+    val currentElapsed = remember(smoothRemoteTime) {
+        TimeSpan.fromTimeString(smoothRemoteTime) ?: TimeSpan.ZERO
+    }
+    val currentDelta = remember(remoteDelta) { parseRemoteDelta(remoteDelta) }
     val errorMessage by viewModel.errorMessage.collectAsStateWithLifecycle()
     
     var showSplitsInFullscreen by rememberSaveable(layoutPrefs.showSplits) {
@@ -185,6 +247,18 @@ fun RemoteScreen(
     LaunchedEffect(lastResponse) {
         if (!lastResponse.isNullOrBlank()) {
             android.widget.Toast.makeText(context, context.getString(R.string.remote_toast_response, lastResponse), android.widget.Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    DisposableEffect(remotePhase) {
+        val activity = context.findActivity()
+        if (remotePhase.equals("Running", ignoreCase = true)) {
+            activity?.window?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        } else {
+            activity?.window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        }
+        onDispose {
+            activity?.window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         }
     }
 
@@ -364,6 +438,26 @@ fun RemoteScreen(
             com.elg.swiftsplit.domain.model.FullscreenOrientationPreset.AUTO ->
                 configuration.orientation == android.content.res.Configuration.ORIENTATION_PORTRAIT
         }
+        val currentIndex = if (remotePhase.equals("Ended", ignoreCase = true)) {
+            mockRun.segments.size
+        } else {
+            remoteSplitIndex.coerceAtLeast(0)
+        }
+        val remoteTimerState = remember(remotePhase, remoteSplitIndex, remoteSplitTimes, currentElapsed) {
+            mapRemotePhaseToTimerState(remotePhase, remoteSplitIndex, remoteSplitTimes, currentElapsed)
+        }
+        val timerColor = TimerDisplayColorResolver.resolve(
+            colorMode = layoutPrefs.colorMode,
+            timerState = remoteTimerState,
+            delta = currentDelta
+        ).toComposeColorWithPrefs(colors, layoutPrefs)
+        val isLastSplit = mockRun.segments.isNotEmpty() && currentIndex == mockRun.segments.lastIndex
+        val gameHeader = when {
+            remoteGameName.isNotBlank() && remoteCategoryName.isNotBlank() -> "$remoteGameName — $remoteCategoryName"
+            remoteGameName.isNotBlank() -> remoteGameName
+            remoteCategoryName.isNotBlank() -> remoteCategoryName
+            else -> ""
+        }
 
         Box(
             modifier = Modifier
@@ -373,144 +467,62 @@ fun RemoteScreen(
                     interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
                     indication = null
                 ) {
-                    val isPaused = remotePhase.equals("Paused", ignoreCase = true)
-                    viewModel.sendCommand(if (isPaused) "resume" else "pause")
-                },
-            contentAlignment = Alignment.Center
+                    resolveRemoteTapCommand(remotePhase)?.let { viewModel.sendCommand(it) }
+                }
         ) {
             if (isPortrait) {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.SpaceBetween,
+                    verticalArrangement = Arrangement.Top,
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(top = 64.dp, bottom = 48.dp, start = 16.dp, end = 16.dp)
+                        .padding(top = 64.dp, bottom = 24.dp, start = 16.dp, end = 16.dp)
                 ) {
-                    if (remoteGameName.isNotBlank() || remoteCategoryName.isNotBlank()) {
+                    if (gameHeader.isNotEmpty()) {
                         Text(
-                            text = if (remoteGameName.isNotBlank() && remoteCategoryName.isNotBlank()) {
-                                "$remoteGameName — $remoteCategoryName"
-                            } else {
-                                remoteGameName.ifBlank { remoteCategoryName }
-                            },
+                            text = gameHeader,
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.SemiBold,
                             color = colors.textSecondary,
                             textAlign = TextAlign.Center,
                             modifier = Modifier.padding(horizontal = 24.dp)
                         )
-                    } else {
-                        Spacer(modifier = Modifier.height(24.dp))
                     }
 
                     if (showSplitsInFullscreen && remoteSplits.isNotEmpty()) {
                         Spacer(modifier = Modifier.height(16.dp))
                         SplitList(
                             run = mockRun,
-                            currentSegmentIndex = remoteSplitIndex,
+                            currentSegmentIndex = currentIndex,
                             splitTimes = remoteSplitTimes,
                             comparisonName = "Personal Best",
                             timingMethod = TimingMethod.REAL_TIME,
                             timeFormat = layoutPrefs.timeFormat,
                             layoutPreferences = layoutPrefs,
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier.weight(1f),
+                            completedSplitsVisible = 2,
+                            currentElapsed = currentElapsed,
+                            activeSegmentDelta = currentDelta,
+                            isTimerRunning = remotePhase.equals("Running", ignoreCase = true)
                         )
                     } else {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center,
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            if (!remoteSplitName.isNullOrBlank() || remoteSplitIndex >= 0) {
-                                Text(
-                                    text = "${remoteSplitIndex + 1}. ${remoteSplitName ?: ""}",
-                                    style = MaterialTheme.typography.headlineMedium,
-                                    fontWeight = FontWeight.Bold,
-                                    color = colors.textPrimary,
-                                    textAlign = TextAlign.Center,
-                                    modifier = Modifier.padding(horizontal = 16.dp)
-                                )
-                                
-                                val deltaStr = remoteDelta ?: ""
-                                if (deltaStr.isNotBlank()) {
-                                    Spacer(modifier = Modifier.height(8.dp))
-                                    val isAhead = deltaStr.startsWith("-")
-                                    val deltaColor = if (isAhead) colors.aheadGaining else colors.behindLosing
-                                    Text(
-                                        text = deltaStr,
-                                        style = MaterialTheme.typography.headlineLarge,
-                                        fontWeight = FontWeight.Black,
-                                        color = deltaColor,
-                                        textAlign = TextAlign.Center
-                                    )
-                                }
-                            }
-                        }
+                        Spacer(modifier = Modifier.weight(1f))
                     }
 
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Text(
-                            text = smoothRemoteTime,
-                            style = MaterialTheme.typography.displayLarge.copy(
-                                fontSize = if (showSplitsInFullscreen && remoteSplits.isNotEmpty()) 56.sp else 80.sp
-                            ),
-                            fontWeight = FontWeight.Black,
-                            color = when (remotePhase) {
-                                "Running" -> colors.timerText
-                                "Paused" -> colors.warning
-                                "Ended" -> colors.success
-                                else -> colors.textTertiary
-                            },
-                            textAlign = TextAlign.Center,
-                            maxLines = 1,
-                            softWrap = false
-                        )
-                        
-                        Surface(
-                            shape = MaterialTheme.shapes.small,
-                            color = when (remotePhase) {
-                                "Running" -> colors.success.copy(alpha = 0.2f)
-                                "Paused" -> colors.warning.copy(alpha = 0.2f)
-                                "Ended" -> colors.info.copy(alpha = 0.2f)
-                                else -> colors.textDisabled.copy(alpha = 0.2f)
-                            }
-                        ) {
-                            Text(
-                                text = getTranslatedPhase(remotePhase).uppercase(),
-                                style = MaterialTheme.typography.labelMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = when (remotePhase) {
-                                    "Running" -> colors.success
-                                    "Paused" -> colors.warning
-                                    "Ended" -> colors.info
-                                    else -> colors.textSecondary
-                                },
-                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
-                            )
-                        }
-                    }
-                }
-            } else {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center,
-                    modifier = Modifier.padding(24.dp)
-                ) {
+                    Spacer(modifier = Modifier.height(16.dp))
+
                     Text(
                         text = smoothRemoteTime,
-                        style = MaterialTheme.typography.displayLarge.copy(fontSize = 110.sp),
+                        style = MaterialTheme.typography.displayLarge.copy(
+                            fontSize = if (showSplitsInFullscreen && remoteSplits.isNotEmpty()) 70.sp else 96.sp
+                        ),
                         fontWeight = FontWeight.Black,
-                        color = when (remotePhase) {
-                            "Running" -> colors.timerText
-                            "Paused" -> colors.warning
-                            "Ended" -> colors.success
-                            else -> colors.textTertiary
-                        },
-                        textAlign = TextAlign.Center
+                        color = timerColor,
+                        textAlign = TextAlign.Center,
+                        maxLines = 1,
+                        softWrap = false
                     )
+
                     Spacer(modifier = Modifier.height(8.dp))
                     Surface(
                         shape = MaterialTheme.shapes.small,
@@ -533,6 +545,177 @@ fun RemoteScreen(
                             },
                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                         )
+                    }
+
+                    val currentSegmentName = when {
+                        remotePhase.equals("Ended", ignoreCase = true) -> stringResource(R.string.timer_finished)
+                        currentIndex < mockRun.segments.size -> mockRun.segments[currentIndex].name
+                        !remoteSplitName.isNullOrBlank() -> remoteSplitName!!
+                        else -> ""
+                    }
+                    if (currentSegmentName.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = currentSegmentName,
+                            style = MaterialTheme.typography.headlineSmall,
+                            color = colors.textTertiary,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable(
+                                interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
+                                indication = null
+                            ) { }
+                    ) {
+                        TimerControls(
+                            timerState = remoteTimerState,
+                            isLastSplit = isLastSplit,
+                            onStartSplit = {
+                                if (remoteTimerState is TimerState.Idle) {
+                                    viewModel.sendCommand("startorsplit")
+                                } else {
+                                    viewModel.sendCommand("split")
+                                }
+                            },
+                            onPauseResume = {
+                                resolveRemotePauseResumeCommand(remotePhase)?.let { viewModel.sendCommand(it) }
+                            },
+                            onUndo = { viewModel.sendCommand("unsplit") },
+                            onSkip = { viewModel.sendCommand("skipsplit") },
+                            onReset = { viewModel.sendCommand("reset") }
+                        )
+                    }
+                }
+            } else {
+                Row(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(top = 64.dp, bottom = 16.dp, start = 16.dp, end = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    if (showSplitsInFullscreen && remoteSplits.isNotEmpty()) {
+                        Box(modifier = Modifier.weight(1.2f)) {
+                            SplitList(
+                                run = mockRun,
+                                currentSegmentIndex = currentIndex,
+                                splitTimes = remoteSplitTimes,
+                                comparisonName = "Personal Best",
+                                timingMethod = TimingMethod.REAL_TIME,
+                                timeFormat = layoutPrefs.timeFormat,
+                                layoutPreferences = layoutPrefs,
+                                modifier = Modifier.fillMaxSize(),
+                                completedSplitsVisible = 2,
+                                currentElapsed = currentElapsed,
+                                activeSegmentDelta = currentDelta,
+                                isTimerRunning = remotePhase.equals("Running", ignoreCase = true)
+                            )
+                        }
+                    }
+
+                    Column(
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .weight(1f),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Top
+                    ) {
+                        if (gameHeader.isNotEmpty()) {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = gameHeader,
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                color = colors.textSecondary,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                        Spacer(modifier = Modifier.weight(1f))
+
+                        Text(
+                            text = smoothRemoteTime,
+                            style = MaterialTheme.typography.displayLarge.copy(
+                                fontSize = if (showSplitsInFullscreen && remoteSplits.isNotEmpty()) 56.sp else 80.sp
+                            ),
+                            fontWeight = FontWeight.Black,
+                            color = timerColor,
+                            textAlign = TextAlign.Center,
+                            maxLines = 1,
+                            softWrap = false
+                        )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Surface(
+                            shape = MaterialTheme.shapes.small,
+                            color = when (remotePhase) {
+                                "Running" -> colors.success.copy(alpha = 0.2f)
+                                "Paused" -> colors.warning.copy(alpha = 0.2f)
+                                "Ended" -> colors.info.copy(alpha = 0.2f)
+                                else -> colors.textDisabled.copy(alpha = 0.2f)
+                            }
+                        ) {
+                            Text(
+                                text = getTranslatedPhase(remotePhase).uppercase(),
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = when (remotePhase) {
+                                    "Running" -> colors.success
+                                    "Paused" -> colors.warning
+                                    "Ended" -> colors.info
+                                    else -> colors.textSecondary
+                                },
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                            )
+                        }
+
+                        val currentSegmentName = when {
+                            remotePhase.equals("Ended", ignoreCase = true) -> stringResource(R.string.timer_finished)
+                            currentIndex < mockRun.segments.size -> mockRun.segments[currentIndex].name
+                            !remoteSplitName.isNullOrBlank() -> remoteSplitName!!
+                            else -> ""
+                        }
+                        if (currentSegmentName.isNotEmpty()) {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = currentSegmentName,
+                                style = MaterialTheme.typography.titleMedium,
+                                color = colors.textTertiary,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                        Spacer(modifier = Modifier.weight(1f))
+
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable(
+                                    interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
+                                    indication = null
+                                ) { }
+                        ) {
+                            TimerControls(
+                                timerState = remoteTimerState,
+                                isLastSplit = isLastSplit,
+                                onStartSplit = {
+                                    if (remoteTimerState is TimerState.Idle) {
+                                        viewModel.sendCommand("startorsplit")
+                                    } else {
+                                        viewModel.sendCommand("split")
+                                    }
+                                },
+                                onPauseResume = {
+                                    resolveRemotePauseResumeCommand(remotePhase)?.let { viewModel.sendCommand(it) }
+                                },
+                                onUndo = { viewModel.sendCommand("unsplit") },
+                                onSkip = { viewModel.sendCommand("skipsplit") },
+                                onReset = { viewModel.sendCommand("reset") }
+                            )
+                        }
                     }
                 }
             }
@@ -594,273 +777,281 @@ fun RemoteScreen(
             containerColor = colors.deepBackground
         ) { innerPadding ->
             val scrollState = rememberScrollState()
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
-                    .verticalScroll(scrollState),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                
-                if (errorMessage != null) {
+
+            if (connectionState == ConnectionState.CONNECTED) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding)
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    if (errorMessage != null) {
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = CardDefaults.cardColors(containerColor = colors.error.copy(alpha = 0.15f)),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, colors.error)
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(12.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.ErrorOutline,
+                                    contentDescription = null,
+                                    tint = colors.error
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = errorMessage ?: "",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = colors.textPrimary,
+                                    modifier = Modifier.weight(1f)
+                                )
+                                IconButton(onClick = { viewModel.clearError() }) {
+                                    Icon(
+                                        imageVector = Icons.Default.Close,
+                                        contentDescription = null,
+                                        tint = colors.textSecondary
+                                    )
+                                }
+                            }
+                        }
+                    }
+
                     Card(
                         modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(containerColor = colors.error.copy(alpha = 0.15f)),
-                        border = androidx.compose.foundation.BorderStroke(1.dp, colors.error)
+                        colors = CardDefaults.cardColors(containerColor = colors.elevatedSurface)
                     ) {
-                        Row(
-                            modifier = Modifier.padding(12.dp),
-                            verticalAlignment = Alignment.CenterVertically
+                        Column(
+                            modifier = Modifier.padding(16.dp)
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.ErrorOutline,
-                                contentDescription = null,
-                                tint = colors.error
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = errorMessage ?: "",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = colors.textPrimary,
-                                modifier = Modifier.weight(1f)
-                            )
-                            IconButton(onClick = { viewModel.clearError() }) {
-                                Icon(
-                                    imageVector = Icons.Default.Close,
-                                    contentDescription = null,
-                                    tint = colors.textSecondary
-                                )
-                            }
-                        }
-                    }
-                }
-
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = colors.elevatedSurface)
-                ) {
-                    Column(
-                        modifier = Modifier.padding(16.dp)
-                    ) {
-                        
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable { isSettingsExpanded = !isSettingsExpanded },
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(
-                                    stringResource(R.string.remote_conn_settings),
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.Bold,
-                                    color = colors.textPrimary
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Icon(
-                                    imageVector = if (isSettingsExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                                    contentDescription = if (isSettingsExpanded) "Collapse" else "Expand",
-                                    tint = colors.textSecondary
-                                )
-                            }
-
-                            val statusColor = when (connectionState) {
-                                ConnectionState.CONNECTED -> colors.success
-                                ConnectionState.CONNECTING -> colors.warning
-                                ConnectionState.ERROR -> colors.error
-                                ConnectionState.DISCONNECTED -> colors.textDisabled
-                            }
-                            
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Surface(
-                                    modifier = Modifier.size(8.dp),
-                                    shape = MaterialTheme.shapes.small,
-                                    color = statusColor
-                                ) {}
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Text(
-                                    text = connectionState.name,
-                                    style = MaterialTheme.typography.labelMedium,
-                                    color = colors.textSecondary
-                                )
-                            }
-                        }
-
-                        
-                        AnimatedVisibility(visible = isSettingsExpanded) {
-                            Column(
-                                modifier = Modifier.padding(top = 12.dp),
-                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { isSettingsExpanded = !isSettingsExpanded },
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                ) {
-                                    OutlinedTextField(
-                                        value = host,
-                                        onValueChange = { viewModel.updateHost(it) },
-                                        label = { Text(stringResource(R.string.remote_ip_address)) },
-                                        modifier = Modifier.weight(1f),
-                                        enabled = connectionState == ConnectionState.DISCONNECTED || connectionState == ConnectionState.ERROR,
-                                        colors = OutlinedTextFieldDefaults.colors(
-                                            focusedTextColor = colors.textPrimary,
-                                            unfocusedTextColor = colors.textSecondary
-                                        )
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text(
+                                        stringResource(R.string.remote_conn_settings),
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        color = colors.textPrimary
                                     )
-
-                                    OutlinedTextField(
-                                        value = port,
-                                        onValueChange = { viewModel.updatePort(it) },
-                                        label = { Text(stringResource(R.string.remote_port)) },
-                                        modifier = Modifier.width(100.dp),
-                                        enabled = connectionState == ConnectionState.DISCONNECTED || connectionState == ConnectionState.ERROR,
-                                        colors = OutlinedTextFieldDefaults.colors(
-                                            focusedTextColor = colors.textPrimary,
-                                            unfocusedTextColor = colors.textSecondary
-                                        )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Icon(
+                                        imageVector = if (isSettingsExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                                        contentDescription = if (isSettingsExpanded) "Collapse" else "Expand",
+                                        tint = colors.textSecondary
                                     )
                                 }
 
-                                Button(
-                                    onClick = {
-                                        if (connectionState == ConnectionState.CONNECTED) {
-                                            viewModel.disconnect()
-                                        } else {
-                                            viewModel.connect()
-                                        }
-                                    },
-                                    modifier = Modifier.fillMaxWidth(),
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = if (connectionState == ConnectionState.CONNECTED) colors.error else MaterialTheme.colorScheme.primary
+                                val statusColor = colors.success
+
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Surface(
+                                        modifier = Modifier.size(8.dp),
+                                        shape = MaterialTheme.shapes.small,
+                                        color = statusColor
+                                    ) {}
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Text(
+                                        text = connectionState.name,
+                                        style = MaterialTheme.typography.labelMedium,
+                                        color = colors.textSecondary
                                     )
-                                ) {
-                                    Text(if (connectionState == ConnectionState.CONNECTED) stringResource(R.string.remote_disconnect) else stringResource(R.string.remote_connect))
                                 }
                             }
-                        }
-                    }
-                }
 
-                
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = colors.elevatedSurface)
-                ) {
-                    Column(
-                        modifier = Modifier.padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable { isFormatExpanded = !isFormatExpanded },
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(
-                                    text = stringResource(R.string.remote_format_header),
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.Bold,
-                                    color = colors.textPrimary
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Icon(
-                                    imageVector = if (isFormatExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                                    contentDescription = if (isFormatExpanded) "Collapse" else "Expand",
-                                    tint = colors.textSecondary
-                                )
-                            }
-                            IconButton(
-                                onClick = onNavigateToLayoutEditor,
-                                modifier = Modifier.size(24.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Settings,
-                                    contentDescription = "Edit Full Layout",
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(20.dp)
-                                )
-                            }
-                        }
-
-                        var showPatternMenu by remember { mutableStateOf(false) }
-                        val currentPattern = layoutPrefs.timeFormat.pattern
-
-                        // Sample times
-                        val sampleShort = TimeSpan.fromSeconds(1.23)
-                        val sampleLong = TimeSpan.fromHours(1.0) + TimeSpan.fromMinutes(5.0) + TimeSpan.fromSeconds(30.45)
-
-                        fun getPatternDisplayName(pat: com.elg.swiftsplit.domain.model.TimeFormatPattern): String = when (pat) {
-                            com.elg.swiftsplit.domain.model.TimeFormatPattern.HH_MM_SS_SS -> "HH:mm:ss.SS"
-                            com.elg.swiftsplit.domain.model.TimeFormatPattern.HH_MM_SS_S -> "HH:mm:ss.S"
-                            com.elg.swiftsplit.domain.model.TimeFormatPattern.HH_MM_SS -> "HH:mm:ss"
-                            com.elg.swiftsplit.domain.model.TimeFormatPattern.OPT_HH_MM_SS_SS -> "[HH:]mm:ss.SS"
-                            com.elg.swiftsplit.domain.model.TimeFormatPattern.OPT_HH_MM_SS_S -> "[HH:]mm:ss.S"
-                            com.elg.swiftsplit.domain.model.TimeFormatPattern.OPT_HH_MM_SS -> "[HH:]mm:ss"
-                            com.elg.swiftsplit.domain.model.TimeFormatPattern.OPT_HH_OPT_MM_SS_SS -> "[HH:][mm:]ss.SS"
-                            com.elg.swiftsplit.domain.model.TimeFormatPattern.OPT_HH_OPT_MM_SS_S -> "[HH:][mm:]ss.S"
-                            com.elg.swiftsplit.domain.model.TimeFormatPattern.MM_SS_SS -> "mm:ss.SS"
-                            com.elg.swiftsplit.domain.model.TimeFormatPattern.MM_SS_S -> "mm:ss.S"
-                            com.elg.swiftsplit.domain.model.TimeFormatPattern.MM_SS -> "mm:ss"
-                            com.elg.swiftsplit.domain.model.TimeFormatPattern.OPT_MM_SS_SS -> "[mm:]ss.SS"
-                            com.elg.swiftsplit.domain.model.TimeFormatPattern.OPT_MM_SS_S -> "[mm:]ss.S"
-                            com.elg.swiftsplit.domain.model.TimeFormatPattern.OPT_MM_SS -> "[mm:]ss"
-                            com.elg.swiftsplit.domain.model.TimeFormatPattern.SS_SS -> "ss.SS"
-                            com.elg.swiftsplit.domain.model.TimeFormatPattern.SS_S -> "ss.S"
-                            com.elg.swiftsplit.domain.model.TimeFormatPattern.SS -> "ss"
-                        }
-
-                        AnimatedVisibility(visible = isFormatExpanded) {
-                            Column(
-                                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-                                verticalArrangement = Arrangement.spacedBy(10.dp)
-                            ) {
-                                Box(modifier = Modifier.fillMaxWidth()) {
-                                    ListItem(
-                                        headlineContent = { Text(stringResource(R.string.remote_format_select)) },
-                                        supportingContent = {
-                                            Text(
-                                                text = getPatternDisplayName(currentPattern) + "\n" + stringResource(R.string.layout_editor_format_examples, sampleShort.formatted(layoutPrefs.timeFormat), sampleLong.formatted(layoutPrefs.timeFormat)),
-                                                style = MaterialTheme.typography.bodySmall
-                                            )
-                                        },
-                                        modifier = Modifier.clickable { showPatternMenu = true },
-                                        colors = ListItemDefaults.colors(containerColor = colors.elevatedSurface)
-                                    )
-                                    DropdownMenu(
-                                        expanded = showPatternMenu,
-                                        onDismissRequest = { showPatternMenu = false }
+                            AnimatedVisibility(visible = isSettingsExpanded) {
+                                Column(
+                                    modifier = Modifier.padding(top = 12.dp),
+                                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                                     ) {
-                                        com.elg.swiftsplit.domain.model.TimeFormatPattern.entries.forEach { pat ->
-                                            DropdownMenuItem(
-                                                text = {
-                                                    Column {
-                                                        Text(getPatternDisplayName(pat), fontWeight = FontWeight.Bold)
-                                                        Text(
-                                                            text = stringResource(R.string.layout_editor_format_examples, sampleShort.formatted(TimeFormatOptions(pattern = pat)), sampleLong.formatted(TimeFormatOptions(pattern = pat))),
-                                                            style = MaterialTheme.typography.bodySmall,
-                                                            color = colors.textSecondary
-                                                        )
-                                                    }
-                                                },
-                                                onClick = {
-                                                    viewModel.setFormatPattern(pat)
-                                                    showPatternMenu = false
-                                                }
+                                        OutlinedTextField(
+                                            value = host,
+                                            onValueChange = { viewModel.updateHost(it) },
+                                            label = { Text(stringResource(R.string.remote_ip_address)) },
+                                            modifier = Modifier.weight(1f),
+                                            enabled = false,
+                                            colors = OutlinedTextFieldDefaults.colors(
+                                                focusedTextColor = colors.textPrimary,
+                                                unfocusedTextColor = colors.textSecondary
                                             )
+                                        )
+
+                                        OutlinedTextField(
+                                            value = port,
+                                            onValueChange = { viewModel.updatePort(it) },
+                                            label = { Text(stringResource(R.string.remote_port)) },
+                                            modifier = Modifier.width(100.dp),
+                                            enabled = false,
+                                            colors = OutlinedTextFieldDefaults.colors(
+                                                focusedTextColor = colors.textPrimary,
+                                                unfocusedTextColor = colors.textSecondary
+                                            )
+                                        )
+                                    }
+
+                                    Button(
+                                        onClick = { viewModel.disconnect() },
+                                        modifier = Modifier.fillMaxWidth(),
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = colors.error
+                                        )
+                                    ) {
+                                        Text(stringResource(R.string.remote_disconnect))
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(containerColor = colors.elevatedSurface)
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { isFormatExpanded = !isFormatExpanded },
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text(
+                                        text = stringResource(R.string.remote_format_header),
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        color = colors.textPrimary
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Icon(
+                                        imageVector = if (isFormatExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                                        contentDescription = if (isFormatExpanded) "Collapse" else "Expand",
+                                        tint = colors.textSecondary
+                                    )
+                                }
+                                IconButton(
+                                    onClick = onNavigateToLayoutEditor,
+                                    modifier = Modifier.size(24.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Settings,
+                                        contentDescription = "Edit Full Layout",
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                }
+                            }
+
+                            var showPatternMenu by remember { mutableStateOf(false) }
+                            val currentPattern = layoutPrefs.timeFormat.pattern
+
+                            val sampleShort = TimeSpan.fromSeconds(1.23)
+                            val sampleLong = TimeSpan.fromHours(1.0) + TimeSpan.fromMinutes(5.0) + TimeSpan.fromSeconds(30.45)
+
+                            fun getPatternDisplayName(pat: com.elg.swiftsplit.domain.model.TimeFormatPattern): String = when (pat) {
+                                com.elg.swiftsplit.domain.model.TimeFormatPattern.HH_MM_SS_SS -> "HH:mm:ss.SS"
+                                com.elg.swiftsplit.domain.model.TimeFormatPattern.HH_MM_SS_S -> "HH:mm:ss.S"
+                                com.elg.swiftsplit.domain.model.TimeFormatPattern.HH_MM_SS -> "HH:mm:ss"
+                                com.elg.swiftsplit.domain.model.TimeFormatPattern.OPT_HH_MM_SS_SS -> "[HH:]mm:ss.SS"
+                                com.elg.swiftsplit.domain.model.TimeFormatPattern.OPT_HH_MM_SS_S -> "[HH:]mm:ss.S"
+                                com.elg.swiftsplit.domain.model.TimeFormatPattern.OPT_HH_MM_SS -> "[HH:]mm:ss"
+                                com.elg.swiftsplit.domain.model.TimeFormatPattern.OPT_HH_OPT_MM_SS_SS -> "[HH:][mm:]ss.SS"
+                                com.elg.swiftsplit.domain.model.TimeFormatPattern.OPT_HH_OPT_MM_SS_S -> "[HH:][mm:]ss.S"
+                                com.elg.swiftsplit.domain.model.TimeFormatPattern.MM_SS_SS -> "mm:ss.SS"
+                                com.elg.swiftsplit.domain.model.TimeFormatPattern.MM_SS_S -> "mm:ss.S"
+                                com.elg.swiftsplit.domain.model.TimeFormatPattern.MM_SS -> "mm:ss"
+                                com.elg.swiftsplit.domain.model.TimeFormatPattern.OPT_MM_SS_SS -> "[mm:]ss.SS"
+                                com.elg.swiftsplit.domain.model.TimeFormatPattern.OPT_MM_SS_S -> "[mm:]ss.S"
+                                com.elg.swiftsplit.domain.model.TimeFormatPattern.OPT_MM_SS -> "[mm:]ss"
+                                com.elg.swiftsplit.domain.model.TimeFormatPattern.SS_SS -> "ss.SS"
+                                com.elg.swiftsplit.domain.model.TimeFormatPattern.SS_S -> "ss.S"
+                                com.elg.swiftsplit.domain.model.TimeFormatPattern.SS -> "ss"
+                            }
+
+                            AnimatedVisibility(visible = isFormatExpanded) {
+                                Column(
+                                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                                ) {
+                                    Box(modifier = Modifier.fillMaxWidth()) {
+                                        ListItem(
+                                            headlineContent = { Text(stringResource(R.string.remote_format_select)) },
+                                            supportingContent = {
+                                                Text(
+                                                    text = getPatternDisplayName(currentPattern) + "\n" + stringResource(R.string.layout_editor_format_examples, sampleShort.formatted(layoutPrefs.timeFormat), sampleLong.formatted(layoutPrefs.timeFormat)),
+                                                    style = MaterialTheme.typography.bodySmall
+                                                )
+                                            },
+                                            modifier = Modifier.clickable { showPatternMenu = true },
+                                            colors = ListItemDefaults.colors(containerColor = colors.elevatedSurface)
+                                        )
+                                        DropdownMenu(
+                                            expanded = showPatternMenu,
+                                            onDismissRequest = { showPatternMenu = false }
+                                        ) {
+                                            com.elg.swiftsplit.domain.model.TimeFormatPattern.entries.forEach { pat ->
+                                                DropdownMenuItem(
+                                                    text = {
+                                                        Column {
+                                                            Text(getPatternDisplayName(pat), fontWeight = FontWeight.Bold)
+                                                            Text(
+                                                                text = stringResource(R.string.layout_editor_format_examples, sampleShort.formatted(TimeFormatOptions(pattern = pat)), sampleLong.formatted(TimeFormatOptions(pattern = pat))),
+                                                                style = MaterialTheme.typography.bodySmall,
+                                                                color = colors.textSecondary
+                                                            )
+                                                        }
+                                                    },
+                                                    onClick = {
+                                                        viewModel.setFormatPattern(pat)
+                                                        showPatternMenu = false
+                                                    }
+                                                )
+                                            }
                                         }
                                     }
                                 }
                             }
                         }
                     }
-                }
 
-                if (connectionState == ConnectionState.CONNECTED) {
-                    
+                    val currentIndex = if (remotePhase.equals("Ended", ignoreCase = true)) {
+                        mockRun.segments.size
+                    } else {
+                        remoteSplitIndex.coerceAtLeast(0)
+                    }
+
+                    if (remoteSplits.isNotEmpty()) {
+                        SplitList(
+                            run = mockRun,
+                            currentSegmentIndex = currentIndex,
+                            splitTimes = remoteSplitTimes,
+                            comparisonName = "Personal Best",
+                            timingMethod = TimingMethod.REAL_TIME,
+                            timeFormat = layoutPrefs.timeFormat,
+                            layoutPreferences = layoutPrefs,
+                            modifier = Modifier.weight(1f),
+                            completedSplitsVisible = 2,
+                            currentElapsed = currentElapsed,
+                            activeSegmentDelta = currentDelta,
+                            isTimerRunning = remotePhase.equals("Running", ignoreCase = true)
+                        )
+                    } else {
+                        Spacer(modifier = Modifier.weight(1f))
+                    }
+
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -899,8 +1090,7 @@ fun RemoteScreen(
                                 },
                                 textAlign = TextAlign.Center
                             )
-                            
-                            
+
                             if (!remoteSplitName.isNullOrBlank() || remoteSplitIndex >= 0) {
                                 Spacer(modifier = Modifier.height(10.dp))
                                 Row(
@@ -915,7 +1105,7 @@ fun RemoteScreen(
                                         color = colors.textPrimary,
                                         modifier = Modifier.weight(1f)
                                     )
-                                    
+
                                     val deltaStr = remoteDelta ?: ""
                                     if (deltaStr.isNotBlank()) {
                                         val isAhead = deltaStr.startsWith("-")
@@ -929,9 +1119,9 @@ fun RemoteScreen(
                                     }
                                 }
                             }
-                            
+
                             Spacer(modifier = Modifier.height(4.dp))
-                            
+
                             Surface(
                                 shape = MaterialTheme.shapes.small,
                                 color = when (remotePhase) {
@@ -964,7 +1154,6 @@ fun RemoteScreen(
                         color = colors.textPrimary
                     )
 
-                    
                     Column(
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                         modifier = Modifier.fillMaxWidth()
@@ -998,8 +1187,10 @@ fun RemoteScreen(
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             val isPaused = remotePhase.equals("Paused", ignoreCase = true)
+                            val pauseResumeCommand = resolveRemotePauseResumeCommand(remotePhase)
                             Button(
-                                onClick = { viewModel.sendCommand(if (isPaused) "resume" else "pause") },
+                                onClick = { pauseResumeCommand?.let { viewModel.sendCommand(it) } },
+                                enabled = pauseResumeCommand != null,
                                 colors = ButtonDefaults.buttonColors(containerColor = colors.textSecondary),
                                 modifier = Modifier.weight(1f)
                             ) {
@@ -1064,7 +1255,268 @@ fun RemoteScreen(
                             Text(stringResource(R.string.remote_btn_ping), color = colors.textPrimary, style = MaterialTheme.typography.labelSmall)
                         }
                     }
-                } else {
+                }
+            } else {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding)
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                        .verticalScroll(scrollState),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    if (errorMessage != null) {
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = CardDefaults.cardColors(containerColor = colors.error.copy(alpha = 0.15f)),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, colors.error)
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(12.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.ErrorOutline,
+                                    contentDescription = null,
+                                    tint = colors.error
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = errorMessage ?: "",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = colors.textPrimary,
+                                    modifier = Modifier.weight(1f)
+                                )
+                                IconButton(onClick = { viewModel.clearError() }) {
+                                    Icon(
+                                        imageVector = Icons.Default.Close,
+                                        contentDescription = null,
+                                        tint = colors.textSecondary
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(containerColor = colors.elevatedSurface)
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(16.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { isSettingsExpanded = !isSettingsExpanded },
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text(
+                                        stringResource(R.string.remote_conn_settings),
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        color = colors.textPrimary
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Icon(
+                                        imageVector = if (isSettingsExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                                        contentDescription = if (isSettingsExpanded) "Collapse" else "Expand",
+                                        tint = colors.textSecondary
+                                    )
+                                }
+
+                                val statusColor = when (connectionState) {
+                                    ConnectionState.CONNECTED -> colors.success
+                                    ConnectionState.CONNECTING -> colors.warning
+                                    ConnectionState.ERROR -> colors.error
+                                    ConnectionState.DISCONNECTED -> colors.textDisabled
+                                }
+
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Surface(
+                                        modifier = Modifier.size(8.dp),
+                                        shape = MaterialTheme.shapes.small,
+                                        color = statusColor
+                                    ) {}
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Text(
+                                        text = connectionState.name,
+                                        style = MaterialTheme.typography.labelMedium,
+                                        color = colors.textSecondary
+                                    )
+                                }
+                            }
+
+                            AnimatedVisibility(visible = isSettingsExpanded) {
+                                Column(
+                                    modifier = Modifier.padding(top = 12.dp),
+                                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        OutlinedTextField(
+                                            value = host,
+                                            onValueChange = { viewModel.updateHost(it) },
+                                            label = { Text(stringResource(R.string.remote_ip_address)) },
+                                            modifier = Modifier.weight(1f),
+                                            enabled = connectionState == ConnectionState.DISCONNECTED || connectionState == ConnectionState.ERROR,
+                                            colors = OutlinedTextFieldDefaults.colors(
+                                                focusedTextColor = colors.textPrimary,
+                                                unfocusedTextColor = colors.textSecondary
+                                            )
+                                        )
+
+                                        OutlinedTextField(
+                                            value = port,
+                                            onValueChange = { viewModel.updatePort(it) },
+                                            label = { Text(stringResource(R.string.remote_port)) },
+                                            modifier = Modifier.width(100.dp),
+                                            enabled = connectionState == ConnectionState.DISCONNECTED || connectionState == ConnectionState.ERROR,
+                                            colors = OutlinedTextFieldDefaults.colors(
+                                                focusedTextColor = colors.textPrimary,
+                                                unfocusedTextColor = colors.textSecondary
+                                            )
+                                        )
+                                    }
+
+                                    Button(
+                                        onClick = {
+                                            if (connectionState == ConnectionState.CONNECTED) {
+                                                viewModel.disconnect()
+                                            } else {
+                                                viewModel.connect()
+                                            }
+                                        },
+                                        modifier = Modifier.fillMaxWidth(),
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = if (connectionState == ConnectionState.CONNECTED) colors.error else MaterialTheme.colorScheme.primary
+                                        )
+                                    ) {
+                                        Text(if (connectionState == ConnectionState.CONNECTED) stringResource(R.string.remote_disconnect) else stringResource(R.string.remote_connect))
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(containerColor = colors.elevatedSurface)
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { isFormatExpanded = !isFormatExpanded },
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text(
+                                        text = stringResource(R.string.remote_format_header),
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        color = colors.textPrimary
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Icon(
+                                        imageVector = if (isFormatExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                                        contentDescription = if (isFormatExpanded) "Collapse" else "Expand",
+                                        tint = colors.textSecondary
+                                    )
+                                }
+                                IconButton(
+                                    onClick = onNavigateToLayoutEditor,
+                                    modifier = Modifier.size(24.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Settings,
+                                        contentDescription = "Edit Full Layout",
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                }
+                            }
+
+                            var showPatternMenu by remember { mutableStateOf(false) }
+                            val currentPattern = layoutPrefs.timeFormat.pattern
+
+                            val sampleShort = TimeSpan.fromSeconds(1.23)
+                            val sampleLong = TimeSpan.fromHours(1.0) + TimeSpan.fromMinutes(5.0) + TimeSpan.fromSeconds(30.45)
+
+                            fun getPatternDisplayName(pat: com.elg.swiftsplit.domain.model.TimeFormatPattern): String = when (pat) {
+                                com.elg.swiftsplit.domain.model.TimeFormatPattern.HH_MM_SS_SS -> "HH:mm:ss.SS"
+                                com.elg.swiftsplit.domain.model.TimeFormatPattern.HH_MM_SS_S -> "HH:mm:ss.S"
+                                com.elg.swiftsplit.domain.model.TimeFormatPattern.HH_MM_SS -> "HH:mm:ss"
+                                com.elg.swiftsplit.domain.model.TimeFormatPattern.OPT_HH_MM_SS_SS -> "[HH:]mm:ss.SS"
+                                com.elg.swiftsplit.domain.model.TimeFormatPattern.OPT_HH_MM_SS_S -> "[HH:]mm:ss.S"
+                                com.elg.swiftsplit.domain.model.TimeFormatPattern.OPT_HH_MM_SS -> "[HH:]mm:ss"
+                                com.elg.swiftsplit.domain.model.TimeFormatPattern.OPT_HH_OPT_MM_SS_SS -> "[HH:][mm:]ss.SS"
+                                com.elg.swiftsplit.domain.model.TimeFormatPattern.OPT_HH_OPT_MM_SS_S -> "[HH:][mm:]ss.S"
+                                com.elg.swiftsplit.domain.model.TimeFormatPattern.MM_SS_SS -> "mm:ss.SS"
+                                com.elg.swiftsplit.domain.model.TimeFormatPattern.MM_SS_S -> "mm:ss.S"
+                                com.elg.swiftsplit.domain.model.TimeFormatPattern.MM_SS -> "mm:ss"
+                                com.elg.swiftsplit.domain.model.TimeFormatPattern.OPT_MM_SS_SS -> "[mm:]ss.SS"
+                                com.elg.swiftsplit.domain.model.TimeFormatPattern.OPT_MM_SS_S -> "[mm:]ss.S"
+                                com.elg.swiftsplit.domain.model.TimeFormatPattern.OPT_MM_SS -> "[mm:]ss"
+                                com.elg.swiftsplit.domain.model.TimeFormatPattern.SS_SS -> "ss.SS"
+                                com.elg.swiftsplit.domain.model.TimeFormatPattern.SS_S -> "ss.S"
+                                com.elg.swiftsplit.domain.model.TimeFormatPattern.SS -> "ss"
+                            }
+
+                            AnimatedVisibility(visible = isFormatExpanded) {
+                                Column(
+                                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                                ) {
+                                    Box(modifier = Modifier.fillMaxWidth()) {
+                                        ListItem(
+                                            headlineContent = { Text(stringResource(R.string.remote_format_select)) },
+                                            supportingContent = {
+                                                Text(
+                                                    text = getPatternDisplayName(currentPattern) + "\n" + stringResource(R.string.layout_editor_format_examples, sampleShort.formatted(layoutPrefs.timeFormat), sampleLong.formatted(layoutPrefs.timeFormat)),
+                                                    style = MaterialTheme.typography.bodySmall
+                                                )
+                                            },
+                                            modifier = Modifier.clickable { showPatternMenu = true },
+                                            colors = ListItemDefaults.colors(containerColor = colors.elevatedSurface)
+                                        )
+                                        DropdownMenu(
+                                            expanded = showPatternMenu,
+                                            onDismissRequest = { showPatternMenu = false }
+                                        ) {
+                                            com.elg.swiftsplit.domain.model.TimeFormatPattern.entries.forEach { pat ->
+                                                DropdownMenuItem(
+                                                    text = {
+                                                        Column {
+                                                            Text(getPatternDisplayName(pat), fontWeight = FontWeight.Bold)
+                                                            Text(
+                                                                text = stringResource(R.string.layout_editor_format_examples, sampleShort.formatted(TimeFormatOptions(pattern = pat)), sampleLong.formatted(TimeFormatOptions(pattern = pat))),
+                                                                style = MaterialTheme.typography.bodySmall,
+                                                                color = colors.textSecondary
+                                                            )
+                                                        }
+                                                    },
+                                                    onClick = {
+                                                        viewModel.setFormatPattern(pat)
+                                                        showPatternMenu = false
+                                                    }
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()

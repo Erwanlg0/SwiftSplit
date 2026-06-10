@@ -177,6 +177,7 @@ fun TimerScreen(
             val currentIndex = when (val state = timerState) {
                 is TimerState.Running -> state.currentSegmentIndex
                 is TimerState.Paused -> state.currentSegmentIndex
+                is TimerState.Finished -> currentRun.segments.size
                 else -> 0
             }
             val activeComp = when (val state = timerState) {
@@ -615,6 +616,7 @@ fun TimerScreen(
                     val currentIndex = when (val state = timerState) {
                         is TimerState.Running -> state.currentSegmentIndex
                         is TimerState.Paused -> state.currentSegmentIndex
+                        is TimerState.Finished -> currentRun.segments.size
                         else -> 0
                     }
 

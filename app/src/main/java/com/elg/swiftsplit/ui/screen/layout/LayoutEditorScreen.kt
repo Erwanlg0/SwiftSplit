@@ -143,6 +143,8 @@ fun LayoutEditorScreen(
     var showOrientationMenu by remember { mutableStateOf(false) }
     var showSplitsDecimalsMenu by remember { mutableStateOf(false) }
     var showApproachThresholdMenu by remember { mutableStateOf(false) }
+    var showCustomApproachThresholdDialog by remember { mutableStateOf(false) }
+    var customApproachThresholdInput by remember { mutableStateOf("") }
 
     val previewStates = remember(preferences.colorMode) { previewStatesFor(preferences.colorMode) }
     var previewIndex by remember(preferences.colorMode) { mutableIntStateOf(0) }
@@ -478,9 +480,52 @@ fun LayoutEditorScreen(
                                     }
                                 )
                             }
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.layout_editor_split_approach_threshold_custom)) },
+                                onClick = {
+                                    customApproachThresholdInput = if (preferences.splitApproachThresholdSeconds > 0) {
+                                        preferences.splitApproachThresholdSeconds.toString()
+                                    } else {
+                                        ""
+                                    }
+                                    showApproachThresholdMenu = false
+                                    showCustomApproachThresholdDialog = true
+                                }
+                            )
                         }
                     }
                 }
+            }
+
+            if (showCustomApproachThresholdDialog) {
+                AlertDialog(
+                    onDismissRequest = { showCustomApproachThresholdDialog = false },
+                    title = { Text(stringResource(R.string.layout_editor_split_approach_threshold_custom_title)) },
+                    text = {
+                        OutlinedTextField(
+                            value = customApproachThresholdInput,
+                            onValueChange = { customApproachThresholdInput = it.filter { ch -> ch.isDigit() }.take(3) },
+                            label = { Text(stringResource(R.string.layout_editor_split_approach_threshold_custom_hint)) },
+                            singleLine = true
+                        )
+                    },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                val seconds = customApproachThresholdInput.toIntOrNull()?.coerceIn(0, 120) ?: return@TextButton
+                                viewModel.setSplitApproachThresholdSeconds(seconds)
+                                showCustomApproachThresholdDialog = false
+                            }
+                        ) {
+                            Text(stringResource(R.string.save))
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { showCustomApproachThresholdDialog = false }) {
+                            Text(stringResource(R.string.cancel))
+                        }
+                    }
+                )
             }
 
             Text(

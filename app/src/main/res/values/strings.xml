@@ -139,6 +139,9 @@
     <string name="layout_editor_split_approach_threshold">Split approach delta</string>
     <string name="layout_editor_split_approach_threshold_disabled">Disabled</string>
     <string name="layout_editor_split_approach_threshold_value">%1$d s before split</string>
+    <string name="layout_editor_split_approach_threshold_custom">Custom value…</string>
+    <string name="layout_editor_split_approach_threshold_custom_title">Custom approach threshold</string>
+    <string name="layout_editor_split_approach_threshold_custom_hint">Seconds (0 = disabled, max 120)</string>
     <string name="layout_editor_delta_ahead_gaining">Ahead (gaining)</string>
     <string name="layout_editor_delta_ahead_losing">Ahead (losing)</string>
     <string name="layout_editor_delta_behind_losing">Behind (losing)</string>

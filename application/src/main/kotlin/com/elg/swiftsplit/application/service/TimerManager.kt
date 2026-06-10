@@ -108,6 +108,7 @@ class TimerManager @Inject constructor(
 
     suspend fun pauseResume() {
         val current = activeRun ?: return
+        if (current.currentSegmentIndex >= current.run.segments.size) return
         val now = System.currentTimeMillis()
         if (current.pauseStart == null) {
             val (updated, _) = timerService.pause(current, now)
