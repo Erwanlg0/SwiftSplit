@@ -11,4 +11,7 @@ data class Segment(
     val splitTimes: Map<ComparisonName, SplitTime> = emptyMap(),
     val bestSegmentTime: SplitTime? = null,
     val segmentHistory: List<SegmentHistoryEntry> = emptyList()
-)
+) {
+    val isSubsplit: Boolean get() = name.startsWith("-")
+    val cleanedName: String get() = if (isSubsplit) name.substring(1).trim() else name
+}

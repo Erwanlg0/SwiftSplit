@@ -9,11 +9,11 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.automirrored.filled.ShowChart
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.filled.ShowChart
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -24,6 +24,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.graphics.toColorInt
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.elg.swiftsplit.domain.model.ComparisonName
 import com.elg.swiftsplit.domain.model.Delta
@@ -45,10 +46,10 @@ import com.elg.swiftsplit.R
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
-private fun android.content.Context.findActivity(): android.app.Activity? {
+private fun android.content.Context.findActivity(): Activity? {
     var context = this
     while (context is android.content.ContextWrapper) {
-        if (context is android.app.Activity) return context
+        if (context is Activity) return context
         context = context.baseContext
     }
     return null
@@ -104,6 +105,19 @@ fun TimerScreen(
     var isFullscreen by rememberSaveable { mutableStateOf(false) }
     var showSplitsInFullscreen by rememberSaveable(layoutPreferences.showSplits) {
         mutableStateOf(layoutPreferences.showSplits)
+    }
+
+    val backgroundModifier = if (layoutPreferences.backgroundGradientEnabled) {
+        Modifier.background(
+            androidx.compose.ui.graphics.Brush.verticalGradient(
+                colors = listOf(
+                    androidx.compose.ui.graphics.Color(layoutPreferences.backgroundGradientStart.toColorInt()),
+                    androidx.compose.ui.graphics.Color(layoutPreferences.backgroundGradientEnd.toColorInt())
+                )
+            )
+        )
+    } else {
+        Modifier.background(colors.deepBackground)
     }
 
     
@@ -524,81 +538,83 @@ fun TimerScreen(
         }
     } else {
         Scaffold(
-            modifier = modifier.fillMaxSize(),
+            modifier = modifier.fillMaxSize().then(backgroundModifier),
             topBar = {
-                TopAppBar(
-                    title = { Text(stringResource(R.string.timer_title), color = colors.textPrimary) },
-                    navigationIcon = {
-                        IconButton(onClick = onNavigateBack) {
-                            Icon(
-                                Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = stringResource(R.string.back),
-                                tint = colors.textPrimary
-                            )
-                        }
-                    },
-                    actions = {
-                        IconButton(onClick = {
-                            viewModel.exportCurrentRun(
-                                onSuccess = { bytes ->
-                                    val filename = "${run?.gameInfo?.gameName ?: "splits"}.lss"
-                                    try {
-                                        val cacheFile = java.io.File(context.cacheDir, filename)
-                                        cacheFile.writeBytes(bytes)
-                                        val uri = androidx.core.content.FileProvider.getUriForFile(
-                                            context,
-                                            "${context.packageName}.fileprovider",
-                                            cacheFile
-                                        )
-                                        val shareIntent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
-                                            type = "application/octet-stream"
-                                            putExtra(android.content.Intent.EXTRA_STREAM, uri)
-                                            addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                if (!layoutPreferences.timerLocked) {
+                    TopAppBar(
+                        title = { Text(stringResource(R.string.timer_title), color = colors.textPrimary) },
+                        navigationIcon = {
+                            IconButton(onClick = onNavigateBack) {
+                                Icon(
+                                    Icons.AutoMirrored.Filled.ArrowBack,
+                                    contentDescription = stringResource(R.string.back),
+                                    tint = colors.textPrimary
+                                )
+                            }
+                        },
+                        actions = {
+                            IconButton(onClick = {
+                                viewModel.exportCurrentRun(
+                                    onSuccess = { bytes ->
+                                        val filename = "${run?.gameInfo?.gameName ?: "splits"}.lss"
+                                        try {
+                                            val cacheFile = java.io.File(context.cacheDir, filename)
+                                            cacheFile.writeBytes(bytes)
+                                            val uri = androidx.core.content.FileProvider.getUriForFile(
+                                                context,
+                                                "${context.packageName}.fileprovider",
+                                                cacheFile
+                                            )
+                                            val shareIntent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+                                                type = "application/octet-stream"
+                                                putExtra(android.content.Intent.EXTRA_STREAM, uri)
+                                                addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                            }
+                                            context.startActivity(android.content.Intent.createChooser(shareIntent, context.getString(R.string.timer_export_chooser_title)))
+                                        } catch (e: Exception) {
+                                            android.widget.Toast.makeText(context, context.getString(R.string.timer_export_error, e.localizedMessage), android.widget.Toast.LENGTH_LONG).show()
                                         }
-                                        context.startActivity(android.content.Intent.createChooser(shareIntent, context.getString(R.string.timer_export_chooser_title)))
-                                    } catch (e: Exception) {
-                                        android.widget.Toast.makeText(context, context.getString(R.string.timer_export_error, e.localizedMessage), android.widget.Toast.LENGTH_LONG).show()
+                                    },
+                                    onFailure = { error ->
+                                        android.widget.Toast.makeText(context, context.getString(R.string.timer_export_error, error.localizedMessage), android.widget.Toast.LENGTH_LONG).show()
                                     }
-                                },
-                                onFailure = { error ->
-                                    android.widget.Toast.makeText(context, context.getString(R.string.timer_export_error, error.localizedMessage), android.widget.Toast.LENGTH_LONG).show()
-                                }
-                            )
-                        }) {
-                            Icon(
-                                imageVector = Icons.Default.Share,
-                                contentDescription = stringResource(R.string.timer_desc_share),
-                                tint = colors.textPrimary
-                            )
-                        }
-                        IconButton(onClick = onEditLayout) {
-                            Icon(
-                                Icons.Default.Palette,
-                                contentDescription = stringResource(R.string.layout_editor_title),
-                                tint = colors.textPrimary
-                            )
-                        }
-                        IconButton(onClick = { onEditSplits(runId) }) {
-                            Icon(
-                                Icons.Default.Edit,
-                                contentDescription = stringResource(R.string.timer_edit_splits),
-                                tint = colors.textPrimary
-                            )
-                        }
-                        IconButton(onClick = { onNavigateToStats(runId) }) {
-                            Icon(
-                                imageVector = Icons.Default.ShowChart,
-                                contentDescription = stringResource(R.string.timer_desc_stats),
-                                tint = colors.textPrimary
-                            )
-                        }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = colors.deepBackground
+                                )
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Default.Share,
+                                    contentDescription = stringResource(R.string.timer_desc_share),
+                                    tint = colors.textPrimary
+                                )
+                            }
+                            IconButton(onClick = onEditLayout) {
+                                Icon(
+                                    Icons.Default.Palette,
+                                    contentDescription = stringResource(R.string.layout_editor_title),
+                                    tint = colors.textPrimary
+                                )
+                            }
+                            IconButton(onClick = { onEditSplits(runId) }) {
+                                Icon(
+                                    Icons.Default.Edit,
+                                    contentDescription = stringResource(R.string.timer_edit_splits),
+                                    tint = colors.textPrimary
+                                )
+                            }
+                            IconButton(onClick = { onNavigateToStats(runId) }) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.ShowChart,
+                                    contentDescription = stringResource(R.string.timer_desc_stats),
+                                    tint = colors.textPrimary
+                                )
+                            }
+                        },
+                        colors = TopAppBarDefaults.topAppBarColors(
+                            containerColor = androidx.compose.ui.graphics.Color.Transparent
+                        )
                     )
-                )
+                }
             },
-            containerColor = colors.deepBackground
+            containerColor = androidx.compose.ui.graphics.Color.Transparent
         ) { innerPadding ->
             val currentRun = run
             if (currentRun == null) {
@@ -640,7 +656,8 @@ fun TimerScreen(
                     RunHeader(
                         run = currentRun,
                         activeComparison = activeComp,
-                        onComparisonClick = { viewModel.cycleComparison() }
+                        onComparisonClick = { viewModel.cycleComparison() },
+                        backgroundColor = if (layoutPreferences.backgroundGradientEnabled) androidx.compose.ui.graphics.Color.Transparent else colors.elevatedSurface
                     )
 
                     val isLastSplit = currentRun.segments.let { currentIndex == it.size - 1 }

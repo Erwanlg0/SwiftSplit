@@ -25,6 +25,7 @@ class LssFileParser @Inject constructor() : RunFileParser {
             var platform = ""
             var region = ""
             var usesEmulator = false
+            var gameIcon = ""
             val variables = mutableMapOf<String, String>()
             val attempts = mutableListOf<Attempt>()
             val segments = mutableListOf<Segment>()
@@ -33,6 +34,7 @@ class LssFileParser @Inject constructor() : RunFileParser {
             while (eventType != XmlPullParser.END_DOCUMENT) {
                 if (eventType == XmlPullParser.START_TAG) {
                     when (parser.name) {
+                        "GameIcon" -> gameIcon = parser.nextText()
                         "GameName" -> gameName = parser.nextText()
                         "CategoryName" -> categoryName = parser.nextText()
                         "Offset" -> offset = TimeSpan.fromTimeString(parser.nextText()) ?: TimeSpan.ZERO
@@ -67,7 +69,8 @@ class LssFileParser @Inject constructor() : RunFileParser {
                     platform = platform,
                     region = region,
                     usesEmulator = usesEmulator,
-                    variables = variables
+                    variables = variables,
+                    iconData = gameIcon.takeIf { it.isNotEmpty() }
                 ),
                 segments = segments,
                 attemptCount = attemptCount,

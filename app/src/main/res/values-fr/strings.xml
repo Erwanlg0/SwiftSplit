@@ -160,6 +160,15 @@
     <string name="layout_editor_show_durations_desc">Affiche le temps de chaque section</string>
     <string name="layout_editor_minimalist">Mode minimaliste</string>
     <string name="layout_editor_minimalist_desc">Masque en-têtes et bas de page</string>
+    <string name="layout_editor_use_subsplits">Utiliser les sous-segments</string>
+    <string name="layout_editor_use_subsplits_desc">Groupe les segments commençant par -</string>
+    <string name="layout_editor_show_pts">Afficher le gain potentiel</string>
+    <string name="layout_editor_bg_gradient">Dégradé d\'arrière-plan</string>
+    <string name="layout_editor_bg_start">Couleur de départ (HEX)</string>
+    <string name="layout_editor_bg_end">Couleur de fin (HEX)</string>
+    <string name="layout_editor_lock">Verrouiller le chrono</string>
+    <string name="layout_editor_lock_desc">Empêche l\'ouverture accidentelle des menus</string>
+    <string name="layout_editor_possible_time_save">Gain de temps potentiel</string>
 
     <!-- Timer Control Labels -->
     <string name="timer_control_start">Démarrer</string>

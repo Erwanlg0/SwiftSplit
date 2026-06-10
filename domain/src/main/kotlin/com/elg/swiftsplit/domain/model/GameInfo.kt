@@ -6,5 +6,6 @@ data class GameInfo(
     val platform: String = "",
     val region: String = "",
     val usesEmulator: Boolean = false,
-    val variables: Map<String, String> = emptyMap()
+    val variables: Map<String, String> = emptyMap(),
+    val iconData: String? = null
 )

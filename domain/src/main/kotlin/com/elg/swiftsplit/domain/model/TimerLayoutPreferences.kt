@@ -18,7 +18,13 @@ data class TimerLayoutPreferences(
     val enableVibration: Boolean = true,
     val showSumOfBest: Boolean = true,
     val showSegmentDurations: Boolean = false,
-    val isMinimalistMode: Boolean = false
+    val isMinimalistMode: Boolean = false,
+    val useSubsplits: Boolean = true,
+    val showPossibleTimeSave: Boolean = true,
+    val backgroundGradientEnabled: Boolean = false,
+    val backgroundGradientStart: String = "#000000",
+    val backgroundGradientEnd: String = "#0D1117",
+    val timerLocked: Boolean = false
 ) {
     companion object {
         val DEFAULT = TimerLayoutPreferences()

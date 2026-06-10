@@ -160,6 +160,15 @@
     <string name="layout_editor_show_durations_desc">Display time for each section</string>
     <string name="layout_editor_minimalist">Minimalist mode</string>
     <string name="layout_editor_minimalist_desc">Hide headers and footers</string>
+    <string name="layout_editor_use_subsplits">Use Subsplits</string>
+    <string name="layout_editor_use_subsplits_desc">Group segments starting with -</string>
+    <string name="layout_editor_show_pts">Show Possible Time Save</string>
+    <string name="layout_editor_bg_gradient">Background Gradient</string>
+    <string name="layout_editor_bg_start">Start Color (HEX)</string>
+    <string name="layout_editor_bg_end">End Color (HEX)</string>
+    <string name="layout_editor_lock">Lock Timer</string>
+    <string name="layout_editor_lock_desc">Prevent accidental menu opening</string>
+    <string name="layout_editor_possible_time_save">Possible Time Save</string>
 
     <!-- Timer Control Labels -->
     <string name="timer_control_start">Start</string>

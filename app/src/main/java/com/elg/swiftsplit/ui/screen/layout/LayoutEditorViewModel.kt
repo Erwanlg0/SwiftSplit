@@ -104,6 +104,30 @@ class LayoutEditorViewModel @Inject constructor(
         update { it.copy(isMinimalistMode = enabled) }
     }
 
+    fun setUseSubsplits(enabled: Boolean) {
+        update { it.copy(useSubsplits = enabled) }
+    }
+
+    fun setShowPossibleTimeSave(enabled: Boolean) {
+        update { it.copy(showPossibleTimeSave = enabled) }
+    }
+
+    fun setBackgroundGradientEnabled(enabled: Boolean) {
+        update { it.copy(backgroundGradientEnabled = enabled) }
+    }
+
+    fun setBackgroundGradientStart(color: String) {
+        update { it.copy(backgroundGradientStart = color) }
+    }
+
+    fun setBackgroundGradientEnd(color: String) {
+        update { it.copy(backgroundGradientEnd = color) }
+    }
+
+    fun setTimerLocked(enabled: Boolean) {
+        update { it.copy(timerLocked = enabled) }
+    }
+
     private fun update(transform: (TimerLayoutPreferences) -> TimerLayoutPreferences) {
         viewModelScope.launch {
             val current = layoutPreferences.value

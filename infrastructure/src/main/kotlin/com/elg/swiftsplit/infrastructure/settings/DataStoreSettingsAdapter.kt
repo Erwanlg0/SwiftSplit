@@ -50,6 +50,12 @@ class DataStoreSettingsAdapter @Inject constructor(
         val TIMER_SHOW_SUM_OF_BEST = booleanPreferencesKey("timer_show_sum_of_best")
         val TIMER_SHOW_SEGMENT_DURATIONS = booleanPreferencesKey("timer_show_segment_durations")
         val TIMER_IS_MINIMALIST_MODE = booleanPreferencesKey("timer_is_minimalist_mode")
+        val TIMER_USE_SUBSPLITS = booleanPreferencesKey("timer_use_subsplits")
+        val TIMER_SHOW_POSSIBLE_TIME_SAVE = booleanPreferencesKey("timer_show_possible_time_save")
+        val TIMER_BG_GRADIENT_ENABLED = booleanPreferencesKey("timer_bg_gradient_enabled")
+        val TIMER_BG_GRADIENT_START = stringPreferencesKey("timer_bg_gradient_start")
+        val TIMER_BG_GRADIENT_END = stringPreferencesKey("timer_bg_gradient_end")
+        val TIMER_LOCKED = booleanPreferencesKey("timer_locked")
         val POLLING_DELAY_MS = longPreferencesKey("polling_delay_ms")
         val NETWORK_TIMEOUT_MS = longPreferencesKey("network_timeout_ms")
         val REMOTE_HOST = stringPreferencesKey("remote_host")
@@ -185,7 +191,13 @@ class DataStoreSettingsAdapter @Inject constructor(
                 enableVibration = preferences[PreferencesKeys.TIMER_ENABLE_VIBRATION] ?: true,
                 showSumOfBest = preferences[PreferencesKeys.TIMER_SHOW_SUM_OF_BEST] ?: true,
                 showSegmentDurations = preferences[PreferencesKeys.TIMER_SHOW_SEGMENT_DURATIONS] ?: false,
-                isMinimalistMode = preferences[PreferencesKeys.TIMER_IS_MINIMALIST_MODE] ?: false
+                isMinimalistMode = preferences[PreferencesKeys.TIMER_IS_MINIMALIST_MODE] ?: false,
+                useSubsplits = preferences[PreferencesKeys.TIMER_USE_SUBSPLITS] ?: true,
+                showPossibleTimeSave = preferences[PreferencesKeys.TIMER_SHOW_POSSIBLE_TIME_SAVE] ?: true,
+                backgroundGradientEnabled = preferences[PreferencesKeys.TIMER_BG_GRADIENT_ENABLED] ?: false,
+                backgroundGradientStart = preferences[PreferencesKeys.TIMER_BG_GRADIENT_START] ?: "#000000",
+                backgroundGradientEnd = preferences[PreferencesKeys.TIMER_BG_GRADIENT_END] ?: "#0D1117",
+                timerLocked = preferences[PreferencesKeys.TIMER_LOCKED] ?: false
             )
         }
     }
@@ -212,6 +224,12 @@ class DataStoreSettingsAdapter @Inject constructor(
             prefs[PreferencesKeys.TIMER_SHOW_SUM_OF_BEST] = preferences.showSumOfBest
             prefs[PreferencesKeys.TIMER_SHOW_SEGMENT_DURATIONS] = preferences.showSegmentDurations
             prefs[PreferencesKeys.TIMER_IS_MINIMALIST_MODE] = preferences.isMinimalistMode
+            prefs[PreferencesKeys.TIMER_USE_SUBSPLITS] = preferences.useSubsplits
+            prefs[PreferencesKeys.TIMER_SHOW_POSSIBLE_TIME_SAVE] = preferences.showPossibleTimeSave
+            prefs[PreferencesKeys.TIMER_BG_GRADIENT_ENABLED] = preferences.backgroundGradientEnabled
+            prefs[PreferencesKeys.TIMER_BG_GRADIENT_START] = preferences.backgroundGradientStart
+            prefs[PreferencesKeys.TIMER_BG_GRADIENT_END] = preferences.backgroundGradientEnd
+            prefs[PreferencesKeys.TIMER_LOCKED] = preferences.timerLocked
         }
     }
 

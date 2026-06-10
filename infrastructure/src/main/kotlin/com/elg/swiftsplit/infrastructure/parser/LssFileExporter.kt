@@ -22,7 +22,7 @@ class LssFileExporter @Inject constructor() : RunFileExporter {
         serializer.attribute(null, "version", "1.7.0")
 
         serializer.startTag(null, "GameIcon")
-        serializer.text("")
+        serializer.text(run.gameInfo.iconData ?: "")
         serializer.endTag(null, "GameIcon")
 
         serializer.startTag(null, "GameName")

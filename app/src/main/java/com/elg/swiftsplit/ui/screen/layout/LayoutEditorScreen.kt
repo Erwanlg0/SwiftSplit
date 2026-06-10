@@ -1,39 +1,43 @@
 package com.elg.swiftsplit.ui.screen.layout
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.graphics.toColorInt
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import com.elg.swiftsplit.domain.model.ComparisonName
-import com.elg.swiftsplit.domain.model.Delta
-import com.elg.swiftsplit.domain.model.FullscreenOrientationPreset
-import com.elg.swiftsplit.domain.model.TimeFormatOptions
-import com.elg.swiftsplit.domain.model.TimeFormatPattern
-import com.elg.swiftsplit.domain.model.TimeSpan
-import com.elg.swiftsplit.domain.model.TimerColorMode
-import com.elg.swiftsplit.domain.model.TimerState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.elg.swiftsplit.R
+import com.elg.swiftsplit.domain.model.*
 import com.elg.swiftsplit.domain.service.TimerDisplayColorResolver
 import com.elg.swiftsplit.ui.theme.SwiftSplitThemeColors
-import com.elg.swiftsplit.R
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 
 private sealed class LayoutPreviewState {
     data object Idle : LayoutPreviewState()
@@ -145,6 +149,9 @@ fun LayoutEditorScreen(
     var showApproachThresholdMenu by remember { mutableStateOf(false) }
     var showCustomApproachThresholdDialog by remember { mutableStateOf(false) }
     var customApproachThresholdInput by remember { mutableStateOf("") }
+    
+    var showStartColorPicker by remember { mutableStateOf(false) }
+    var showEndColorPicker by remember { mutableStateOf(false) }
 
     val previewStates = remember(preferences.colorMode) { previewStatesFor(preferences.colorMode) }
     var previewIndex by remember(preferences.colorMode) { mutableIntStateOf(0) }
@@ -195,7 +202,20 @@ fun LayoutEditorScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(MaterialTheme.shapes.medium)
-                    .background(colors.elevatedSurface)
+                    .then(
+                        if (preferences.backgroundGradientEnabled) {
+                            Modifier.background(
+                                Brush.verticalGradient(
+                                    colors = listOf(
+                                        Color(preferences.backgroundGradientStart.toColorInt()),
+                                        Color(preferences.backgroundGradientEnd.toColorInt())
+                                    )
+                                )
+                            )
+                        } else {
+                            Modifier.background(colors.elevatedSurface)
+                        }
+                    )
                     .clickable {
                         previewIndex = (previewIndex + 1) % previewStates.size
                     }
@@ -275,7 +295,7 @@ fun LayoutEditorScreen(
                             }
                         },
                         modifier = Modifier.clickable { showPatternMenu = true },
-                        colors = ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent)
+                        colors = ListItemDefaults.colors(containerColor = Color.Transparent)
                     )
                     DropdownMenu(
                         expanded = showPatternMenu,
@@ -336,7 +356,7 @@ fun LayoutEditorScreen(
                                 onCheckedChange = { viewModel.setShowSplits(it) }
                             )
                         },
-                        colors = ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent)
+                        colors = ListItemDefaults.colors(containerColor = Color.Transparent)
                     )
 
                     HorizontalDivider(color = colors.deepBackground.copy(alpha = 0.5f), thickness = 0.5.dp)
@@ -357,7 +377,7 @@ fun LayoutEditorScreen(
                                 )
                             },
                             modifier = Modifier.clickable { showOrientationMenu = true },
-                            colors = ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent)
+                            colors = ListItemDefaults.colors(containerColor = Color.Transparent)
                         )
                         DropdownMenu(
                             expanded = showOrientationMenu,
@@ -395,7 +415,7 @@ fun LayoutEditorScreen(
                                 onCheckedChange = { viewModel.setShowSplitsFraction(it) }
                             )
                         },
-                        colors = ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent)
+                        colors = ListItemDefaults.colors(containerColor = Color.Transparent)
                     )
 
                     HorizontalDivider(color = colors.deepBackground.copy(alpha = 0.5f), thickness = 0.5.dp)
@@ -413,7 +433,7 @@ fun LayoutEditorScreen(
                                 )
                             },
                             modifier = Modifier.clickable { showSplitsDecimalsMenu = true },
-                            colors = ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent)
+                            colors = ListItemDefaults.colors(containerColor = Color.Transparent)
                         )
                         DropdownMenu(
                             expanded = showSplitsDecimalsMenu,
@@ -453,7 +473,7 @@ fun LayoutEditorScreen(
                                 )
                             },
                             modifier = Modifier.clickable { showApproachThresholdMenu = true },
-                            colors = ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent)
+                            colors = ListItemDefaults.colors(containerColor = Color.Transparent)
                         )
                         DropdownMenu(
                             expanded = showApproachThresholdMenu,
@@ -551,7 +571,7 @@ fun LayoutEditorScreen(
                                 onCheckedChange = { viewModel.setShowUndoButton(it) }
                             )
                         },
-                        colors = ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent)
+                        colors = ListItemDefaults.colors(containerColor = Color.Transparent)
                     )
 
                     HorizontalDivider(color = colors.deepBackground.copy(alpha = 0.5f), thickness = 0.5.dp)
@@ -564,7 +584,7 @@ fun LayoutEditorScreen(
                                 onCheckedChange = { viewModel.setShowSkipButton(it) }
                             )
                         },
-                        colors = ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent)
+                        colors = ListItemDefaults.colors(containerColor = Color.Transparent)
                     )
 
                     HorizontalDivider(color = colors.deepBackground.copy(alpha = 0.5f), thickness = 0.5.dp)
@@ -577,7 +597,7 @@ fun LayoutEditorScreen(
                                 onCheckedChange = { viewModel.setShowPauseButton(it) }
                             )
                         },
-                        colors = ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent)
+                        colors = ListItemDefaults.colors(containerColor = Color.Transparent)
                     )
 
                     HorizontalDivider(color = colors.deepBackground.copy(alpha = 0.5f), thickness = 0.5.dp)
@@ -591,7 +611,7 @@ fun LayoutEditorScreen(
                                 onCheckedChange = { viewModel.setEnableVibration(it) }
                             )
                         },
-                        colors = ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent)
+                        colors = ListItemDefaults.colors(containerColor = Color.Transparent)
                     )
 
                     HorizontalDivider(color = colors.deepBackground.copy(alpha = 0.5f), thickness = 0.5.dp)
@@ -604,7 +624,7 @@ fun LayoutEditorScreen(
                                 onCheckedChange = { viewModel.setShowSumOfBest(it) }
                             )
                         },
-                        colors = ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent)
+                        colors = ListItemDefaults.colors(containerColor = Color.Transparent)
                     )
 
                     HorizontalDivider(color = colors.deepBackground.copy(alpha = 0.5f), thickness = 0.5.dp)
@@ -618,7 +638,7 @@ fun LayoutEditorScreen(
                                 onCheckedChange = { viewModel.setShowSegmentDurations(it) }
                             )
                         },
-                        colors = ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent)
+                        colors = ListItemDefaults.colors(containerColor = Color.Transparent)
                     )
 
                     HorizontalDivider(color = colors.deepBackground.copy(alpha = 0.5f), thickness = 0.5.dp)
@@ -632,10 +652,171 @@ fun LayoutEditorScreen(
                                 onCheckedChange = { viewModel.setIsMinimalistMode(it) }
                             )
                         },
-                        colors = ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent)
+                        colors = ListItemDefaults.colors(containerColor = Color.Transparent)
+                    )
+
+                    HorizontalDivider(color = colors.deepBackground.copy(alpha = 0.5f), thickness = 0.5.dp)
+
+                    ListItem(
+                        headlineContent = { Text(stringResource(R.string.layout_editor_use_subsplits), color = colors.textPrimary) },
+                        supportingContent = { Text(stringResource(R.string.layout_editor_use_subsplits_desc), color = colors.textSecondary) },
+                        trailingContent = {
+                            Switch(
+                                checked = preferences.useSubsplits,
+                                onCheckedChange = { viewModel.setUseSubsplits(it) }
+                            )
+                        },
+                        colors = ListItemDefaults.colors(containerColor = Color.Transparent)
+                    )
+
+                    HorizontalDivider(color = colors.deepBackground.copy(alpha = 0.5f), thickness = 0.5.dp)
+
+                    ListItem(
+                        headlineContent = { Text(stringResource(R.string.layout_editor_show_pts), color = colors.textPrimary) },
+                        trailingContent = {
+                            Switch(
+                                checked = preferences.showPossibleTimeSave,
+                                onCheckedChange = { viewModel.setShowPossibleTimeSave(it) }
+                            )
+                        },
+                        colors = ListItemDefaults.colors(containerColor = Color.Transparent)
+                    )
+
+                    HorizontalDivider(color = colors.deepBackground.copy(alpha = 0.5f), thickness = 0.5.dp)
+
+                    ListItem(
+                        headlineContent = { Text(stringResource(R.string.layout_editor_lock), color = colors.textPrimary) },
+                        supportingContent = { Text(stringResource(R.string.layout_editor_lock_desc), color = colors.textSecondary) },
+                        trailingContent = {
+                            Switch(
+                                checked = preferences.timerLocked,
+                                onCheckedChange = { viewModel.setTimerLocked(it) }
+                            )
+                        },
+                        colors = ListItemDefaults.colors(containerColor = Color.Transparent)
                     )
                 }
             }
+
+            Text(
+                stringResource(R.string.layout_editor_bg_gradient),
+                style = MaterialTheme.typography.titleMedium,
+                color = colors.textPrimary,
+                modifier = Modifier.padding(top = 8.dp)
+            )
+
+            Card(
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(containerColor = colors.elevatedSurface),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+            ) {
+                Column {
+                    ListItem(
+                        headlineContent = { Text(stringResource(R.string.layout_editor_bg_gradient), color = colors.textPrimary) },
+                        trailingContent = {
+                            Switch(
+                                checked = preferences.backgroundGradientEnabled,
+                                onCheckedChange = { viewModel.setBackgroundGradientEnabled(it) }
+                            )
+                        },
+                        colors = ListItemDefaults.colors(containerColor = Color.Transparent)
+                    )
+
+                    if (preferences.backgroundGradientEnabled) {
+                        HorizontalDivider(color = colors.deepBackground.copy(alpha = 0.5f), thickness = 0.5.dp)
+                        
+                        var startColorInput by remember { mutableStateOf(preferences.backgroundGradientStart) }
+                        var endColorInput by remember { mutableStateOf(preferences.backgroundGradientEnd) }
+
+                        ListItem(
+                            headlineContent = { Text(stringResource(R.string.layout_editor_bg_start), color = colors.textPrimary) },
+                            trailingContent = {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(24.dp)
+                                            .clip(RoundedCornerShape(4.dp))
+                                            .background(Color(startColorInput.toColorInt()))
+                                            .clickable { showStartColorPicker = true }
+                                            .border(1.dp, colors.textDisabled, RoundedCornerShape(4.dp))
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    OutlinedTextField(
+                                        value = startColorInput,
+                                        onValueChange = { 
+                                            startColorInput = it
+                                            if (it.matches(Regex("^#([A-Fa-f0-9]{6})$"))) {
+                                                viewModel.setBackgroundGradientStart(it)
+                                            }
+                                        },
+                                        modifier = Modifier.width(100.dp),
+                                        singleLine = true,
+                                        textStyle = MaterialTheme.typography.bodySmall
+                                    )
+                                }
+                            },
+                            colors = ListItemDefaults.colors(containerColor = Color.Transparent)
+                        )
+
+                        HorizontalDivider(color = colors.deepBackground.copy(alpha = 0.5f), thickness = 0.5.dp)
+
+                        ListItem(
+                            headlineContent = { Text(stringResource(R.string.layout_editor_bg_end), color = colors.textPrimary) },
+                            trailingContent = {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(24.dp)
+                                            .clip(RoundedCornerShape(4.dp))
+                                            .background(Color(endColorInput.toColorInt()))
+                                            .clickable { showEndColorPicker = true }
+                                            .border(1.dp, colors.textDisabled, RoundedCornerShape(4.dp))
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    OutlinedTextField(
+                                        value = endColorInput,
+                                        onValueChange = { 
+                                            endColorInput = it
+                                            if (it.matches(Regex("^#([A-Fa-f0-9]{6})$"))) {
+                                                viewModel.setBackgroundGradientEnd(it)
+                                            }
+                                        },
+                                        modifier = Modifier.width(100.dp),
+                                        singleLine = true,
+                                        textStyle = MaterialTheme.typography.bodySmall
+                                    )
+                                }
+                            },
+                            colors = ListItemDefaults.colors(containerColor = Color.Transparent)
+                        )
+                    }
+                }
+            }
+
+            if (showStartColorPicker) {
+                HexColorPickerDialog(
+                    initialColor = preferences.backgroundGradientStart,
+                    onColorSelected = { 
+                        viewModel.setBackgroundGradientStart(it)
+                        showStartColorPicker = false
+                    },
+                    onDismiss = { showStartColorPicker = false }
+                )
+            }
+
+            if (showEndColorPicker) {
+                HexColorPickerDialog(
+                    initialColor = preferences.backgroundGradientEnd,
+                    onColorSelected = { 
+                        viewModel.setBackgroundGradientEnd(it)
+                        showEndColorPicker = false
+                    },
+                    onDismiss = { showEndColorPicker = false }
+                )
+            }
+
 
             Text(
                 stringResource(R.string.layout_editor_color_header),
@@ -660,7 +841,7 @@ fun LayoutEditorScreen(
                         headlineContent = { Text(stringResource(R.string.layout_editor_color_mode), color = colors.textPrimary) },
                         supportingContent = { Text(colorModeLabel, color = colors.textSecondary) },
                         modifier = Modifier.clickable { showColorModeMenu = true },
-                        colors = ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent)
+                        colors = ListItemDefaults.colors(containerColor = Color.Transparent)
                     )
                     DropdownMenu(
                         expanded = showColorModeMenu,
@@ -756,9 +937,9 @@ fun LayoutEditorScreen(
 @Composable
 private fun StateColorLegend(
     label: String,
-    color: androidx.compose.ui.graphics.Color,
-    preset: com.elg.swiftsplit.domain.model.StateColorPreset?,
-    onPresetSelected: (com.elg.swiftsplit.domain.model.StateColorPreset) -> Unit
+    color: Color,
+    preset: StateColorPreset?,
+    onPresetSelected: (StateColorPreset) -> Unit
 ) {
     val colors = SwiftSplitThemeColors.colors
     var expanded by remember { mutableStateOf(false) }
@@ -803,7 +984,7 @@ private fun StateColorLegend(
                 onDismissRequest = { expanded = false },
                 shape = RoundedCornerShape(12.dp)
             ) {
-                com.elg.swiftsplit.domain.model.StateColorPreset.entries.forEach { pr ->
+                StateColorPreset.entries.forEach { pr ->
                     DropdownMenuItem(
                         text = { Text(pr.localName()) },
                         onClick = {
@@ -818,13 +999,210 @@ private fun StateColorLegend(
 }
 
 @Composable
-private fun com.elg.swiftsplit.domain.model.StateColorPreset.localName(): String = when (this) {
-    com.elg.swiftsplit.domain.model.StateColorPreset.GREEN -> stringResource(R.string.color_preset_green)
-    com.elg.swiftsplit.domain.model.StateColorPreset.BLUE -> stringResource(R.string.color_preset_blue)
-    com.elg.swiftsplit.domain.model.StateColorPreset.GRAY -> stringResource(R.string.color_preset_gray)
-    com.elg.swiftsplit.domain.model.StateColorPreset.RED -> stringResource(R.string.color_preset_red)
-    com.elg.swiftsplit.domain.model.StateColorPreset.ORANGE -> stringResource(R.string.color_preset_orange)
-    com.elg.swiftsplit.domain.model.StateColorPreset.GOLD -> stringResource(R.string.color_preset_gold)
-    com.elg.swiftsplit.domain.model.StateColorPreset.WHITE -> stringResource(R.string.color_preset_white)
+private fun SaturationValueBox(
+    hue: Float,
+    saturation: Float,
+    value: Float,
+    onValueChange: (Float, Float) -> Unit
+) {
+    var size by remember { mutableStateOf(IntSize.Zero) }
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(200.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .onGloballyPositioned { size = it.size }
+            .pointerInput(size) {
+                if (size.width <= 0 || size.height <= 0) return@pointerInput
+                detectDragGestures { change, _ ->
+                    val s = (change.position.x / size.width).coerceIn(0f, 1f)
+                    val v = 1f - (change.position.y / size.height).coerceIn(0f, 1f)
+                    onValueChange(s, v)
+                }
+            }
+            .pointerInput(size) {
+                if (size.width <= 0 || size.height <= 0) return@pointerInput
+                detectTapGestures { offset ->
+                    val s = (offset.x / size.width).coerceIn(0f, 1f)
+                    val v = 1f - (offset.y / size.height).coerceIn(0f, 1f)
+                    onValueChange(s, v)
+                }
+            }
+    ) {
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val hsvColor = Color.hsv(hue, 1f, 1f)
+            
+            // Background Hue
+            drawRect(color = hsvColor)
+            
+            // White to transparent horizontal gradient
+            drawRect(
+                brush = Brush.horizontalGradient(
+                    colors = listOf(Color.White, Color.Transparent)
+                )
+            )
+            
+            // Transparent to black vertical gradient
+            drawRect(
+                brush = Brush.verticalGradient(
+                    colors = listOf(Color.Transparent, Color.Black)
+                )
+            )
+
+            // Selector circle
+            val x = saturation * size.width
+            val y = (1f - value) * size.height
+            drawCircle(
+                color = Color.White,
+                radius = 8.dp.toPx(),
+                center = Offset(x, y),
+                style = Stroke(width = 2.dp.toPx())
+            )
+            drawCircle(
+                color = Color.Black,
+                radius = 9.dp.toPx(),
+                center = Offset(x, y),
+                style = Stroke(width = 1.dp.toPx())
+            )
+        }
+    }
 }
 
+@Composable
+private fun HueSlider(
+    hue: Float,
+    onHueChange: (Float) -> Unit
+) {
+    var size by remember { mutableStateOf(IntSize.Zero) }
+    val hueColors = remember {
+        (0..360).map { Color.hsv(it.toFloat(), 1f, 1f) }
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(24.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .onGloballyPositioned { size = it.size }
+            .pointerInput(size) {
+                if (size.width <= 0) return@pointerInput
+                detectDragGestures { change, _ ->
+                    val h = (change.position.x / size.width).coerceIn(0f, 1f) * 360f
+                    onHueChange(h)
+                }
+            }
+            .pointerInput(size) {
+                if (size.width <= 0) return@pointerInput
+                detectTapGestures { offset ->
+                    val h = (offset.x / size.width).coerceIn(0f, 1f) * 360f
+                    onHueChange(h)
+                }
+            }
+    ) {
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            drawRect(
+                brush = Brush.horizontalGradient(colors = hueColors)
+            )
+
+            // Selector circle
+            val x = (hue / 360f) * size.width
+            drawCircle(
+                color = Color.White,
+                radius = 10.dp.toPx(),
+                center = Offset(x, size.height / 2f),
+                style = Stroke(width = 2.dp.toPx())
+            )
+            drawCircle(
+                color = Color.Black,
+                radius = 11.dp.toPx(),
+                center = Offset(x, size.height / 2f),
+                style = Stroke(width = 1.dp.toPx())
+            )
+        }
+    }
+}
+
+@Composable
+private fun HexColorPickerDialog(
+    initialColor: String,
+    onColorSelected: (String) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val hsv = remember {
+        val floatArray = FloatArray(3)
+        val color = try { initialColor.toColorInt() } catch (e: Exception) { 0 }
+        android.graphics.Color.colorToHSV(color, floatArray)
+        mutableStateListOf(floatArray[0], floatArray[1], floatArray[2])
+    }
+
+    val selectedColorInt = android.graphics.Color.HSVToColor(floatArrayOf(hsv[0], hsv[1], hsv[2]))
+    val selectedColorHex = String.format("#%06X", 0xFFFFFF and selectedColorInt)
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.layout_editor_color_header)) },
+        text = {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                SaturationValueBox(
+                    hue = hsv[0],
+                    saturation = hsv[1],
+                    value = hsv[2],
+                    onValueChange = { s, v ->
+                        hsv[1] = s
+                        hsv[2] = v
+                    }
+                )
+
+                HueSlider(
+                    hue = hsv[0],
+                    onHueChange = { hsv[0] = it }
+                )
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(48.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(Color(selectedColorInt))
+                            .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(8.dp))
+                    )
+                    Text(
+                        text = selectedColorHex,
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = { onColorSelected(selectedColorHex) }) {
+                Text(stringResource(R.string.save))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.cancel))
+            }
+        }
+    )
+}
+
+@Composable
+private fun StateColorPreset.localName(): String = when (this) {
+    StateColorPreset.GREEN -> stringResource(R.string.color_preset_green)
+    StateColorPreset.BLUE -> stringResource(R.string.color_preset_blue)
+    StateColorPreset.GRAY -> stringResource(R.string.color_preset_gray)
+    StateColorPreset.RED -> stringResource(R.string.color_preset_red)
+    StateColorPreset.ORANGE -> stringResource(R.string.color_preset_orange)
+    StateColorPreset.GOLD -> stringResource(R.string.color_preset_gold)
+    StateColorPreset.WHITE -> stringResource(R.string.color_preset_white)
+}

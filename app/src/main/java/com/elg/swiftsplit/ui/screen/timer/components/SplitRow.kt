@@ -41,7 +41,7 @@ fun SplitRow(
     val colors = SwiftSplitThemeColors.colors
     val compSplit = segment.splitTimes[com.elg.swiftsplit.domain.model.ComparisonName(comparisonName)]?.getTime(timingMethod)
 
-    val delta = if (isCompleted && elapsedSplit != null) {
+            val delta = if (isCompleted && elapsedSplit != null) {
         val segmentVal = previousCurrentSplit?.let { elapsedSplit - it } ?: elapsedSplit
         val isGold = segment.bestSegmentTime?.getTime(timingMethod)?.let { segmentVal <= it } ?: false
 
@@ -57,6 +57,22 @@ fun SplitRow(
     } else {
         null
     }
+
+    val pts = if (isActive && !isCompleted) {
+        val pbSplit = compSplit
+        val prevPbSplit = previousComparisonSplit ?: TimeSpan.ZERO
+        val pbSegment = pbSplit?.let { it - prevPbSplit }
+        val bestSegment = segment.bestSegmentTime?.getTime(timingMethod)
+        
+        if (pbSegment != null && bestSegment != null) {
+            pbSegment - bestSegment
+        } else {
+            null
+        }
+    } else {
+        null
+    }
+
 
     val deltaColor = when (delta?.status) {
         Delta.Status.AHEAD_GAINING -> colors.aheadGaining
@@ -83,14 +99,10 @@ fun SplitRow(
                 .background(if (isActive) activeBrush else androidx.compose.ui.graphics.Brush.horizontalGradient(listOf(Color.Transparent, Color.Transparent)))
                 .padding(horizontal = 16.dp, vertical = 8.dp)
         ) {
-            if (!segment.iconData.isNullOrBlank()) {
-                val bitmap = remember(segment.iconData) {
-                    try {
-                        val bytes = android.util.Base64.decode(segment.iconData, android.util.Base64.DEFAULT)
-                        android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.size)?.let {
-                            it.asImageBitmap()
-                        }
-                    } catch (e: Exception) { null }
+            val iconData = segment.iconData
+            if (iconData != null && iconData.isNotBlank()) {
+                val bitmap = remember(iconData) {
+                    com.elg.swiftsplit.infrastructure.parser.LssIconDecoder.decode(iconData)?.asImageBitmap()
                 }
                 bitmap?.let {
                     androidx.compose.foundation.Image(
@@ -102,7 +114,7 @@ fun SplitRow(
             }
 
             Text(
-                text = segment.name,
+                text = if (layoutPreferences.useSubsplits && segment.isSubsplit) "  ${segment.cleanedName}" else segment.name,
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = if (isActive) FontWeight.Bold else FontWeight.Normal,
                 color = if (isActive) Color.White else colors.textPrimary,
@@ -132,11 +144,13 @@ fun SplitRow(
                         elapsedSplit.formatted(timeFormat)
                     }
                 }
+                pts != null && layoutPreferences.showPossibleTimeSave -> "-${pts.formatted(false)}"
                 else -> compSplit?.formatted(timeFormat) ?: "-"
             }
 
             val timeColor = when {
                 liveElapsed != null && liveDelta != null -> deltaColor
+                isActive && pts != null && layoutPreferences.showPossibleTimeSave -> colors.textTertiary
                 isActive -> Color.White
                 else -> colors.textSecondary
             }

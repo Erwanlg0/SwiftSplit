@@ -82,28 +82,39 @@ fun SplitList(
         state = listState,
         modifier = modifier.fillMaxWidth()
     ) {
-        itemsIndexed(run.segments) { index, segment ->
-            val isCompleted = index < currentSegmentIndex
-            val previousCurrentSplit = if (index > 0) splitTimes[index - 1] else null
-            val previousComparisonSplit = if (index > 0) {
-                run.segments[index - 1].splitTimes[ComparisonName(comparisonName)]?.getTime(timingMethod)
+        val visibleSegments = if (layoutPreferences.useSubsplits) {
+            run.segments.filterIndexed { index, segment ->
+                // Show if it's not a subsplit OR if it's the current active split
+                !segment.isSubsplit || index == currentSegmentIndex
+            }
+        } else {
+            run.segments
+        }
+
+        itemsIndexed(visibleSegments) { index, segment ->
+            // Re-calculating the real index in run.segments
+            val realIndex = run.segments.indexOf(segment)
+            val isCompleted = realIndex < currentSegmentIndex
+            val previousCurrentSplit = if (realIndex > 0) splitTimes[realIndex - 1] else null
+            val previousComparisonSplit = if (realIndex > 0) {
+                run.segments[realIndex - 1].splitTimes[ComparisonName(comparisonName)]?.getTime(timingMethod)
             } else {
                 TimeSpan.ZERO
             }
 
             SplitRow(
                 segment = segment,
-                isActive = index == currentSegmentIndex,
+                isActive = realIndex == currentSegmentIndex,
                 isCompleted = isCompleted,
-                elapsedSplit = splitTimes.getOrNull(index),
+                elapsedSplit = splitTimes.getOrNull(realIndex),
                 comparisonName = comparisonName,
                 timingMethod = timingMethod,
                 previousCurrentSplit = previousCurrentSplit,
                 previousComparisonSplit = previousComparisonSplit,
                 timeFormat = timeFormat,
                 layoutPreferences = layoutPreferences,
-                liveDelta = if (index == currentSegmentIndex && showLiveDelta) activeSegmentDelta else null,
-                liveElapsed = if (index == currentSegmentIndex && showLiveDelta) currentElapsed else null
+                liveDelta = if (realIndex == currentSegmentIndex && showLiveDelta) activeSegmentDelta else null,
+                liveElapsed = if (realIndex == currentSegmentIndex && showLiveDelta) currentElapsed else null
             )
         }
     }
