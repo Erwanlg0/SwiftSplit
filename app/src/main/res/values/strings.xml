@@ -136,6 +136,9 @@
     <string name="layout_editor_splits_fraction">Show split decimals</string>
     <string name="layout_editor_splits_fraction_desc">Show fractional seconds on split deltas</string>
     <string name="layout_editor_splits_decimals">Split decimal places</string>
+    <string name="layout_editor_split_approach_threshold">Split approach delta</string>
+    <string name="layout_editor_split_approach_threshold_disabled">Disabled</string>
+    <string name="layout_editor_split_approach_threshold_value">%1$d s before split</string>
     <string name="layout_editor_delta_ahead_gaining">Ahead (gaining)</string>
     <string name="layout_editor_delta_ahead_losing">Ahead (losing)</string>
     <string name="layout_editor_delta_behind_losing">Behind (losing)</string>

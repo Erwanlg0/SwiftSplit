@@ -72,6 +72,10 @@ class LayoutEditorViewModel @Inject constructor(
         update { it.copy(splitsDecimalPlaces = places.coerceIn(0, 3)) }
     }
 
+    fun setSplitApproachThresholdSeconds(seconds: Int) {
+        update { it.copy(splitApproachThresholdSeconds = seconds.coerceIn(0, 120)) }
+    }
+
     private fun update(transform: (TimerLayoutPreferences) -> TimerLayoutPreferences) {
         viewModelScope.launch {
             val current = layoutPreferences.value

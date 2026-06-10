@@ -32,6 +32,8 @@ fun SplitRow(
     previousComparisonSplit: TimeSpan?,
     timeFormat: TimeFormatOptions = TimeFormatOptions.DEFAULT,
     layoutPreferences: TimerLayoutPreferences = TimerLayoutPreferences.DEFAULT,
+    liveDelta: Delta? = null,
+    liveElapsed: TimeSpan? = null,
     modifier: Modifier = Modifier
 ) {
     val colors = SwiftSplitThemeColors.colors
@@ -48,6 +50,8 @@ fun SplitRow(
             previousComparisonSplit = previousComparisonSplit,
             isBestSegment = isGold
         )
+    } else if (isActive && liveDelta != null) {
+        liveDelta
     } else {
         null
     }
@@ -99,10 +103,16 @@ fun SplitRow(
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center
             )
 
-            val timeToShow = if (isCompleted && elapsedSplit != null) {
-                elapsedSplit.formatted(timeFormat)
-            } else {
-                compSplit?.formatted(timeFormat) ?: "-"
+            val timeToShow = when {
+                liveElapsed != null -> liveElapsed.formatted(timeFormat)
+                isCompleted && elapsedSplit != null -> elapsedSplit.formatted(timeFormat)
+                else -> compSplit?.formatted(timeFormat) ?: "-"
+            }
+
+            val timeColor = when {
+                liveElapsed != null && liveDelta != null -> deltaColor
+                isActive -> Color.White
+                else -> colors.textSecondary
             }
 
             Text(
@@ -110,8 +120,8 @@ fun SplitRow(
                 style = MaterialTheme.typography.bodyLarge.copy(
                     fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace
                 ),
-                fontWeight = if (isActive) FontWeight.Bold else FontWeight.Normal,
-                color = if (isActive) Color.White else colors.textSecondary,
+                fontWeight = if (isActive || liveElapsed != null) FontWeight.Bold else FontWeight.Normal,
+                color = timeColor,
                 modifier = Modifier.width(90.dp),
                 textAlign = androidx.compose.ui.text.style.TextAlign.End
             )

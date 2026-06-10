@@ -167,7 +167,11 @@ fun TimerScreen(
                     interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
                     indication = null
                 ) {
-                    viewModel.pauseResume()
+                    if (timerState is TimerState.Idle) {
+                        viewModel.startTimer()
+                    } else {
+                        viewModel.pauseResume()
+                    }
                 }
         ) {
             val currentIndex = when (val state = timerState) {
@@ -231,7 +235,11 @@ fun TimerScreen(
                             timingMethod = TimingMethod.REAL_TIME,
                             timeFormat = layoutPreferences.timeFormat,
                             layoutPreferences = layoutPreferences,
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier.weight(1f),
+                            completedSplitsVisible = 2,
+                            currentElapsed = currentElapsed,
+                            activeSegmentDelta = currentDelta,
+                            isTimerRunning = timerState is TimerState.Running
                         )
                     } else {
                         Spacer(modifier = Modifier.weight(1f))
@@ -298,6 +306,33 @@ fun TimerScreen(
                             textAlign = androidx.compose.ui.text.style.TextAlign.Center
                         )
                     }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+                    val isLastSplit = currentRun.segments.let { currentIndex == it.size - 1 }
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable(
+                                interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
+                                indication = null
+                            ) { /* Consume click */ }
+                    ) {
+                        TimerControls(
+                            timerState = timerState,
+                            isLastSplit = isLastSplit,
+                            onStartSplit = {
+                                if (timerState is TimerState.Idle) {
+                                    viewModel.startTimer()
+                                } else {
+                                    viewModel.split()
+                                }
+                            },
+                            onPauseResume = { viewModel.pauseResume() },
+                            onUndo = { viewModel.undoSplit() },
+                            onSkip = { viewModel.skipSplit() },
+                            onReset = { viewModel.reset(saveAttempt = true) }
+                        )
+                    }
                 }
             } else {
                 
@@ -318,17 +353,23 @@ fun TimerScreen(
                             timingMethod = TimingMethod.REAL_TIME,
                             timeFormat = layoutPreferences.timeFormat,
                             layoutPreferences = layoutPreferences,
-                            modifier = Modifier.fillMaxSize()
+                            modifier = Modifier.fillMaxSize(),
+                            completedSplitsVisible = 2,
+                            currentElapsed = currentElapsed,
+                            activeSegmentDelta = currentDelta,
+                            isTimerRunning = timerState is TimerState.Running
                         )
                         }
                     }
 
                     Column(
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .weight(1f),
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
+                        verticalArrangement = Arrangement.Top
                     ) {
-                        
+                        Spacer(modifier = Modifier.height(8.dp))
                         Text(
                             text = "${currentRun.gameInfo.gameName} — ${currentRun.gameInfo.categoryName}",
                             style = MaterialTheme.typography.titleMedium,
@@ -336,7 +377,7 @@ fun TimerScreen(
                             color = colors.textSecondary,
                             textAlign = androidx.compose.ui.text.style.TextAlign.Center
                         )
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.weight(1f))
 
                         Text(
                             text = currentElapsed.formatted(layoutPreferences.timeFormat),
@@ -397,6 +438,33 @@ fun TimerScreen(
                                 textAlign = androidx.compose.ui.text.style.TextAlign.Center
                             )
                         }
+                        Spacer(modifier = Modifier.weight(1f))
+
+                        val isLastSplit = currentRun.segments.let { currentIndex == it.size - 1 }
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable(
+                                    interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
+                                    indication = null
+                                ) { /* Consume click */ }
+                        ) {
+                            TimerControls(
+                                timerState = timerState,
+                                isLastSplit = isLastSplit,
+                                onStartSplit = {
+                                    if (timerState is TimerState.Idle) {
+                                        viewModel.startTimer()
+                                    } else {
+                                        viewModel.split()
+                                    }
+                                },
+                                onPauseResume = { viewModel.pauseResume() },
+                                onUndo = { viewModel.undoSplit() },
+                                onSkip = { viewModel.skipSplit() },
+                                onReset = { viewModel.reset(saveAttempt = true) }
+                            )
+                        }
                     }
                 }
             }
@@ -405,7 +473,11 @@ fun TimerScreen(
             Row(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
-                    .padding(16.dp),
+                    .padding(16.dp)
+                    .clickable(
+                        interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
+                        indication = null
+                    ) { /* Consume click */ },
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {

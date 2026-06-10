@@ -39,6 +39,7 @@ class DataStoreSettingsAdapter @Inject constructor(
         val TIMER_FULLSCREEN_ORIENTATION = stringPreferencesKey("timer_fullscreen_orientation")
         val TIMER_SHOW_SPLITS_FRACTION = booleanPreferencesKey("timer_show_splits_fraction")
         val TIMER_SPLITS_DECIMAL_PLACES = intPreferencesKey("timer_splits_decimal_places")
+        val TIMER_SPLIT_APPROACH_THRESHOLD_SECONDS = intPreferencesKey("timer_split_approach_threshold_seconds")
         val POLLING_DELAY_MS = longPreferencesKey("polling_delay_ms")
         val NETWORK_TIMEOUT_MS = longPreferencesKey("network_timeout_ms")
         val REMOTE_HOST = stringPreferencesKey("remote_host")
@@ -165,7 +166,9 @@ class DataStoreSettingsAdapter @Inject constructor(
                     com.elg.swiftsplit.domain.model.FullscreenOrientationPreset.AUTO
                 },
                 showSplitsFraction = preferences[PreferencesKeys.TIMER_SHOW_SPLITS_FRACTION] ?: true,
-                splitsDecimalPlaces = (preferences[PreferencesKeys.TIMER_SPLITS_DECIMAL_PLACES] ?: 2).coerceIn(0, 3)
+                splitsDecimalPlaces = (preferences[PreferencesKeys.TIMER_SPLITS_DECIMAL_PLACES] ?: 2).coerceIn(0, 3),
+                splitApproachThresholdSeconds = (preferences[PreferencesKeys.TIMER_SPLIT_APPROACH_THRESHOLD_SECONDS]
+                    ?: 30).coerceIn(0, 120)
             )
         }
     }
@@ -184,6 +187,7 @@ class DataStoreSettingsAdapter @Inject constructor(
             prefs[PreferencesKeys.TIMER_FULLSCREEN_ORIENTATION] = preferences.fullscreenOrientation.name
             prefs[PreferencesKeys.TIMER_SHOW_SPLITS_FRACTION] = preferences.showSplitsFraction
             prefs[PreferencesKeys.TIMER_SPLITS_DECIMAL_PLACES] = preferences.splitsDecimalPlaces
+            prefs[PreferencesKeys.TIMER_SPLIT_APPROACH_THRESHOLD_SECONDS] = preferences.splitApproachThresholdSeconds
         }
     }
 

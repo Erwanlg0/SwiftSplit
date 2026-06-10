@@ -142,6 +142,7 @@ fun LayoutEditorScreen(
     var showColorModeMenu by remember { mutableStateOf(false) }
     var showOrientationMenu by remember { mutableStateOf(false) }
     var showSplitsDecimalsMenu by remember { mutableStateOf(false) }
+    var showApproachThresholdMenu by remember { mutableStateOf(false) }
 
     val previewStates = remember(preferences.colorMode) { previewStatesFor(preferences.colorMode) }
     var previewIndex by remember(preferences.colorMode) { mutableIntStateOf(0) }
@@ -423,6 +424,57 @@ fun LayoutEditorScreen(
                                     onClick = {
                                         viewModel.setSplitsDecimalPlaces(places)
                                         showSplitsDecimalsMenu = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+
+                    HorizontalDivider(color = colors.deepBackground.copy(alpha = 0.5f), thickness = 0.5.dp)
+
+                    Box(modifier = Modifier.fillMaxWidth()) {
+                        ListItem(
+                            headlineContent = {
+                                Text(stringResource(R.string.layout_editor_split_approach_threshold), color = colors.textPrimary)
+                            },
+                            supportingContent = {
+                                Text(
+                                    text = if (preferences.splitApproachThresholdSeconds == 0) {
+                                        stringResource(R.string.layout_editor_split_approach_threshold_disabled)
+                                    } else {
+                                        stringResource(
+                                            R.string.layout_editor_split_approach_threshold_value,
+                                            preferences.splitApproachThresholdSeconds
+                                        )
+                                    },
+                                    color = colors.textSecondary
+                                )
+                            },
+                            modifier = Modifier.clickable { showApproachThresholdMenu = true },
+                            colors = ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent)
+                        )
+                        DropdownMenu(
+                            expanded = showApproachThresholdMenu,
+                            onDismissRequest = { showApproachThresholdMenu = false },
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            listOf(0, 10, 15, 20, 30, 45, 60).forEach { seconds ->
+                                DropdownMenuItem(
+                                    text = {
+                                        Text(
+                                            if (seconds == 0) {
+                                                stringResource(R.string.layout_editor_split_approach_threshold_disabled)
+                                            } else {
+                                                stringResource(
+                                                    R.string.layout_editor_split_approach_threshold_value,
+                                                    seconds
+                                                )
+                                            }
+                                        )
+                                    },
+                                    onClick = {
+                                        viewModel.setSplitApproachThresholdSeconds(seconds)
+                                        showApproachThresholdMenu = false
                                     }
                                 )
                             }
