@@ -9,6 +9,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.*
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -17,6 +18,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.elg.swiftsplit.ui.theme.SwiftSplitThemeColors
 import com.elg.swiftsplit.R
+import androidx.compose.ui.text.font.FontWeight
+import android.widget.Toast
+import androidx.compose.ui.platform.LocalContext
 
 import androidx.compose.ui.res.stringResource
 
@@ -31,6 +35,46 @@ fun SplitEditorScreen(
     val run by viewModel.run.collectAsStateWithLifecycle()
     val segments by viewModel.segments.collectAsStateWithLifecycle()
     val colors = SwiftSplitThemeColors.colors
+    val context = LocalContext.current
+    var showResetDialog by remember { mutableStateOf(false) }
+
+    if (showResetDialog) {
+        AlertDialog(
+            onDismissRequest = { showResetDialog = false },
+            title = {
+                Text(
+                    "Réinitialiser les statistiques",
+                    color = colors.textPrimary,
+                    fontWeight = FontWeight.Bold
+                )
+            },
+            text = {
+                Text(
+                    "Cela va remettre à zéro le nombre de tentatives, l'historique, les PB et les meilleurs segments. Les noms des splits seront conservés.\n\nCette action est irréversible.",
+                    color = colors.textSecondary
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        viewModel.resetStats {
+                            Toast.makeText(context, "Statistiques réinitialisées", Toast.LENGTH_SHORT).show()
+                        }
+                        showResetDialog = false
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = colors.error)
+                ) {
+                    Text("Réinitialiser")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showResetDialog = false }) {
+                    Text("Annuler")
+                }
+            },
+            containerColor = colors.cardBackground
+        )
+    }
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -98,6 +142,27 @@ fun SplitEditorScreen(
                         unfocusedTextColor = colors.textSecondary
                     )
                 )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                OutlinedButton(
+                    onClick = { showResetDialog = true },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = colors.error
+                    ),
+                    border = ButtonDefaults.outlinedButtonBorder(enabled = true).copy(
+                        brush = androidx.compose.ui.graphics.SolidColor(colors.error)
+                    )
+                ) {
+                    Icon(
+                        Icons.Default.RestartAlt,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Réinitialiser les statistiques")
+                }
 
                 Spacer(modifier = Modifier.height(16.dp))
 

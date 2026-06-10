@@ -47,6 +47,10 @@ fun RunsListScreen(
     var customCategory by remember { mutableStateOf("") }
     var customPlatform by remember { mutableStateOf("") }
 
+    var showUrlImportDialog by remember { mutableStateOf(false) }
+    var urlToImport by remember { mutableStateOf("") }
+    var isImportingFromUrl by remember { mutableStateOf(false) }
+
     var showSpeedrunDialog by remember { mutableStateOf(false) }
     var speedrunQuery by remember { mutableStateOf("") }
     val speedrunGames by viewModel.speedrunGames.collectAsStateWithLifecycle()
@@ -58,6 +62,7 @@ fun RunsListScreen(
     var selectedGameName by remember { mutableStateOf<String?>(null) }
     var selectedCategoryId by remember { mutableStateOf<String?>(null) }
     var selectedCategoryName by remember { mutableStateOf<String?>(null) }
+    var onlyRunsWithSplits by remember { mutableStateOf(false) }
 
     
     val fileLauncher = rememberLauncherForActivityResult(
@@ -167,62 +172,6 @@ fun RunsListScreen(
                         }
                     }
 
-                    
-                    var showUrlImportDialog by remember { mutableStateOf(false) }
-                    var urlToImport by remember { mutableStateOf("") }
-                    var isImportingFromUrl by remember { mutableStateOf(false) }
-
-                    if (showUrlImportDialog) {
-                        AlertDialog(
-                            onDismissRequest = { showUrlImportDialog = false; urlToImport = "" },
-                            title = { Text("Importer via Lien / URL", color = swiftSplitColors.textPrimary) },
-                            text = {
-                                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    OutlinedTextField(
-                                        value = urlToImport,
-                                        onValueChange = { urlToImport = it },
-                                        placeholder = { Text("https://livesplit.org/splits/...") },
-                                        label = { Text("Adresse URL du fichier LSS") },
-                                        singleLine = true,
-                                        modifier = Modifier.fillMaxWidth()
-                                    )
-                                    if (isImportingFromUrl) {
-                                        CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
-                                    }
-                                }
-                            },
-                            confirmButton = {
-                                Button(
-                                    onClick = {
-                                        isImportingFromUrl = true
-                                        viewModel.importRunFromUrl(
-                                            url = urlToImport,
-                                            onSuccess = {
-                                                isImportingFromUrl = false
-                                                showUrlImportDialog = false
-                                                urlToImport = ""
-                                                Toast.makeText(context, "Fichier LSS importé avec succès !", Toast.LENGTH_SHORT).show()
-                                            },
-                                            onFailure = { err ->
-                                                isImportingFromUrl = false
-                                                Toast.makeText(context, "Erreur : ${err.localizedMessage}", Toast.LENGTH_LONG).show()
-                                            }
-                                        )
-                                    },
-                                    enabled = urlToImport.isNotBlank() && !isImportingFromUrl
-                                ) {
-                                    Text("Télécharger & Importer")
-                                }
-                            },
-                            dismissButton = {
-                                TextButton(onClick = { showUrlImportDialog = false; urlToImport = "" }) {
-                                    Text("Annuler")
-                                }
-                            },
-                            containerColor = swiftSplitColors.cardBackground
-                        )
-                    }
-
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -285,6 +234,57 @@ fun RunsListScreen(
         )
     }
 
+    // URL Import Dialog - at top level so it persists after parent dialog closes
+    if (showUrlImportDialog) {
+        AlertDialog(
+            onDismissRequest = { showUrlImportDialog = false; urlToImport = "" },
+            title = { Text("Importer via Lien / URL", color = swiftSplitColors.textPrimary) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedTextField(
+                        value = urlToImport,
+                        onValueChange = { urlToImport = it },
+                        placeholder = { Text("https://livesplit.org/splits/...") },
+                        label = { Text("Adresse URL du fichier LSS") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    if (isImportingFromUrl) {
+                        CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+                    }
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        isImportingFromUrl = true
+                        viewModel.importRunFromUrl(
+                            url = urlToImport,
+                            onSuccess = {
+                                isImportingFromUrl = false
+                                showUrlImportDialog = false
+                                urlToImport = ""
+                                Toast.makeText(context, "Fichier LSS importé avec succès !", Toast.LENGTH_SHORT).show()
+                            },
+                            onFailure = { err ->
+                                isImportingFromUrl = false
+                                Toast.makeText(context, "Erreur : ${err.localizedMessage}", Toast.LENGTH_LONG).show()
+                            }
+                        )
+                    },
+                    enabled = urlToImport.isNotBlank() && !isImportingFromUrl
+                ) {
+                    Text("Télécharger & Importer")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showUrlImportDialog = false; urlToImport = "" }) {
+                    Text("Annuler")
+                }
+            },
+            containerColor = swiftSplitColors.cardBackground
+        )
+    }
 
 
     if (showSpeedrunDialog) {
@@ -386,50 +386,118 @@ fun RunsListScreen(
                         Spacer(modifier = Modifier.height(8.dp))
                         if (isSpeedrunLoading) {
                             CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
-                        } else if (speedrunRuns.isEmpty()) {
-                            Text("Aucun run trouvé pour cette catégorie.", style = MaterialTheme.typography.bodyMedium, color = swiftSplitColors.textSecondary)
                         } else {
-                            LazyColumn(
-                                modifier = Modifier.weight(1f),
-                                verticalArrangement = Arrangement.spacedBy(4.dp)
+                            val filteredRuns = if (onlyRunsWithSplits) {
+                                speedrunRuns.filter { it.run.splits != null }
+                            } else {
+                                speedrunRuns
+                            }
+
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { onlyRunsWithSplits = !onlyRunsWithSplits }
+                                    .padding(vertical = 4.dp)
                             ) {
-                                items(speedrunRuns, key = { it.run.id }) { placement ->
-                                    Card(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .clickable {
-                                                showSpeedrunDialog = false
-                                                viewModel.importSpeedrunRun(
-                                                    runId = placement.run.id,
-                                                    onSuccess = {
-                                                        Toast.makeText(context, "Splits Speedrun.com importés !", Toast.LENGTH_SHORT).show()
-                                                        viewModel.clearSpeedrunSearch()
-                                                    },
-                                                    onFailure = { err ->
-                                                        Toast.makeText(context, "Erreur : ${err.localizedMessage}", Toast.LENGTH_LONG).show()
-                                                        viewModel.clearSpeedrunSearch()
+                                Checkbox(
+                                    checked = onlyRunsWithSplits,
+                                    onCheckedChange = { onlyRunsWithSplits = it },
+                                    colors = CheckboxDefaults.colors(
+                                        checkedColor = MaterialTheme.colorScheme.primary,
+                                        uncheckedColor = swiftSplitColors.textSecondary
+                                    )
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = "Avec splits uniquement",
+                                    color = swiftSplitColors.textPrimary,
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            if (filteredRuns.isEmpty()) {
+                                Text("Aucun run trouvé.", style = MaterialTheme.typography.bodyMedium, color = swiftSplitColors.textSecondary)
+                            } else {
+                                LazyColumn(
+                                    modifier = Modifier.weight(1f),
+                                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+                                    items(filteredRuns, key = { it.run.id }) { placement ->
+                                        val hasSplits = placement.run.splits != null
+                                        Card(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .clickable {
+                                                    if (!hasSplits) {
+                                                        Toast.makeText(context, "Ce run n'a pas de splits associés sur splits.io", Toast.LENGTH_LONG).show()
+                                                    } else {
+                                                        showSpeedrunDialog = false
+                                                        viewModel.importSpeedrunRun(
+                                                            runId = placement.run.id,
+                                                            onSuccess = {
+                                                                Toast.makeText(context, "Splits Speedrun.com importés !", Toast.LENGTH_SHORT).show()
+                                                                viewModel.clearSpeedrunSearch()
+                                                            },
+                                                            onFailure = { err ->
+                                                                Toast.makeText(context, "Erreur : ${err.localizedMessage}", Toast.LENGTH_LONG).show()
+                                                                viewModel.clearSpeedrunSearch()
+                                                            }
+                                                        )
                                                     }
-                                                )
-                                            },
-                                        colors = CardDefaults.cardColors(containerColor = swiftSplitColors.elevatedSurface)
-                                    ) {
-                                        Column(modifier = Modifier.padding(12.dp)) {
-                                            val timeSec = placement.run.times.primary_t
-                                            val formattedTime = if (timeSec >= 3600) {
-                                                String.format("%d:%02d:%02d", (timeSec / 3600).toInt(), ((timeSec % 3600) / 60).toInt(), (timeSec % 60).toInt())
-                                            } else {
-                                                String.format("%02d:%02d", (timeSec / 60).toInt(), (timeSec % 60).toInt())
+                                                },
+                                            colors = CardDefaults.cardColors(containerColor = swiftSplitColors.elevatedSurface)
+                                        ) {
+                                            Row(
+                                                modifier = Modifier.padding(12.dp),
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Column(modifier = Modifier.weight(1f)) {
+                                                    val timeSec = placement.run.times.primary_t
+                                                    val formattedTime = if (timeSec >= 3600) {
+                                                        String.format("%d:%02d:%02d", (timeSec / 3600).toInt(), ((timeSec % 3600) / 60).toInt(), (timeSec % 60).toInt())
+                                                    } else {
+                                                        String.format("%02d:%02d", (timeSec / 60).toInt(), (timeSec % 60).toInt())
+                                                    }
+                                                    Text(
+                                                        text = "${placement.place}e place — $formattedTime",
+                                                        fontWeight = FontWeight.Bold,
+                                                        color = if (hasSplits) swiftSplitColors.textPrimary else swiftSplitColors.textDisabled
+                                                    )
+                                                    Text(
+                                                        text = "Run ID : " + placement.run.id,
+                                                        style = MaterialTheme.typography.bodySmall,
+                                                        color = swiftSplitColors.textSecondary
+                                                    )
+                                                }
+                                                if (hasSplits) {
+                                                    Surface(
+                                                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
+                                                        shape = MaterialTheme.shapes.small
+                                                    ) {
+                                                        Text(
+                                                            text = "Importable",
+                                                            color = MaterialTheme.colorScheme.primary,
+                                                            style = MaterialTheme.typography.labelSmall,
+                                                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                                        )
+                                                    }
+                                                } else {
+                                                    Surface(
+                                                        color = swiftSplitColors.textDisabled.copy(alpha = 0.1f),
+                                                        shape = MaterialTheme.shapes.small
+                                                    ) {
+                                                        Text(
+                                                            text = "Sans splits",
+                                                            color = swiftSplitColors.textDisabled,
+                                                            style = MaterialTheme.typography.labelSmall,
+                                                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                                        )
+                                                    }
+                                                }
                                             }
-                                            Text(
-                                                text = "${placement.place}e place — $formattedTime",
-                                                fontWeight = FontWeight.Bold,
-                                                color = swiftSplitColors.textPrimary
-                                            )
-                                            Text(
-                                                text = "Run ID : " + placement.run.id,
-                                                style = MaterialTheme.typography.bodySmall,
-                                                color = swiftSplitColors.textSecondary
-                                            )
                                         }
                                     }
                                 }

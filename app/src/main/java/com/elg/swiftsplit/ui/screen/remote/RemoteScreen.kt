@@ -23,6 +23,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.elg.swiftsplit.domain.model.TimeFormatOptions
 import com.elg.swiftsplit.ui.screen.timer.components.SplitList
+import com.elg.swiftsplit.domain.model.TimingMethod
+import com.elg.swiftsplit.domain.model.Run
+import com.elg.swiftsplit.domain.model.Segment
+import com.elg.swiftsplit.domain.model.GameInfo
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -137,9 +141,28 @@ fun RemoteScreen(
     val remoteSplitName by viewModel.remoteSplitName.collectAsStateWithLifecycle()
     val remoteSplitIndex by viewModel.remoteSplitIndex.collectAsStateWithLifecycle()
     val remoteDelta by viewModel.remoteDelta.collectAsStateWithLifecycle()
+    val remoteGameName by viewModel.remoteGameName.collectAsStateWithLifecycle()
+    val remoteCategoryName by viewModel.remoteCategoryName.collectAsStateWithLifecycle()
+    val remoteSplits by viewModel.remoteSplits.collectAsStateWithLifecycle()
+    val remoteSplitTimes by viewModel.remoteSplitTimes.collectAsStateWithLifecycle()
     val layoutPrefs by viewModel.timerLayoutPreferences.collectAsStateWithLifecycle()
     val smoothRemoteTime = rememberAnimatedRemoteTime(remoteTime, remotePhase, layoutPrefs.timeFormat)
     val errorMessage by viewModel.errorMessage.collectAsStateWithLifecycle()
+    
+    var showSplitsInFullscreen by rememberSaveable(layoutPrefs.showSplits) {
+        mutableStateOf(layoutPrefs.showSplits)
+    }
+    val mockRun = remember(remoteSplits, remoteGameName, remoteCategoryName) {
+        Run(
+            gameInfo = GameInfo(
+                gameName = remoteGameName,
+                categoryName = remoteCategoryName
+            ),
+            segments = remoteSplits.map { name ->
+                Segment(name = name)
+            }
+        )
+    }
     val colors = SwiftSplitThemeColors.colors
     val context = LocalContext.current
     var isFullscreen by rememberSaveable { mutableStateOf(false) }
@@ -340,6 +363,14 @@ fun RemoteScreen(
     }
 
     if (isFullscreen) {
+        val configuration = androidx.compose.ui.platform.LocalConfiguration.current
+        val isPortrait = when (layoutPrefs.fullscreenOrientation) {
+            com.elg.swiftsplit.domain.model.FullscreenOrientationPreset.PORTRAIT -> true
+            com.elg.swiftsplit.domain.model.FullscreenOrientationPreset.LANDSCAPE -> false
+            com.elg.swiftsplit.domain.model.FullscreenOrientationPreset.AUTO ->
+                configuration.orientation == android.content.res.Configuration.ORIENTATION_PORTRAIT
+        }
+
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -353,61 +384,196 @@ fun RemoteScreen(
                 },
             contentAlignment = Alignment.Center
         ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
-                modifier = Modifier.padding(24.dp)
-            ) {
-                Text(
-                    text = smoothRemoteTime,
-                    style = MaterialTheme.typography.displayLarge.copy(fontSize = 110.sp),
-                    fontWeight = FontWeight.Black,
-                    color = when (remotePhase) {
-                        "Running" -> colors.timerText
-                        "Paused" -> colors.warning
-                        "Ended" -> colors.success
-                        else -> colors.textTertiary
-                    },
-                    textAlign = TextAlign.Center
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Surface(
-                    shape = MaterialTheme.shapes.small,
-                    color = when (remotePhase) {
-                        "Running" -> colors.success.copy(alpha = 0.2f)
-                        "Paused" -> colors.warning.copy(alpha = 0.2f)
-                        "Ended" -> colors.info.copy(alpha = 0.2f)
-                        else -> colors.textDisabled.copy(alpha = 0.2f)
+            if (isPortrait) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(top = 64.dp, bottom = 48.dp, start = 16.dp, end = 16.dp)
+                ) {
+                    if (remoteGameName.isNotBlank() || remoteCategoryName.isNotBlank()) {
+                        Text(
+                            text = if (remoteGameName.isNotBlank() && remoteCategoryName.isNotBlank()) {
+                                "$remoteGameName — $remoteCategoryName"
+                            } else {
+                                remoteGameName.ifBlank { remoteCategoryName }
+                            },
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            color = colors.textSecondary,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(horizontal = 24.dp)
+                        )
+                    } else {
+                        Spacer(modifier = Modifier.height(24.dp))
                     }
+
+                    if (showSplitsInFullscreen && remoteSplits.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(16.dp))
+                        SplitList(
+                            run = mockRun,
+                            currentSegmentIndex = remoteSplitIndex,
+                            splitTimes = remoteSplitTimes,
+                            comparisonName = "Personal Best",
+                            timingMethod = TimingMethod.REAL_TIME,
+                            timeFormat = layoutPrefs.timeFormat,
+                            layoutPreferences = layoutPrefs,
+                            modifier = Modifier.weight(1f)
+                        )
+                    } else {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center,
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            if (!remoteSplitName.isNullOrBlank() || remoteSplitIndex >= 0) {
+                                Text(
+                                    text = "${remoteSplitIndex + 1}. ${remoteSplitName ?: ""}",
+                                    style = MaterialTheme.typography.headlineMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = colors.textPrimary,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.padding(horizontal = 16.dp)
+                                )
+                                
+                                val deltaStr = remoteDelta ?: ""
+                                if (deltaStr.isNotBlank()) {
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    val isAhead = deltaStr.startsWith("-")
+                                    val deltaColor = if (isAhead) colors.aheadGaining else colors.behindLosing
+                                    Text(
+                                        text = deltaStr,
+                                        style = MaterialTheme.typography.headlineLarge,
+                                        fontWeight = FontWeight.Black,
+                                        color = deltaColor,
+                                        textAlign = TextAlign.Center
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = smoothRemoteTime,
+                            style = MaterialTheme.typography.displayLarge.copy(
+                                fontSize = if (showSplitsInFullscreen && remoteSplits.isNotEmpty()) 56.sp else 80.sp
+                            ),
+                            fontWeight = FontWeight.Black,
+                            color = when (remotePhase) {
+                                "Running" -> colors.timerText
+                                "Paused" -> colors.warning
+                                "Ended" -> colors.success
+                                else -> colors.textTertiary
+                            },
+                            textAlign = TextAlign.Center,
+                            maxLines = 1,
+                            softWrap = false
+                        )
+                        
+                        Surface(
+                            shape = MaterialTheme.shapes.small,
+                            color = when (remotePhase) {
+                                "Running" -> colors.success.copy(alpha = 0.2f)
+                                "Paused" -> colors.warning.copy(alpha = 0.2f)
+                                "Ended" -> colors.info.copy(alpha = 0.2f)
+                                else -> colors.textDisabled.copy(alpha = 0.2f)
+                            }
+                        ) {
+                            Text(
+                                text = getTranslatedPhase(remotePhase).uppercase(),
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = when (remotePhase) {
+                                    "Running" -> colors.success
+                                    "Paused" -> colors.warning
+                                    "Ended" -> colors.info
+                                    else -> colors.textSecondary
+                                },
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                            )
+                        }
+                    }
+                }
+            } else {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                    modifier = Modifier.padding(24.dp)
                 ) {
                     Text(
-                        text = getTranslatedPhase(remotePhase).uppercase(),
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.Bold,
+                        text = smoothRemoteTime,
+                        style = MaterialTheme.typography.displayLarge.copy(fontSize = 110.sp),
+                        fontWeight = FontWeight.Black,
                         color = when (remotePhase) {
-                            "Running" -> colors.success
+                            "Running" -> colors.timerText
                             "Paused" -> colors.warning
-                            "Ended" -> colors.info
-                            else -> colors.textSecondary
+                            "Ended" -> colors.success
+                            else -> colors.textTertiary
                         },
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                        textAlign = TextAlign.Center
                     )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Surface(
+                        shape = MaterialTheme.shapes.small,
+                        color = when (remotePhase) {
+                            "Running" -> colors.success.copy(alpha = 0.2f)
+                            "Paused" -> colors.warning.copy(alpha = 0.2f)
+                            "Ended" -> colors.info.copy(alpha = 0.2f)
+                            else -> colors.textDisabled.copy(alpha = 0.2f)
+                        }
+                    ) {
+                        Text(
+                            text = getTranslatedPhase(remotePhase).uppercase(),
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = when (remotePhase) {
+                                "Running" -> colors.success
+                                "Paused" -> colors.warning
+                                "Ended" -> colors.info
+                                else -> colors.textSecondary
+                            },
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                        )
+                    }
                 }
             }
 
-            
-            IconButton(
-                onClick = { isFullscreen = false },
+            Row(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
-                    .padding(16.dp)
-                    .background(Color.White.copy(alpha = 0.1f), shape = MaterialTheme.shapes.small)
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    imageVector = Icons.Default.Close,
-                    contentDescription = "Exit Fullscreen",
-                    tint = Color.White
-                )
+                IconButton(
+                    onClick = { showSplitsInFullscreen = !showSplitsInFullscreen },
+                    modifier = Modifier.background(
+                        if (showSplitsInFullscreen) colors.success.copy(alpha = 0.2f)
+                        else Color.White.copy(alpha = 0.1f),
+                        shape = MaterialTheme.shapes.small
+                    )
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.List,
+                        contentDescription = "Toggle Splits",
+                        tint = Color.White
+                    )
+                }
+                IconButton(
+                    onClick = { isFullscreen = false },
+                    modifier = Modifier.background(Color.White.copy(alpha = 0.1f), shape = MaterialTheme.shapes.small)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "Exit Fullscreen",
+                        tint = Color.White
+                    )
+                }
             }
         }
     } else {

@@ -7,6 +7,7 @@ import com.elg.swiftsplit.application.port.output.ConnectionState
 import com.elg.swiftsplit.application.port.output.SettingsPort
 import com.elg.swiftsplit.domain.model.NetworkPreferences
 import com.elg.swiftsplit.domain.model.TimerLayoutPreferences
+import com.elg.swiftsplit.domain.model.TimeSpan
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -55,6 +56,18 @@ class RemoteViewModel @Inject constructor(
 
     private val _remoteDelta = MutableStateFlow<String?>(null)
     val remoteDelta = _remoteDelta.asStateFlow()
+
+    private val _remoteGameName = MutableStateFlow("")
+    val remoteGameName = _remoteGameName.asStateFlow()
+
+    private val _remoteCategoryName = MutableStateFlow("")
+    val remoteCategoryName = _remoteCategoryName.asStateFlow()
+
+    private val _remoteSplits = MutableStateFlow<List<String>>(emptyList())
+    val remoteSplits = _remoteSplits.asStateFlow()
+
+    private val _remoteSplitTimes = MutableStateFlow<List<TimeSpan?>>(emptyList())
+    val remoteSplitTimes = _remoteSplitTimes.asStateFlow()
 
     private var pollingJob: Job? = null
 
@@ -168,6 +181,10 @@ class RemoteViewModel @Inject constructor(
                         _remoteSplitIndex.value = -1
                         _remoteSplitName.value = null
                         _remoteDelta.value = null
+                        _remoteGameName.value = ""
+                        _remoteCategoryName.value = ""
+                        _remoteSplits.value = emptyList()
+                        _remoteSplitTimes.value = emptyList()
                     }
                 }
             }
@@ -179,6 +196,27 @@ class RemoteViewModel @Inject constructor(
         pollingJob = viewModelScope.launch {
             var lastIdx = -2
             while (isActive) {
+                if (_remoteGameName.value.isEmpty() || _remoteCategoryName.value.isEmpty()) {
+                    val gameResult = sendLiveSplitCommandUseCase("getgamename")
+                    _remoteGameName.value = gameResult.getOrNull()?.trim() ?: ""
+                    val categoryResult = sendLiveSplitCommandUseCase("getcategoryname")
+                    _remoteCategoryName.value = categoryResult.getOrNull()?.trim() ?: ""
+                }
+
+                if (_remoteSplits.value.isEmpty()) {
+                    val countResult = sendLiveSplitCommandUseCase("getsplitcount")
+                    val count = countResult.getOrNull()?.trim()?.toIntOrNull() ?: 0
+                    if (count > 0) {
+                        val names = mutableListOf<String>()
+                        for (i in 0 until count) {
+                            val nameResult = sendLiveSplitCommandUseCase("getsplitname $i")
+                            names.add(nameResult.getOrNull()?.trim() ?: "Split $i")
+                        }
+                        _remoteSplits.value = names
+                        _remoteSplitTimes.value = List(count) { null }
+                    }
+                }
+
                 val phaseResult = sendLiveSplitCommandUseCase("getcurrenttimerphase")
                 val phase = phaseResult.getOrNull()?.trim() ?: "NotRunning"
                 _remotePhase.value = phase
@@ -195,6 +233,24 @@ class RemoteViewModel @Inject constructor(
                     if (currentIdx != lastIdx) {
                         val nameResult = sendLiveSplitCommandUseCase("getcurrentsplitname")
                         _remoteSplitName.value = nameResult.getOrNull()?.trim()
+
+                        val currentList = _remoteSplitTimes.value.toMutableList()
+                        if (currentList.isNotEmpty()) {
+                            if (currentIdx > lastIdx && lastIdx >= 0) {
+                                val parsedTime = TimeSpan.fromTimeString(_remoteTime.value)
+                                for (idx in lastIdx until currentIdx) {
+                                    if (idx < currentList.size) {
+                                        currentList[idx] = parsedTime
+                                    }
+                                }
+                            } else if (currentIdx < lastIdx && currentIdx >= 0) {
+                                for (idx in currentIdx until currentList.size) {
+                                    currentList[idx] = null
+                                }
+                            }
+                            _remoteSplitTimes.value = currentList
+                        }
+
                         lastIdx = currentIdx
                     }
 
@@ -205,6 +261,14 @@ class RemoteViewModel @Inject constructor(
                     _remoteSplitName.value = null
                     _remoteDelta.value = null
                     lastIdx = -2
+                    if (phase == "Ended") {
+                        val currentList = _remoteSplitTimes.value.toMutableList()
+                        if (currentList.isNotEmpty() && currentList.last() == null) {
+                            val parsedTime = TimeSpan.fromTimeString(_remoteTime.value)
+                            currentList[currentList.lastIndex] = parsedTime
+                            _remoteSplitTimes.value = currentList
+                        }
+                    }
                 }
 
                 val actualDelay = if (phase == "Running") pollingDelayMs else maxOf(pollingDelayMs, 1000L)
@@ -233,6 +297,10 @@ class RemoteViewModel @Inject constructor(
         _remoteSplitIndex.value = -1
         _remoteSplitName.value = null
         _remoteDelta.value = null
+        _remoteGameName.value = ""
+        _remoteCategoryName.value = ""
+        _remoteSplits.value = emptyList()
+        _remoteSplitTimes.value = emptyList()
     }
 
     override fun onCleared() {

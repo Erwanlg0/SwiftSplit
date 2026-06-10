@@ -91,7 +91,14 @@ class TimerViewModel @Inject constructor(
 
     private fun loadRun() {
         viewModelScope.launch {
-            _run.value = getRunByIdUseCase(RunId(runId))
+            val loaded = getRunByIdUseCase(RunId(runId))
+            _run.value = loaded?.let {
+                if (it.segments.isEmpty()) {
+                    it.copy(segments = listOf(Segment(name = "Finish")))
+                } else {
+                    it
+                }
+            }
         }
     }
 

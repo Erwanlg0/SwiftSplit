@@ -79,8 +79,33 @@ class SplitEditorViewModel @Inject constructor(
     fun save(onSuccess: () -> Unit) {
         viewModelScope.launch {
             val current = _run.value ?: return@launch
-            val updated = current.copy(segments = _segments.value)
+            val updatedSegments = _segments.value.ifEmpty {
+                listOf(Segment(name = "Finish"))
+            }
+            val updated = current.copy(segments = updatedSegments)
             updateRunUseCase(updated)
+            onSuccess()
+        }
+    }
+    fun resetStats(onSuccess: () -> Unit) {
+        val current = _run.value ?: return
+        val updatedRun = current.copy(
+            attemptCount = 0,
+            attemptHistory = emptyList()
+        )
+        val updatedSegments = _segments.value.map { segment ->
+            segment.copy(
+                bestSegmentTime = null,
+                splitTimes = emptyMap(),
+                segmentHistory = emptyList()
+            )
+        }
+        _run.value = updatedRun
+        _segments.value = updatedSegments
+
+        viewModelScope.launch {
+            val finalUpdated = updatedRun.copy(segments = updatedSegments)
+            updateRunUseCase(finalUpdated)
             onSuccess()
         }
     }

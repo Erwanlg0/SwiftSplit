@@ -28,7 +28,12 @@ class TimerManager @Inject constructor(
 
     suspend fun start(runId: RunId, comparison: ComparisonName, timingMethod: TimingMethod) {
         val run = runRepository.getById(runId) ?: return
-        val newActiveRun = timerService.start(run, comparison, timingMethod)
+        val correctedRun = if (run.segments.isEmpty()) {
+            run.copy(segments = listOf(Segment(name = "Finish")))
+        } else {
+            run
+        }
+        val newActiveRun = timerService.start(correctedRun, comparison, timingMethod)
         activeRun = newActiveRun
         _timerState.value = TimerState.Running(
             startTime = newActiveRun.startTime,

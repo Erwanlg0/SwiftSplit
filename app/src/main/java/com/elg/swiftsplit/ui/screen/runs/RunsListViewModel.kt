@@ -53,13 +53,14 @@ class RunsListViewModel @Inject constructor(
 
     fun searchSpeedrunGames(query: String) {
         if (query.isBlank()) return
-        viewModelScope.launch {
+        viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
             _isSpeedrunLoading.value = true
             try {
                 _speedrunGames.value = speedrunClient.searchGames(query)
                 _speedrunCategories.value = emptyList()
                 _speedrunRuns.value = emptyList()
             } catch (e: Exception) {
+                android.util.Log.e("RunsListViewModel", "Error searching games", e)
                 _speedrunGames.value = emptyList()
             } finally {
                 _isSpeedrunLoading.value = false
@@ -68,12 +69,13 @@ class RunsListViewModel @Inject constructor(
     }
 
     fun selectSpeedrunGame(gameId: String) {
-        viewModelScope.launch {
+        viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
             _isSpeedrunLoading.value = true
             try {
                 _speedrunCategories.value = speedrunClient.getCategories(gameId)
                 _speedrunRuns.value = emptyList()
             } catch (e: Exception) {
+                android.util.Log.e("RunsListViewModel", "Error selecting game", e)
                 _speedrunCategories.value = emptyList()
             } finally {
                 _isSpeedrunLoading.value = false
@@ -82,12 +84,13 @@ class RunsListViewModel @Inject constructor(
     }
 
     fun selectSpeedrunCategory(gameId: String, categoryId: String) {
-        viewModelScope.launch {
+        viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
             _isSpeedrunLoading.value = true
             try {
                 val placements = speedrunClient.getLeaderboard(gameId, categoryId)
                 _speedrunRuns.value = placements.take(15)
             } catch (e: Exception) {
+                android.util.Log.e("RunsListViewModel", "Error selecting category", e)
                 _speedrunRuns.value = emptyList()
             } finally {
                 _isSpeedrunLoading.value = false
@@ -146,7 +149,7 @@ class RunsListViewModel @Inject constructor(
     fun importRunFromUrl(url: String, onSuccess: () -> Unit, onFailure: (Throwable) -> Unit) {
         viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
             try {
-                var currentUrl = cleanUrlForDownload(url)
+                var currentUrl = speedrunClient.resolveUrl(cleanUrlForDownload(url))
 
                 var connection: java.net.HttpURLConnection? = null
                 var status = -1
@@ -200,6 +203,7 @@ class RunsListViewModel @Inject constructor(
                     launch(kotlinx.coroutines.Dispatchers.Main) { onFailure(error) }
                 }
             } catch (e: Exception) {
+                android.util.Log.e("RunsListViewModel", "Error importing run from URL: $url", e)
                 launch(kotlinx.coroutines.Dispatchers.Main) { onFailure(e) }
             }
         }
@@ -214,7 +218,7 @@ class RunsListViewModel @Inject constructor(
                 if (splitsUri.isNullOrEmpty()) {
                     throw Exception("Ce run n'a pas de splits associés sur splits.io")
                 }
-                var currentUrl = cleanUrlForDownload(splitsUri)
+                var currentUrl = speedrunClient.resolveUrl(cleanUrlForDownload(splitsUri))
                 var connection: java.net.HttpURLConnection? = null
                 var status = -1
                 var redirects = 0
@@ -267,6 +271,7 @@ class RunsListViewModel @Inject constructor(
                     launch(kotlinx.coroutines.Dispatchers.Main) { onFailure(error) }
                 }
             } catch (e: Exception) {
+                android.util.Log.e("RunsListViewModel", "Error importing speedrun run: $runId", e)
                 launch(kotlinx.coroutines.Dispatchers.Main) { onFailure(e) }
             } finally {
                 _isSpeedrunLoading.value = false

@@ -46,6 +46,9 @@ data class SpeedrunSplits(val uri: String)
 @Serializable
 data class SpeedrunSingleRunResponse(val data: SpeedrunRun)
 
+@Serializable
+data class SplitsIoMetadata(val s3_filename: String? = null)
+
 @Singleton
 class SpeedrunClient @Inject constructor() {
 
@@ -54,7 +57,7 @@ class SpeedrunClient @Inject constructor() {
         coerceInputValues = true
     }
 
-    private fun getRequest(urlString: String): String {
+    fun getRequest(urlString: String): String {
         val url = URL(urlString)
         val conn = url.openConnection() as HttpURLConnection
         conn.requestMethod = "GET"
@@ -97,7 +100,7 @@ class SpeedrunClient @Inject constructor() {
     }
 
     suspend fun getLeaderboard(gameId: String, categoryId: String): List<SpeedrunRunPlacement> {
-        val url = "https://www.speedrun.com/api/v1/leaderboards/$gameId/category/$categoryId?embed=runs"
+        val url = "https://www.speedrun.com/api/v1/leaderboards/$gameId/category/$categoryId"
         val responseStr = getRequest(url)
         val parsed = json.decodeFromString<SpeedrunLeaderboardResponse>(responseStr)
         return parsed.data.runs
@@ -108,5 +111,32 @@ class SpeedrunClient @Inject constructor() {
         val responseStr = getRequest(url)
         val parsed = json.decodeFromString<SpeedrunSingleRunResponse>(responseStr)
         return parsed.data
+    }
+
+    fun resolveUrl(url: String): String {
+        if (url.contains("splits.io/")) {
+            return resolveSplitsIoUrl(url)
+        }
+        return url
+    }
+
+    private fun resolveSplitsIoUrl(splitsIoUrl: String): String {
+        var clean = splitsIoUrl.split("?")[0].trimEnd('/')
+        if (clean.endsWith("/download/livesplit")) {
+            clean = clean.removeSuffix("/download/livesplit")
+        } else if (clean.endsWith("/export/livesplit")) {
+            clean = clean.removeSuffix("/export/livesplit")
+        }
+        val runId = clean.substring(clean.lastIndexOf('/') + 1)
+        val id10 = try {
+            runId.toLong(36)
+        } catch (e: Exception) {
+            return splitsIoUrl
+        }
+        val metadataUrl = "https://s3.amazonaws.com/splits.io-runid-to-s3filename/by_id10/$id10.json"
+        val responseStr = getRequest(metadataUrl)
+        val metadata = json.decodeFromString<SplitsIoMetadata>(responseStr)
+        val s3Filename = metadata.s3_filename ?: throw Exception("Fichier de splits non trouvé sur l'archive de splits.io")
+        return "https://s3.amazonaws.com/splits.io/splits/$s3Filename"
     }
 }
