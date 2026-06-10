@@ -24,6 +24,9 @@ import com.elg.swiftsplit.application.port.output.SettingsPort
 import com.elg.swiftsplit.navigation.AppNavigation
 import com.elg.swiftsplit.ui.theme.SwiftSplitTheme
 import android.view.KeyEvent
+import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.platform.LocalView
+import androidx.core.view.WindowCompat
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -55,6 +58,18 @@ class MainActivity : AppCompatActivity() {
                 "dark" -> true
                 "light" -> false
                 else -> isSystemInDarkTheme()
+            }
+
+            val view = LocalView.current
+            if (!view.isInEditMode) {
+                SideEffect {
+                    val window = (view.context as android.app.Activity).window
+                    window.statusBarColor = android.graphics.Color.TRANSPARENT
+                    window.navigationBarColor = android.graphics.Color.TRANSPARENT
+                    val insetsController = WindowCompat.getInsetsController(window, view)
+                    insetsController.isAppearanceLightStatusBars = !darkTheme
+                    insetsController.isAppearanceLightNavigationBars = !darkTheme
+                }
             }
 
             LaunchedEffect(language) {

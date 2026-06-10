@@ -39,7 +39,15 @@ fun TimerDisplay(
         MaterialTheme.typography.displayLarge.copy(fontSize = fontSize)
     } else {
         MaterialTheme.typography.displayLarge
-    }
+    }.copy(
+        shadow = if (layoutPreferences.timerTextShadow) {
+            androidx.compose.ui.graphics.Shadow(
+                color = androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.5f),
+                offset = androidx.compose.ui.geometry.Offset(2f, 2f),
+                blurRadius = 4f
+            )
+        } else null
+    )
 
     Text(
         text = elapsedTime.formatted(timeFormat),

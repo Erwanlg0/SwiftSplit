@@ -168,7 +168,15 @@
     <string name="layout_editor_bg_end">Couleur de fin (HEX)</string>
     <string name="layout_editor_lock">Verrouiller le chrono</string>
     <string name="layout_editor_lock_desc">Empêche l\'ouverture accidentelle des menus</string>
+    <string name="layout_editor_confirm_reset">Confirmer le reset</string>
+    <string name="layout_editor_split_debounce">Délai anti-double split (ms)</string>
+    <string name="layout_editor_timer_shadow">Ombre du chrono</string>
+    <string name="layout_editor_segment_opacity">Opacité des segments</string>
+    <string name="layout_editor_auto_lock_fullscreen">Auto-verrouillage plein écran</string>
     <string name="layout_editor_possible_time_save">Gain de temps potentiel</string>
+
+    <string name="timer_reset_confirm_title">Réinitialiser ?</string>
+    <string name="timer_reset_confirm_message">Voulez-vous vraiment réinitialiser cette tentative ?</string>
 
     <!-- Timer Control Labels -->
     <string name="timer_control_start">Démarrer</string>

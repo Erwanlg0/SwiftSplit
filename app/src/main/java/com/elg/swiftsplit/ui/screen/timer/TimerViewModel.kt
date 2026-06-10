@@ -29,6 +29,7 @@ class TimerViewModel @Inject constructor(
     private val exportRunUseCase: ExportRunUseCase,
     private val settingsPort: SettingsPort,
     private val clock: com.elg.swiftsplit.domain.service.Clock,
+    private val updateTimerLayoutPreferencesUseCase: UpdateTimerLayoutPreferencesUseCase,
     observeTimerLayoutPreferencesUseCase: ObserveTimerLayoutPreferencesUseCase
 ) : ViewModel() {
 
@@ -142,12 +143,19 @@ class TimerViewModel @Inject constructor(
             val comparisons = listOf(
                 ComparisonName.PERSONAL_BEST,
                 ComparisonName.BEST_SEGMENTS,
-                ComparisonName.AVERAGE_SEGMENTS
+                ComparisonName.AVERAGE_SEGMENTS,
+                ComparisonName.LATEST_RUN
             )
             
             val nextComp = comparisons[(comparisons.indexOf(currentComp) + 1) % comparisons.size]
             settingsPort.setComparison(nextComp)
-            // The timer state will update automatically if ObserveTimerUseCase reacts to settings
+        }
+    }
+
+    fun setTimerLocked(locked: Boolean) {
+        viewModelScope.launch {
+            val current = layoutPreferences.value
+            updateTimerLayoutPreferencesUseCase(current.copy(timerLocked = locked))
         }
     }
 }

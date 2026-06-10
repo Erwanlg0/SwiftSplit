@@ -24,7 +24,13 @@ data class TimerLayoutPreferences(
     val backgroundGradientEnabled: Boolean = false,
     val backgroundGradientStart: String = "#000000",
     val backgroundGradientEnd: String = "#0D1117",
-    val timerLocked: Boolean = false
+    val timerLocked: Boolean = false,
+    val confirmReset: Boolean = true,
+    /** Minimum time between splits in milliseconds. */
+    val splitDebounceMs: Long = 500L,
+    val timerTextShadow: Boolean = true,
+    val segmentOpacity: Float = 1.0f,
+    val autoLockInFullscreen: Boolean = false
 ) {
     companion object {
         val DEFAULT = TimerLayoutPreferences()

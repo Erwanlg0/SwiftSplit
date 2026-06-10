@@ -168,7 +168,15 @@
     <string name="layout_editor_bg_end">End Color (HEX)</string>
     <string name="layout_editor_lock">Lock Timer</string>
     <string name="layout_editor_lock_desc">Prevent accidental menu opening</string>
+    <string name="layout_editor_confirm_reset">Confirm Reset</string>
+    <string name="layout_editor_split_debounce">Split Debounce (ms)</string>
+    <string name="layout_editor_timer_shadow">Timer Shadow</string>
+    <string name="layout_editor_segment_opacity">Segments Opacity</string>
+    <string name="layout_editor_auto_lock_fullscreen">Auto-lock in Fullscreen</string>
     <string name="layout_editor_possible_time_save">Possible Time Save</string>
+
+    <string name="timer_reset_confirm_title">Reset Run?</string>
+    <string name="timer_reset_confirm_message">Are you sure you want to reset this attempt?</string>
 
     <!-- Timer Control Labels -->
     <string name="timer_control_start">Start</string>

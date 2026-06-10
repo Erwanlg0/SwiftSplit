@@ -128,6 +128,26 @@ class LayoutEditorViewModel @Inject constructor(
         update { it.copy(timerLocked = enabled) }
     }
 
+    fun setConfirmReset(enabled: Boolean) {
+        update { it.copy(confirmReset = enabled) }
+    }
+
+    fun setSplitDebounceMs(ms: Long) {
+        update { it.copy(splitDebounceMs = ms) }
+    }
+
+    fun setTimerTextShadow(enabled: Boolean) {
+        update { it.copy(timerTextShadow = enabled) }
+    }
+
+    fun setSegmentOpacity(opacity: Float) {
+        update { it.copy(segmentOpacity = opacity.coerceIn(0f, 1f)) }
+    }
+
+    fun setAutoLockInFullscreen(enabled: Boolean) {
+        update { it.copy(autoLockInFullscreen = enabled) }
+    }
+
     private fun update(transform: (TimerLayoutPreferences) -> TimerLayoutPreferences) {
         viewModelScope.launch {
             val current = layoutPreferences.value

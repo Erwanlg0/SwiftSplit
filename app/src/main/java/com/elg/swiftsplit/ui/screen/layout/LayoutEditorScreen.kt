@@ -695,8 +695,90 @@ fun LayoutEditorScreen(
                         },
                         colors = ListItemDefaults.colors(containerColor = Color.Transparent)
                     )
+
+                    HorizontalDivider(color = colors.deepBackground.copy(alpha = 0.5f), thickness = 0.5.dp)
+
+                    ListItem(
+                        headlineContent = { Text(stringResource(R.string.layout_editor_auto_lock_fullscreen), color = colors.textPrimary) },
+                        trailingContent = {
+                            Switch(
+                                checked = preferences.autoLockInFullscreen,
+                                onCheckedChange = { viewModel.setAutoLockInFullscreen(it) }
+                            )
+                        },
+                        colors = ListItemDefaults.colors(containerColor = Color.Transparent)
+                    )
+
+                    HorizontalDivider(color = colors.deepBackground.copy(alpha = 0.5f), thickness = 0.5.dp)
+
+                    ListItem(
+                        headlineContent = { Text(stringResource(R.string.layout_editor_confirm_reset), color = colors.textPrimary) },
+                        trailingContent = {
+                            Switch(
+                                checked = preferences.confirmReset,
+                                onCheckedChange = { viewModel.setConfirmReset(it) }
+                            )
+                        },
+                        colors = ListItemDefaults.colors(containerColor = Color.Transparent)
+                    )
+
+                    HorizontalDivider(color = colors.deepBackground.copy(alpha = 0.5f), thickness = 0.5.dp)
+
+                    Box(modifier = Modifier.fillMaxWidth()) {
+                        var showDebounceMenu by remember { mutableStateOf(false) }
+                        ListItem(
+                            headlineContent = { Text(stringResource(R.string.layout_editor_split_debounce), color = colors.textPrimary) },
+                            supportingContent = { Text("${preferences.splitDebounceMs} ms", color = colors.textSecondary) },
+                            modifier = Modifier.clickable { showDebounceMenu = true },
+                            colors = ListItemDefaults.colors(containerColor = Color.Transparent)
+                        )
+                        DropdownMenu(
+                            expanded = showDebounceMenu,
+                            onDismissRequest = { showDebounceMenu = false },
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            listOf(0L, 100L, 250L, 500L, 750L, 1000L).forEach { ms ->
+                                DropdownMenuItem(
+                                    text = { Text("$ms ms") },
+                                    onClick = {
+                                        viewModel.setSplitDebounceMs(ms)
+                                        showDebounceMenu = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+
+                    HorizontalDivider(color = colors.deepBackground.copy(alpha = 0.5f), thickness = 0.5.dp)
+
+                    ListItem(
+                        headlineContent = { Text(stringResource(R.string.layout_editor_timer_shadow), color = colors.textPrimary) },
+                        trailingContent = {
+                            Switch(
+                                checked = preferences.timerTextShadow,
+                                onCheckedChange = { viewModel.setTimerTextShadow(it) }
+                            )
+                        },
+                        colors = ListItemDefaults.colors(containerColor = Color.Transparent)
+                    )
+
+                    HorizontalDivider(color = colors.deepBackground.copy(alpha = 0.5f), thickness = 0.5.dp)
+
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(stringResource(R.string.layout_editor_segment_opacity), color = colors.textPrimary, style = MaterialTheme.typography.bodyLarge)
+                        Slider(
+                            value = preferences.segmentOpacity,
+                            onValueChange = { viewModel.setSegmentOpacity(it) },
+                            valueRange = 0f..1f,
+                            colors = SliderDefaults.colors(
+                                thumbColor = colors.success,
+                                activeTrackColor = colors.success.copy(alpha = 0.5f)
+                            )
+                        )
+                    }
                 }
             }
+
 
             Text(
                 stringResource(R.string.layout_editor_bg_gradient),

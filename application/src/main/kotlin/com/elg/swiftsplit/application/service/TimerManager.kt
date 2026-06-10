@@ -28,6 +28,7 @@ class TimerManager @Inject constructor(
     val timerState: Flow<TimerState> = _timerState.asStateFlow()
 
     private var activeRun: ActiveRun? = null
+    private var lastSplitTime = 0L
 
     suspend fun start(runId: RunId, comparison: ComparisonName, timingMethod: TimingMethod) {
         val run = runRepository.getById(runId) ?: return
@@ -49,10 +50,15 @@ class TimerManager @Inject constructor(
 
     suspend fun split() {
         val current = activeRun ?: return
+        val now = clock.currentTimeMillis()
+        
+        val layoutPrefs = settingsPort.observeTimerLayoutPreferences().first()
+        if (now - lastSplitTime < layoutPrefs.splitDebounceMs) return
+        lastSplitTime = now
+
         val (updated, event) = timerService.split(current)
         activeRun = updated
 
-        val layoutPrefs = settingsPort.observeTimerLayoutPreferences().first()
         if (layoutPrefs.enableVibration) {
             val isGold = event is TimerEvent.Split && current.run.segments[event.segmentIndex].bestSegmentTime?.getTime(current.timingMethod)?.let {
                 event.splitTime <= it

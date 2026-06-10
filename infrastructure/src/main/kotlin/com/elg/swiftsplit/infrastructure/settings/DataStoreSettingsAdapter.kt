@@ -56,6 +56,11 @@ class DataStoreSettingsAdapter @Inject constructor(
         val TIMER_BG_GRADIENT_START = stringPreferencesKey("timer_bg_gradient_start")
         val TIMER_BG_GRADIENT_END = stringPreferencesKey("timer_bg_gradient_end")
         val TIMER_LOCKED = booleanPreferencesKey("timer_locked")
+        val TIMER_CONFIRM_RESET = booleanPreferencesKey("timer_confirm_reset")
+        val TIMER_SPLIT_DEBOUNCE_MS = longPreferencesKey("timer_split_debounce_ms")
+        val TIMER_TEXT_SHADOW = booleanPreferencesKey("timer_text_shadow")
+        val TIMER_SEGMENT_OPACITY = floatPreferencesKey("timer_segment_opacity")
+        val TIMER_AUTO_LOCK_FULLSCREEN = booleanPreferencesKey("timer_auto_lock_fullscreen")
         val POLLING_DELAY_MS = longPreferencesKey("polling_delay_ms")
         val NETWORK_TIMEOUT_MS = longPreferencesKey("network_timeout_ms")
         val REMOTE_HOST = stringPreferencesKey("remote_host")
@@ -197,7 +202,12 @@ class DataStoreSettingsAdapter @Inject constructor(
                 backgroundGradientEnabled = preferences[PreferencesKeys.TIMER_BG_GRADIENT_ENABLED] ?: false,
                 backgroundGradientStart = preferences[PreferencesKeys.TIMER_BG_GRADIENT_START] ?: "#000000",
                 backgroundGradientEnd = preferences[PreferencesKeys.TIMER_BG_GRADIENT_END] ?: "#0D1117",
-                timerLocked = preferences[PreferencesKeys.TIMER_LOCKED] ?: false
+                timerLocked = preferences[PreferencesKeys.TIMER_LOCKED] ?: false,
+                confirmReset = preferences[PreferencesKeys.TIMER_CONFIRM_RESET] ?: true,
+                splitDebounceMs = preferences[PreferencesKeys.TIMER_SPLIT_DEBOUNCE_MS] ?: 500L,
+                timerTextShadow = preferences[PreferencesKeys.TIMER_TEXT_SHADOW] ?: true,
+                segmentOpacity = preferences[PreferencesKeys.TIMER_SEGMENT_OPACITY] ?: 1.0f,
+                autoLockInFullscreen = preferences[PreferencesKeys.TIMER_AUTO_LOCK_FULLSCREEN] ?: false
             )
         }
     }
@@ -230,6 +240,11 @@ class DataStoreSettingsAdapter @Inject constructor(
             prefs[PreferencesKeys.TIMER_BG_GRADIENT_START] = preferences.backgroundGradientStart
             prefs[PreferencesKeys.TIMER_BG_GRADIENT_END] = preferences.backgroundGradientEnd
             prefs[PreferencesKeys.TIMER_LOCKED] = preferences.timerLocked
+            prefs[PreferencesKeys.TIMER_CONFIRM_RESET] = preferences.confirmReset
+            prefs[PreferencesKeys.TIMER_SPLIT_DEBOUNCE_MS] = preferences.splitDebounceMs
+            prefs[PreferencesKeys.TIMER_TEXT_SHADOW] = preferences.timerTextShadow
+            prefs[PreferencesKeys.TIMER_SEGMENT_OPACITY] = preferences.segmentOpacity
+            prefs[PreferencesKeys.TIMER_AUTO_LOCK_FULLSCREEN] = preferences.autoLockInFullscreen
         }
     }
 

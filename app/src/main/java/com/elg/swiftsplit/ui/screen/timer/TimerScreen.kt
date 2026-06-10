@@ -106,6 +106,14 @@ fun TimerScreen(
     var showSplitsInFullscreen by rememberSaveable(layoutPreferences.showSplits) {
         mutableStateOf(layoutPreferences.showSplits)
     }
+    
+    var showResetDialog by remember { mutableStateOf(false) }
+
+    LaunchedEffect(isFullscreen) {
+        if (isFullscreen && layoutPreferences.autoLockInFullscreen && !layoutPreferences.timerLocked) {
+            viewModel.setTimerLocked(true)
+        }
+    }
 
     val backgroundModifier = if (layoutPreferences.backgroundGradientEnabled) {
         Modifier.background(
@@ -179,7 +187,10 @@ fun TimerScreen(
                 .background(androidx.compose.ui.graphics.Color.Black)
                 .pointerInput(timerState, layoutPreferences.isMinimalistMode) {
                     detectTapGestures(
-                        onTap = {
+                        onTap = { offset ->
+                            // Dead zone at the top (50dp) to avoid conflict with system status bar swipe
+                            if (offset.y < 50 * density) return@detectTapGestures
+                            
                             when (timerState) {
                                 is TimerState.Idle -> viewModel.startTimer()
                                 is TimerState.Running -> {
@@ -193,7 +204,9 @@ fun TimerScreen(
                                 else -> {}
                             }
                         },
-                        onLongPress = {
+                        onLongPress = { offset ->
+                            if (offset.y < 50 * density) return@detectTapGestures
+
                             if (layoutPreferences.isMinimalistMode && timerState is TimerState.Running) {
                                 viewModel.pauseResume()
                             }
@@ -743,7 +756,13 @@ fun TimerScreen(
                         onPauseResume = { viewModel.pauseResume() },
                         onUndo = { viewModel.undoSplit() },
                         onSkip = { viewModel.skipSplit() },
-                        onReset = { viewModel.reset(saveAttempt = true) },
+                        onReset = { 
+                            if (layoutPreferences.confirmReset) {
+                                showResetDialog = true
+                            } else {
+                                viewModel.reset(saveAttempt = true)
+                            }
+                        },
                         showUndo = layoutPreferences.showUndoButton,
                         showSkip = layoutPreferences.showSkipButton,
                         showPause = layoutPreferences.showPauseButton
@@ -751,5 +770,29 @@ fun TimerScreen(
                 }
             }
         }
+    }
+
+    if (showResetDialog) {
+        AlertDialog(
+            onDismissRequest = { showResetDialog = false },
+            title = { Text(stringResource(R.string.timer_reset_confirm_title)) },
+            text = { Text(stringResource(R.string.timer_reset_confirm_message)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.reset(saveAttempt = true)
+                        showResetDialog = false
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = colors.error)
+                ) {
+                    Text(stringResource(R.string.confirm))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showResetDialog = false }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        )
     }
 }
