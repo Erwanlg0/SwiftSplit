@@ -18,6 +18,7 @@ import com.elg.swiftsplit.ui.screen.runs.RunsListScreen
 import com.elg.swiftsplit.ui.screen.settings.AboutScreen
 import com.elg.swiftsplit.ui.screen.settings.SettingsScreen
 import com.elg.swiftsplit.ui.screen.timer.TimerScreen
+import com.elg.swiftsplit.ui.screen.stats.RunStatsScreen
 
 private const val TRANSITION_DURATION = 300
 
@@ -85,6 +86,9 @@ fun AppNavigation(
                 },
                 onEditLayout = {
                     navController.navigate(Screen.LayoutEditor.route)
+                },
+                onNavigateToStats = { id ->
+                    navController.navigate(Screen.RunStats.createRoute(id))
                 }
             )
         }
@@ -123,6 +127,17 @@ fun AppNavigation(
 
         composable(Screen.About.route) {
             AboutScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(
+            route = Screen.RunStats.route,
+            arguments = listOf(navArgument("runId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val runId = backStackEntry.arguments?.getString("runId") ?: return@composable
+            RunStatsScreen(
+                runId = runId,
                 onNavigateBack = { navController.popBackStack() }
             )
         }

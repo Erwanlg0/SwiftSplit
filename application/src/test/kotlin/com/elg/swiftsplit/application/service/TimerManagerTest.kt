@@ -1,11 +1,13 @@
 package com.elg.swiftsplit.application.service
 
 import com.elg.swiftsplit.application.port.output.RunRepository
+import com.elg.swiftsplit.application.port.output.SettingsPort
 import com.elg.swiftsplit.domain.model.*
 import com.elg.swiftsplit.domain.service.TimerService
 import io.mockk.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -16,7 +18,10 @@ class TimerManagerTest {
 
     private val runRepository: RunRepository = mockk(relaxed = true)
     private val timerService = TimerService()
-    private val timerManager = TimerManager(runRepository, timerService)
+    private val settingsPort: SettingsPort = mockk {
+        every { observeSaveQuickRuns() } returns flowOf(false)
+    }
+    private val timerManager = TimerManager(runRepository, timerService, settingsPort)
 
     @Test
     fun testResetIncrementsAttemptCountEvenIfNoSegmentsCompleted() = runTest {

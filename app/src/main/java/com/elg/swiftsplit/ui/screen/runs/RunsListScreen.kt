@@ -10,8 +10,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CastConnected
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -35,7 +37,7 @@ fun RunsListScreen(
     modifier: Modifier = Modifier,
     viewModel: RunsListViewModel = hiltViewModel()
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val swiftSplitColors = SwiftSplitThemeColors.colors
 
@@ -44,6 +46,18 @@ fun RunsListScreen(
     var customGameName by remember { mutableStateOf("") }
     var customCategory by remember { mutableStateOf("") }
     var customPlatform by remember { mutableStateOf("") }
+
+    var showSpeedrunDialog by remember { mutableStateOf(false) }
+    var speedrunQuery by remember { mutableStateOf("") }
+    val speedrunGames by viewModel.speedrunGames.collectAsStateWithLifecycle()
+    val speedrunCategories by viewModel.speedrunCategories.collectAsStateWithLifecycle()
+    val speedrunRuns by viewModel.speedrunRuns.collectAsStateWithLifecycle()
+    val isSpeedrunLoading by viewModel.isSpeedrunLoading.collectAsStateWithLifecycle()
+
+    var selectedGameId by remember { mutableStateOf<String?>(null) }
+    var selectedGameName by remember { mutableStateOf<String?>(null) }
+    var selectedCategoryId by remember { mutableStateOf<String?>(null) }
+    var selectedCategoryName by remember { mutableStateOf<String?>(null) }
 
     
     val fileLauncher = rememberLauncherForActivityResult(
@@ -232,6 +246,30 @@ fun RunsListScreen(
                             )
                         }
                     }
+
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                showNewRunDialog = false
+                                showSpeedrunDialog = true
+                            },
+                        colors = CardDefaults.cardColors(containerColor = swiftSplitColors.elevatedSurface)
+                    ) {
+                        Column(modifier = Modifier.padding(12.dp)) {
+                            Text(
+                                text = "Rechercher sur Speedrun.com",
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.secondary
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = "Rechercher un jeu et télécharger les splits de référence",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = swiftSplitColors.textSecondary
+                            )
+                        }
+                    }
                 }
             },
             confirmButton = {},
@@ -241,6 +279,182 @@ fun RunsListScreen(
                         text = stringResource(R.string.cancel),
                         color = swiftSplitColors.textSecondary
                     )
+                }
+            },
+            containerColor = swiftSplitColors.cardBackground
+        )
+    }
+
+
+
+    if (showSpeedrunDialog) {
+        AlertDialog(
+            onDismissRequest = { 
+                showSpeedrunDialog = false
+                speedrunQuery = ""
+                selectedGameId = null
+                selectedCategoryId = null
+                viewModel.clearSpeedrunSearch()
+            },
+            title = {
+                Text(
+                    text = "Import Speedrun.com",
+                    color = swiftSplitColors.textPrimary,
+                    fontWeight = FontWeight.Bold
+                )
+            },
+            text = {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.fillMaxWidth().heightIn(max = 400.dp)
+                ) {
+                    if (selectedGameId == null) {
+                        OutlinedTextField(
+                            value = speedrunQuery,
+                            onValueChange = { speedrunQuery = it },
+                            placeholder = { Text("Ex: Celeste, Portal...") },
+                            label = { Text("Rechercher un jeu") },
+                            singleLine = true,
+                            modifier = Modifier.fillMaxWidth(),
+                            trailingIcon = {
+                                IconButton(onClick = { viewModel.searchSpeedrunGames(speedrunQuery) }) {
+                                    Icon(Icons.Default.Search, contentDescription = "Search")
+                                }
+                            }
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        if (isSpeedrunLoading) {
+                            CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+                        } else {
+                            LazyColumn(
+                                modifier = Modifier.weight(1f),
+                                verticalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                items(speedrunGames, key = { it.id }) { game ->
+                                    Card(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clickable {
+                                                selectedGameId = game.id
+                                                selectedGameName = game.names.international
+                                                viewModel.selectSpeedrunGame(game.id)
+                                            },
+                                        colors = CardDefaults.cardColors(containerColor = swiftSplitColors.elevatedSurface)
+                                    ) {
+                                        Text(
+                                            text = game.names.international,
+                                            modifier = Modifier.padding(12.dp),
+                                            color = swiftSplitColors.textPrimary
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    } else if (selectedCategoryId == null) {
+                        Text("Jeu : $selectedGameName", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold, color = swiftSplitColors.textPrimary)
+                        Spacer(modifier = Modifier.height(4.dp))
+                        if (isSpeedrunLoading) {
+                            CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+                        } else {
+                            LazyColumn(
+                                modifier = Modifier.weight(1f),
+                                verticalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                items(speedrunCategories, key = { it.id }) { cat ->
+                                    Card(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clickable {
+                                                selectedCategoryId = cat.id
+                                                selectedCategoryName = cat.name
+                                                viewModel.selectSpeedrunCategory(selectedGameId!!, cat.id)
+                                            },
+                                        colors = CardDefaults.cardColors(containerColor = swiftSplitColors.elevatedSurface)
+                                    ) {
+                                        Text(
+                                            text = cat.name,
+                                            modifier = Modifier.padding(12.dp),
+                                            color = swiftSplitColors.textPrimary
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        Text("Jeu : $selectedGameName", style = MaterialTheme.typography.bodySmall, color = swiftSplitColors.textSecondary)
+                        Text("Catégorie : $selectedCategoryName", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold, color = swiftSplitColors.textPrimary)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        if (isSpeedrunLoading) {
+                            CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+                        } else if (speedrunRuns.isEmpty()) {
+                            Text("Aucun run trouvé pour cette catégorie.", style = MaterialTheme.typography.bodyMedium, color = swiftSplitColors.textSecondary)
+                        } else {
+                            LazyColumn(
+                                modifier = Modifier.weight(1f),
+                                verticalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                items(speedrunRuns, key = { it.run.id }) { placement ->
+                                    Card(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clickable {
+                                                showSpeedrunDialog = false
+                                                viewModel.importSpeedrunRun(
+                                                    runId = placement.run.id,
+                                                    onSuccess = {
+                                                        Toast.makeText(context, "Splits Speedrun.com importés !", Toast.LENGTH_SHORT).show()
+                                                        viewModel.clearSpeedrunSearch()
+                                                    },
+                                                    onFailure = { err ->
+                                                        Toast.makeText(context, "Erreur : ${err.localizedMessage}", Toast.LENGTH_LONG).show()
+                                                        viewModel.clearSpeedrunSearch()
+                                                    }
+                                                )
+                                            },
+                                        colors = CardDefaults.cardColors(containerColor = swiftSplitColors.elevatedSurface)
+                                    ) {
+                                        Column(modifier = Modifier.padding(12.dp)) {
+                                            val timeSec = placement.run.times.primary_t
+                                            val formattedTime = if (timeSec >= 3600) {
+                                                String.format("%d:%02d:%02d", (timeSec / 3600).toInt(), ((timeSec % 3600) / 60).toInt(), (timeSec % 60).toInt())
+                                            } else {
+                                                String.format("%02d:%02d", (timeSec / 60).toInt(), (timeSec % 60).toInt())
+                                            }
+                                            Text(
+                                                text = "${placement.place}e place — $formattedTime",
+                                                fontWeight = FontWeight.Bold,
+                                                color = swiftSplitColors.textPrimary
+                                            )
+                                            Text(
+                                                text = "Run ID : " + placement.run.id,
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = swiftSplitColors.textSecondary
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = {},
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        if (selectedCategoryId != null) {
+                            selectedCategoryId = null
+                            viewModel.selectSpeedrunGame(selectedGameId!!)
+                        } else if (selectedGameId != null) {
+                            selectedGameId = null
+                            viewModel.clearSpeedrunSearch()
+                        } else {
+                            showSpeedrunDialog = false
+                            viewModel.clearSpeedrunSearch()
+                        }
+                    }
+                ) {
+                    Text(if (selectedGameId != null) "Retour" else "Fermer")
                 }
             },
             containerColor = swiftSplitColors.cardBackground

@@ -16,6 +16,10 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 import com.elg.swiftsplit.application.port.output.SettingsPort
+import com.elg.swiftsplit.infrastructure.remote.SpeedrunClient
+import com.elg.swiftsplit.infrastructure.remote.SpeedrunGame
+import com.elg.swiftsplit.infrastructure.remote.SpeedrunCategory
+import com.elg.swiftsplit.infrastructure.remote.SpeedrunRunPlacement
 
 sealed interface RunsListUiState {
     data object Loading : RunsListUiState
@@ -30,8 +34,72 @@ class RunsListViewModel @Inject constructor(
     private val importRunUseCase: ImportRunUseCase,
     private val deleteRunUseCase: DeleteRunUseCase,
     private val saveRunUseCase: SaveRunUseCase,
-    private val settingsPort: SettingsPort
+    private val settingsPort: SettingsPort,
+    private val speedrunClient: SpeedrunClient
 ) : ViewModel() {
+
+    // Speedrun.com Integration States
+    private val _speedrunGames = MutableStateFlow<List<SpeedrunGame>>(emptyList())
+    val speedrunGames = _speedrunGames.asStateFlow()
+
+    private val _speedrunCategories = MutableStateFlow<List<SpeedrunCategory>>(emptyList())
+    val speedrunCategories = _speedrunCategories.asStateFlow()
+
+    private val _speedrunRuns = MutableStateFlow<List<SpeedrunRunPlacement>>(emptyList())
+    val speedrunRuns = _speedrunRuns.asStateFlow()
+
+    private val _isSpeedrunLoading = MutableStateFlow(false)
+    val isSpeedrunLoading = _isSpeedrunLoading.asStateFlow()
+
+    fun searchSpeedrunGames(query: String) {
+        if (query.isBlank()) return
+        viewModelScope.launch {
+            _isSpeedrunLoading.value = true
+            try {
+                _speedrunGames.value = speedrunClient.searchGames(query)
+                _speedrunCategories.value = emptyList()
+                _speedrunRuns.value = emptyList()
+            } catch (e: Exception) {
+                _speedrunGames.value = emptyList()
+            } finally {
+                _isSpeedrunLoading.value = false
+            }
+        }
+    }
+
+    fun selectSpeedrunGame(gameId: String) {
+        viewModelScope.launch {
+            _isSpeedrunLoading.value = true
+            try {
+                _speedrunCategories.value = speedrunClient.getCategories(gameId)
+                _speedrunRuns.value = emptyList()
+            } catch (e: Exception) {
+                _speedrunCategories.value = emptyList()
+            } finally {
+                _isSpeedrunLoading.value = false
+            }
+        }
+    }
+
+    fun selectSpeedrunCategory(gameId: String, categoryId: String) {
+        viewModelScope.launch {
+            _isSpeedrunLoading.value = true
+            try {
+                val placements = speedrunClient.getLeaderboard(gameId, categoryId)
+                _speedrunRuns.value = placements.take(15)
+            } catch (e: Exception) {
+                _speedrunRuns.value = emptyList()
+            } finally {
+                _isSpeedrunLoading.value = false
+            }
+        }
+    }
+
+    fun clearSpeedrunSearch() {
+        _speedrunGames.value = emptyList()
+        _speedrunCategories.value = emptyList()
+        _speedrunRuns.value = emptyList()
+    }
 
     val uiState: StateFlow<RunsListUiState> = getRunsUseCase()
         .combine(settingsPort.observeSaveQuickRuns()) { runs, saveQuickRuns ->
@@ -57,28 +125,151 @@ class RunsListViewModel @Inject constructor(
         }
     }
 
+    fun cleanUrlForDownload(url: String): String {
+        var clean = url.trim()
+        if (!clean.startsWith("http://") && !clean.startsWith("https://")) {
+            clean = "https://$clean"
+        }
+        if (clean.contains("splits.io/")) {
+            val uriWithoutQuery = clean.split("?")[0]
+            if (!uriWithoutQuery.endsWith("/download/livesplit") && !uriWithoutQuery.endsWith("/export/livesplit")) {
+                clean = if (uriWithoutQuery.endsWith("/")) {
+                    "${uriWithoutQuery}download/livesplit"
+                } else {
+                    "${uriWithoutQuery}/download/livesplit"
+                }
+            }
+        }
+        return clean
+    }
+
     fun importRunFromUrl(url: String, onSuccess: () -> Unit, onFailure: (Throwable) -> Unit) {
         viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
             try {
-                val connection = java.net.URL(url).openConnection() as java.net.HttpURLConnection
-                connection.connectTimeout = 8000
-                connection.readTimeout = 8000
-                connection.requestMethod = "GET"
-                if (connection.responseCode == 200) {
-                    val bytes = connection.inputStream.use { it.readBytes() }
+                var currentUrl = cleanUrlForDownload(url)
+
+                var connection: java.net.HttpURLConnection? = null
+                var status = -1
+                var redirects = 0
+                val maxRedirects = 5
+
+                while (redirects < maxRedirects) {
+                    val conn = java.net.URL(currentUrl).openConnection() as java.net.HttpURLConnection
+                    conn.connectTimeout = 8000
+                    conn.readTimeout = 8000
+                    conn.requestMethod = "GET"
+                    conn.instanceFollowRedirects = false // Manually follow to allow cross-protocol redirect
+
+                    status = conn.responseCode
+                    if (status == java.net.HttpURLConnection.HTTP_MOVED_TEMP ||
+                        status == java.net.HttpURLConnection.HTTP_MOVED_PERM ||
+                        status == 307 || status == 308
+                    ) {
+                        val newUrl = conn.getHeaderField("Location")
+                        conn.disconnect()
+                        if (newUrl == null) {
+                            throw Exception("Redirection sans header Location")
+                        }
+                        currentUrl = if (!newUrl.startsWith("http://") && !newUrl.startsWith("https://")) {
+                            val base = java.net.URL(currentUrl)
+                            java.net.URL(base, newUrl).toString()
+                        } else {
+                            newUrl
+                        }
+                        redirects++
+                    } else {
+                        connection = conn
+                        break
+                    }
+                }
+
+                val finalConnection = connection ?: throw Exception("Trop de redirections")
+                if (status == 200) {
+                    val bytes = finalConnection.inputStream.use { it.readBytes() }
+                    finalConnection.disconnect()
                     val result = importRunUseCase(bytes)
                     if (result.isSuccess) {
                         launch(kotlinx.coroutines.Dispatchers.Main) { onSuccess() }
                     } else {
-                        val exception = result.exceptionOrNull() ?: Exception("Failed to parse splits")
+                        val exception = result.exceptionOrNull() ?: Exception("Impossible de lire le fichier .lss")
                         launch(kotlinx.coroutines.Dispatchers.Main) { onFailure(exception) }
                     }
                 } else {
-                    val error = Exception("HTTP error: ${connection.responseCode}")
+                    finalConnection.disconnect()
+                    val error = Exception("Code HTTP d'erreur : $status")
                     launch(kotlinx.coroutines.Dispatchers.Main) { onFailure(error) }
                 }
             } catch (e: Exception) {
                 launch(kotlinx.coroutines.Dispatchers.Main) { onFailure(e) }
+            }
+        }
+    }
+
+    fun importSpeedrunRun(runId: String, onSuccess: () -> Unit, onFailure: (Throwable) -> Unit) {
+        viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+            try {
+                _isSpeedrunLoading.value = true
+                val runDetails = speedrunClient.getRun(runId)
+                val splitsUri = runDetails.splits?.uri
+                if (splitsUri.isNullOrEmpty()) {
+                    throw Exception("Ce run n'a pas de splits associés sur splits.io")
+                }
+                var currentUrl = cleanUrlForDownload(splitsUri)
+                var connection: java.net.HttpURLConnection? = null
+                var status = -1
+                var redirects = 0
+                val maxRedirects = 5
+
+                while (redirects < maxRedirects) {
+                    val conn = java.net.URL(currentUrl).openConnection() as java.net.HttpURLConnection
+                    conn.connectTimeout = 8000
+                    conn.readTimeout = 8000
+                    conn.requestMethod = "GET"
+                    conn.instanceFollowRedirects = false
+
+                    status = conn.responseCode
+                    if (status == java.net.HttpURLConnection.HTTP_MOVED_TEMP ||
+                        status == java.net.HttpURLConnection.HTTP_MOVED_PERM ||
+                        status == 307 || status == 308
+                    ) {
+                        val newUrl = conn.getHeaderField("Location")
+                        conn.disconnect()
+                        if (newUrl == null) {
+                            throw Exception("Redirection sans header Location")
+                        }
+                        currentUrl = if (!newUrl.startsWith("http://") && !newUrl.startsWith("https://")) {
+                            val base = java.net.URL(currentUrl)
+                            java.net.URL(base, newUrl).toString()
+                        } else {
+                            newUrl
+                        }
+                        redirects++
+                    } else {
+                        connection = conn
+                        break
+                    }
+                }
+
+                val finalConnection = connection ?: throw Exception("Trop de redirections")
+                if (status == 200) {
+                    val bytes = finalConnection.inputStream.use { it.readBytes() }
+                    finalConnection.disconnect()
+                    val result = importRunUseCase(bytes)
+                    if (result.isSuccess) {
+                        launch(kotlinx.coroutines.Dispatchers.Main) { onSuccess() }
+                    } else {
+                        val exception = result.exceptionOrNull() ?: Exception("Impossible de lire le fichier .lss")
+                        launch(kotlinx.coroutines.Dispatchers.Main) { onFailure(exception) }
+                    }
+                } else {
+                    finalConnection.disconnect()
+                    val error = Exception("Code HTTP d'erreur : $status")
+                    launch(kotlinx.coroutines.Dispatchers.Main) { onFailure(error) }
+                }
+            } catch (e: Exception) {
+                launch(kotlinx.coroutines.Dispatchers.Main) { onFailure(e) }
+            } finally {
+                _isSpeedrunLoading.value = false
             }
         }
     }

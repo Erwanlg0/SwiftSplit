@@ -6,12 +6,20 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.CompareArrows
+import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Keyboard
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.Sync
+import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -32,13 +40,13 @@ fun SettingsScreen(
     modifier: Modifier = Modifier,
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
-    val timingMethod by viewModel.timingMethod.collectAsState()
-    val comparison by viewModel.comparison.collectAsState()
-    val saveQuickRuns by viewModel.saveQuickRuns.collectAsState()
-    val language by viewModel.language.collectAsState()
-    val themeMode by viewModel.themeMode.collectAsState()
-    val globalHotkeysEnabled by viewModel.globalHotkeysEnabled.collectAsState()
-    val networkPreferences by viewModel.networkPreferences.collectAsState()
+    val timingMethod by viewModel.timingMethod.collectAsStateWithLifecycle()
+    val comparison by viewModel.comparison.collectAsStateWithLifecycle()
+    val saveQuickRuns by viewModel.saveQuickRuns.collectAsStateWithLifecycle()
+    val language by viewModel.language.collectAsStateWithLifecycle()
+    val themeMode by viewModel.themeMode.collectAsStateWithLifecycle()
+    val globalHotkeysEnabled by viewModel.globalHotkeysEnabled.collectAsStateWithLifecycle()
+    val networkPreferences by viewModel.networkPreferences.collectAsStateWithLifecycle()
     val colors = SwiftSplitThemeColors.colors
     val context = LocalContext.current
 
@@ -85,6 +93,13 @@ fun SettingsScreen(
                 ListItem(
                     headlineContent = { Text(stringResource(R.string.settings_timing_method)) },
                     supportingContent = { Text(timingMethod.name) },
+                    leadingContent = {
+                        Icon(
+                            Icons.Default.Timer,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    },
                     modifier = Modifier.clickable { showTimingMenu = true },
                     colors = ListItemDefaults.colors(containerColor = colors.elevatedSurface)
                 )
@@ -108,6 +123,13 @@ fun SettingsScreen(
                 ListItem(
                     headlineContent = { Text(stringResource(R.string.settings_active_comparison)) },
                     supportingContent = { Text(comparison.name) },
+                    leadingContent = {
+                        Icon(
+                            Icons.AutoMirrored.Filled.CompareArrows,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    },
                     modifier = Modifier.clickable { showComparisonMenu = true },
                     colors = ListItemDefaults.colors(containerColor = colors.elevatedSurface)
                 )
@@ -135,6 +157,13 @@ fun SettingsScreen(
             ListItem(
                 headlineContent = { Text(stringResource(R.string.settings_save_quick_runs)) },
                 supportingContent = { Text(stringResource(R.string.settings_save_quick_runs_desc)) },
+                leadingContent = {
+                    Icon(
+                        Icons.Default.Save,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                },
                 trailingContent = {
                     Switch(
                         checked = saveQuickRuns,
@@ -147,6 +176,13 @@ fun SettingsScreen(
             ListItem(
                 headlineContent = { Text(stringResource(R.string.settings_global_hotkeys)) },
                 supportingContent = { Text(stringResource(R.string.settings_global_hotkeys_desc)) },
+                leadingContent = {
+                    Icon(
+                        Icons.Default.Keyboard,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                },
                 trailingContent = {
                     Switch(
                         checked = globalHotkeysEnabled,
@@ -168,6 +204,13 @@ fun SettingsScreen(
                 ListItem(
                     headlineContent = { Text(stringResource(R.string.settings_polling_delay)) },
                     supportingContent = { Text(stringResource(R.string.settings_polling_delay_desc)) },
+                    leadingContent = {
+                        Icon(
+                            Icons.Default.Sync,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    },
                     trailingContent = {
                         Text(
                             text = stringResource(R.string.settings_network_ms_value, networkPreferences.pollingDelayMs),
@@ -197,6 +240,13 @@ fun SettingsScreen(
                 ListItem(
                     headlineContent = { Text(stringResource(R.string.settings_network_timeout)) },
                     supportingContent = { Text(stringResource(R.string.settings_network_timeout_desc)) },
+                    leadingContent = {
+                        Icon(
+                            Icons.Default.AccessTime,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    },
                     trailingContent = {
                         Text(
                             text = stringResource(R.string.settings_network_ms_value, networkPreferences.networkTimeoutMs),
@@ -358,6 +408,13 @@ fun SettingsScreen(
             ListItem(
                 headlineContent = { Text(stringResource(R.string.settings_about_title)) },
                 supportingContent = { Text(stringResource(R.string.settings_about_desc)) },
+                leadingContent = {
+                    Icon(
+                        Icons.Default.Info,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                },
                 modifier = Modifier.clickable { onNavigateToAbout() },
                 colors = ListItemDefaults.colors(containerColor = colors.elevatedSurface)
             )

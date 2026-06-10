@@ -61,51 +61,64 @@ fun SplitRow(
         else -> colors.textSecondary
     }
 
-    val rowBackground = if (isActive) colors.elevatedSurface else Color.Transparent
-    val rowBorder = if (isActive) Modifier.border(1.dp, MaterialTheme.colorScheme.primary) else Modifier
-
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween,
-        modifier = modifier
-            .fillMaxWidth()
-            .background(rowBackground)
-            .then(rowBorder)
-            .padding(horizontal = 16.dp, vertical = 12.dp)
-    ) {
-        Text(
-            text = segment.name,
-            style = MaterialTheme.typography.bodyLarge,
-            fontWeight = if (isActive) FontWeight.Bold else FontWeight.Normal,
-            color = if (isActive) colors.textPrimary else colors.textSecondary,
-            modifier = Modifier.weight(1f)
+    val activeBrush = androidx.compose.ui.graphics.Brush.horizontalGradient(
+        colors = listOf(
+            Color(0xFF1D51A7),
+            Color(0xFF1D51A7).copy(alpha = 0.2f)
         )
+    )
 
-        Text(
-            text = delta?.time?.formattedWithSign(
-                showMilliseconds = layoutPreferences.showSplitsFraction,
-                decimalPlaces = layoutPreferences.splitsDecimalPlaces
-            ) ?: "",
-            style = MaterialTheme.typography.bodyLarge,
-            fontWeight = FontWeight.Bold,
-            color = deltaColor,
-            modifier = Modifier.width(80.dp),
-            textAlign = androidx.compose.ui.text.style.TextAlign.Center
-        )
+    Column(modifier = modifier.fillMaxWidth()) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(if (isActive) activeBrush else androidx.compose.ui.graphics.Brush.horizontalGradient(listOf(Color.Transparent, Color.Transparent)))
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+        ) {
+            Text(
+                text = segment.name,
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = if (isActive) FontWeight.Bold else FontWeight.Normal,
+                color = if (isActive) Color.White else colors.textPrimary,
+                modifier = Modifier.weight(1f)
+            )
 
-        val timeToShow = if (isCompleted && elapsedSplit != null) {
-            elapsedSplit.formatted(timeFormat)
-        } else {
-            compSplit?.formatted(timeFormat) ?: "-"
+            Text(
+                text = delta?.time?.formattedWithSign(
+                    showMilliseconds = layoutPreferences.showSplitsFraction,
+                    decimalPlaces = layoutPreferences.splitsDecimalPlaces
+                ) ?: "",
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace
+                ),
+                fontWeight = FontWeight.Bold,
+                color = deltaColor,
+                modifier = Modifier.width(80.dp),
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+            )
+
+            val timeToShow = if (isCompleted && elapsedSplit != null) {
+                elapsedSplit.formatted(timeFormat)
+            } else {
+                compSplit?.formatted(timeFormat) ?: "-"
+            }
+
+            Text(
+                text = timeToShow,
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace
+                ),
+                fontWeight = if (isActive) FontWeight.Bold else FontWeight.Normal,
+                color = if (isActive) Color.White else colors.textSecondary,
+                modifier = Modifier.width(90.dp),
+                textAlign = androidx.compose.ui.text.style.TextAlign.End
+            )
         }
-        
-        Text(
-            text = timeToShow,
-            style = MaterialTheme.typography.bodyLarge,
-            fontWeight = if (isActive) FontWeight.Bold else FontWeight.Normal,
-            color = if (isActive) colors.textPrimary else colors.textSecondary,
-            modifier = Modifier.width(90.dp),
-            textAlign = androidx.compose.ui.text.style.TextAlign.End
+        androidx.compose.material3.HorizontalDivider(
+            color = Color(0x1AFFFFFF),
+            thickness = 0.5.dp
         )
     }
 }

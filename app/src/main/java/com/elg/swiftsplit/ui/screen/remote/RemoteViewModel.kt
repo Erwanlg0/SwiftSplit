@@ -177,6 +177,7 @@ class RemoteViewModel @Inject constructor(
     private fun startPolling(pollingDelayMs: Long) {
         pollingJob?.cancel()
         pollingJob = viewModelScope.launch {
+            var lastIdx = -2
             while (isActive) {
                 val phaseResult = sendLiveSplitCommandUseCase("getcurrenttimerphase")
                 val phase = phaseResult.getOrNull()?.trim() ?: "NotRunning"
@@ -188,10 +189,14 @@ class RemoteViewModel @Inject constructor(
 
                 if (phase == "Running" || phase == "Paused") {
                     val idxResult = sendLiveSplitCommandUseCase("getsplitindex")
-                    _remoteSplitIndex.value = idxResult.getOrNull()?.trim()?.toIntOrNull() ?: -1
+                    val currentIdx = idxResult.getOrNull()?.trim()?.toIntOrNull() ?: -1
+                    _remoteSplitIndex.value = currentIdx
 
-                    val nameResult = sendLiveSplitCommandUseCase("getcurrentsplitname")
-                    _remoteSplitName.value = nameResult.getOrNull()?.trim()
+                    if (currentIdx != lastIdx) {
+                        val nameResult = sendLiveSplitCommandUseCase("getcurrentsplitname")
+                        _remoteSplitName.value = nameResult.getOrNull()?.trim()
+                        lastIdx = currentIdx
+                    }
 
                     val deltaResult = sendLiveSplitCommandUseCase("getdelta")
                     _remoteDelta.value = deltaResult.getOrNull()?.trim()
@@ -199,9 +204,11 @@ class RemoteViewModel @Inject constructor(
                     _remoteSplitIndex.value = -1
                     _remoteSplitName.value = null
                     _remoteDelta.value = null
+                    lastIdx = -2
                 }
 
-                delay(pollingDelayMs)
+                val actualDelay = if (phase == "Running") pollingDelayMs else maxOf(pollingDelayMs, 1000L)
+                delay(actualDelay)
             }
         }
     }

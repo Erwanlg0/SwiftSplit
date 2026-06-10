@@ -13,6 +13,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -21,6 +22,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.elg.swiftsplit.domain.model.TimeFormatOptions
+import com.elg.swiftsplit.ui.screen.timer.components.SplitList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -126,18 +128,18 @@ fun RemoteScreen(
     modifier: Modifier = Modifier,
     viewModel: RemoteViewModel = hiltViewModel()
 ) {
-    val host by viewModel.host.collectAsState()
-    val port by viewModel.port.collectAsState()
-    val connectionState by viewModel.connectionState.collectAsState()
-    val lastResponse by viewModel.lastResponse.collectAsState()
-    val remoteTime by viewModel.remoteTime.collectAsState()
-    val remotePhase by viewModel.remotePhase.collectAsState()
-    val remoteSplitName by viewModel.remoteSplitName.collectAsState()
-    val remoteSplitIndex by viewModel.remoteSplitIndex.collectAsState()
-    val remoteDelta by viewModel.remoteDelta.collectAsState()
-    val layoutPrefs by viewModel.timerLayoutPreferences.collectAsState()
+    val host by viewModel.host.collectAsStateWithLifecycle()
+    val port by viewModel.port.collectAsStateWithLifecycle()
+    val connectionState by viewModel.connectionState.collectAsStateWithLifecycle()
+    val lastResponse by viewModel.lastResponse.collectAsStateWithLifecycle()
+    val remoteTime by viewModel.remoteTime.collectAsStateWithLifecycle()
+    val remotePhase by viewModel.remotePhase.collectAsStateWithLifecycle()
+    val remoteSplitName by viewModel.remoteSplitName.collectAsStateWithLifecycle()
+    val remoteSplitIndex by viewModel.remoteSplitIndex.collectAsStateWithLifecycle()
+    val remoteDelta by viewModel.remoteDelta.collectAsStateWithLifecycle()
+    val layoutPrefs by viewModel.timerLayoutPreferences.collectAsStateWithLifecycle()
     val smoothRemoteTime = rememberAnimatedRemoteTime(remoteTime, remotePhase, layoutPrefs.timeFormat)
-    val errorMessage by viewModel.errorMessage.collectAsState()
+    val errorMessage by viewModel.errorMessage.collectAsStateWithLifecycle()
     val colors = SwiftSplitThemeColors.colors
     val context = LocalContext.current
     var isFullscreen by rememberSaveable { mutableStateOf(false) }
@@ -164,13 +166,18 @@ fun RemoteScreen(
     }
 
     
-    androidx.compose.runtime.DisposableEffect(isFullscreen) {
+    androidx.compose.runtime.DisposableEffect(isFullscreen, layoutPrefs.fullscreenOrientation) {
         val activity = context.findActivity()
         val window = activity?.window
         if (window != null) {
             val insetsController = androidx.core.view.WindowCompat.getInsetsController(window, window.decorView)
             if (isFullscreen) {
-                activity.requestedOrientation = android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+                val req = when (layoutPrefs.fullscreenOrientation) {
+                    com.elg.swiftsplit.domain.model.FullscreenOrientationPreset.PORTRAIT -> android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+                    com.elg.swiftsplit.domain.model.FullscreenOrientationPreset.LANDSCAPE -> android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+                    com.elg.swiftsplit.domain.model.FullscreenOrientationPreset.AUTO -> android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+                }
+                activity.requestedOrientation = req
                 insetsController.hide(androidx.core.view.WindowInsetsCompat.Type.systemBars())
                 insetsController.systemBarsBehavior = androidx.core.view.WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
             } else {
@@ -617,10 +624,12 @@ fun RemoteScreen(
                                     modifier = Modifier.size(20.dp)
                                 )
                             }
-                                   var showPatternMenu by remember { mutableStateOf(false) }
+                        }
+
+                        var showPatternMenu by remember { mutableStateOf(false) }
                         val currentPattern = layoutPrefs.timeFormat.pattern
 
-                        
+                        // Sample times
                         val sampleShort = TimeSpan.fromSeconds(1.23)
                         val sampleLong = TimeSpan.fromHours(1.0) + TimeSpan.fromMinutes(5.0) + TimeSpan.fromSeconds(30.45)
 
@@ -686,7 +695,7 @@ fun RemoteScreen(
                                     }
                                 }
                             }
-                        }                  }
+                        }
                     }
                 }
 

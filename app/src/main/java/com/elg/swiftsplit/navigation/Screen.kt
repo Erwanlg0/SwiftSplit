@@ -13,4 +13,7 @@ sealed class Screen(val route: String) {
     data object Settings : Screen("settings")
     data object LayoutEditor : Screen("layout_editor")
     data object About : Screen("about")
+    data object RunStats : Screen("run_stats/{runId}") {
+        fun createRoute(runId: String): String = "run_stats/$runId"
+    }
 }

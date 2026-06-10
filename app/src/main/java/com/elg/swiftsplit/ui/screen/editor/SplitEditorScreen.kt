@@ -9,6 +9,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -27,8 +28,8 @@ fun SplitEditorScreen(
     modifier: Modifier = Modifier,
     viewModel: SplitEditorViewModel = hiltViewModel()
 ) {
-    val run by viewModel.run.collectAsState()
-    val segments by viewModel.segments.collectAsState()
+    val run by viewModel.run.collectAsStateWithLifecycle()
+    val segments by viewModel.segments.collectAsStateWithLifecycle()
     val colors = SwiftSplitThemeColors.colors
 
     Scaffold(

@@ -13,6 +13,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.ShowChart
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -42,6 +43,7 @@ import com.elg.swiftsplit.ui.theme.SwiftSplitThemeColors
 import com.elg.swiftsplit.R
 
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 private fun android.content.Context.findActivity(): android.app.Activity? {
     var context = this
@@ -88,13 +90,14 @@ fun TimerScreen(
     onNavigateBack: () -> Unit,
     onEditSplits: (String) -> Unit,
     onEditLayout: () -> Unit,
+    onNavigateToStats: (String) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: TimerViewModel = hiltViewModel()
 ) {
-    val run by viewModel.run.collectAsState()
-    val timerState by viewModel.timerState.collectAsState()
-    val currentElapsed by viewModel.currentElapsed.collectAsState()
-    val layoutPreferences by viewModel.layoutPreferences.collectAsState()
+    val run by viewModel.run.collectAsStateWithLifecycle()
+    val timerState by viewModel.timerState.collectAsStateWithLifecycle()
+    val currentElapsed by viewModel.currentElapsed.collectAsStateWithLifecycle()
+    val layoutPreferences by viewModel.layoutPreferences.collectAsStateWithLifecycle()
 
     val colors = SwiftSplitThemeColors.colors
     val context = LocalContext.current
@@ -492,6 +495,13 @@ fun TimerScreen(
                             Icon(
                                 Icons.Default.Edit,
                                 contentDescription = stringResource(R.string.timer_edit_splits),
+                                tint = colors.textPrimary
+                            )
+                        }
+                        IconButton(onClick = { onNavigateToStats(runId) }) {
+                            Icon(
+                                imageVector = Icons.Default.ShowChart,
+                                contentDescription = "Statistiques de course",
                                 tint = colors.textPrimary
                             )
                         }

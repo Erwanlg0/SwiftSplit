@@ -36,8 +36,38 @@ class TimerViewModel @Inject constructor(
     private val _run = MutableStateFlow<Run?>(null)
     val run = _run.asStateFlow()
 
-    private val _currentElapsed = MutableStateFlow(TimeSpan.ZERO)
-    val currentElapsed = _currentElapsed.asStateFlow()
+    val timerState = observeTimerUseCase().stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = TimerState.Idle
+    )
+
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    val currentElapsed: StateFlow<TimeSpan> = timerState.flatMapLatest { state ->
+        when (state) {
+            is TimerState.Running -> flow {
+                while (true) {
+                    val now = System.currentTimeMillis()
+                    val elapsed = now - state.startTime - state.pauseAccumulator
+                    emit(TimeSpan(elapsed))
+                    delay(16)
+                }
+            }
+            is TimerState.Paused -> flowOf(state.elapsedTime)
+            is TimerState.Finished -> flowOf(state.finalTime)
+            is TimerState.Idle -> flowOf(TimeSpan.ZERO)
+        }
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = TimeSpan.ZERO
+    )
+
+    val layoutPreferences = observeTimerLayoutPreferencesUseCase().stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = TimerLayoutPreferences.DEFAULT
+    )
 
     fun exportCurrentRun(onSuccess: (ByteArray) -> Unit, onFailure: (Throwable) -> Unit) {
         viewModelScope.launch {
@@ -47,43 +77,13 @@ class TimerViewModel @Inject constructor(
         }
     }
 
-    val timerState = observeTimerUseCase().stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
-        initialValue = TimerState.Idle
-    )
-
-    val layoutPreferences = observeTimerLayoutPreferencesUseCase().stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
-        initialValue = TimerLayoutPreferences.DEFAULT
-    )
-
-    private var tickJob: Job? = null
-
     init {
         loadRun()
         
         viewModelScope.launch {
             observeTimerUseCase().collect { state ->
-                when (state) {
-                    is TimerState.Idle -> {
-                        stopTicking()
-                        _currentElapsed.value = TimeSpan.ZERO
-                        
-                        loadRun()
-                    }
-                    is TimerState.Running -> {
-                        startTicking(state.startTime, state.pauseAccumulator)
-                    }
-                    is TimerState.Paused -> {
-                        stopTicking()
-                        _currentElapsed.value = state.elapsedTime
-                    }
-                    is TimerState.Finished -> {
-                        stopTicking()
-                        _currentElapsed.value = state.finalTime
-                    }
+                if (state is TimerState.Idle) {
+                    loadRun()
                 }
             }
         }
@@ -131,26 +131,8 @@ class TimerViewModel @Inject constructor(
         }
     }
 
-    private fun startTicking(startTime: Long, pauseAccumulator: Long) {
-        tickJob?.cancel()
-        tickJob = viewModelScope.launch {
-            while (isActive) {
-                val now = System.currentTimeMillis()
-                val elapsed = now - startTime - pauseAccumulator
-                _currentElapsed.value = TimeSpan(elapsed)
-                delay(16) 
-            }
-        }
-    }
-
-    private fun stopTicking() {
-        tickJob?.cancel()
-        tickJob = null
-    }
-
     override fun onCleared() {
         super.onCleared()
-        stopTicking()
         viewModelScope.launch {
             val currentRun = _run.value
             if (currentRun != null &&
