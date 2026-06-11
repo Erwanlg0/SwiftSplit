@@ -14,6 +14,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -39,6 +44,7 @@ import android.view.WindowManager
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.elg.swiftsplit.application.port.output.ConnectionState
 import com.elg.swiftsplit.ui.theme.SwiftSplitThemeColors
+import com.elg.swiftsplit.ui.screen.layout.toComposeColor
 import com.elg.swiftsplit.R
 import com.elg.swiftsplit.domain.model.TimerState
 import com.elg.swiftsplit.domain.model.ComparisonName
@@ -126,6 +132,12 @@ fun RemoteScreen(
     val categoryName by viewModel.categoryName.collectAsStateWithLifecycle()
     val layoutPrefs by viewModel.timerLayoutPreferences.collectAsStateWithLifecycle()
     val errorMessage by viewModel.errorMessage.collectAsStateWithLifecycle()
+    val currentSplitName by viewModel.currentSplitName.collectAsStateWithLifecycle()
+    val currentSplitIndex by viewModel.currentSplitIndex.collectAsStateWithLifecycle()
+    val splitsList by viewModel.splitsList.collectAsStateWithLifecycle()
+    val isSplitsListSupported by viewModel.isSplitsListSupported.collectAsStateWithLifecycle()
+    val isReconnecting by viewModel.isReconnecting.collectAsStateWithLifecycle()
+    val reconnectAttempts by viewModel.reconnectAttempts.collectAsStateWithLifecycle()
     
     val smoothRemoteTime = rememberAnimatedRemoteTime(remoteTime, remotePhase, layoutPrefs.timeFormat)
     val colors = SwiftSplitThemeColors.colors
@@ -135,6 +147,9 @@ fun RemoteScreen(
     var isFullscreen by rememberSaveable { mutableStateOf(false) }
     var isSettingsExpanded by rememberSaveable { mutableStateOf(true) }
     var showTutorial by rememberSaveable { mutableStateOf(false) }
+    var showSplitsInFullscreen by rememberSaveable(layoutPrefs.showSplits) {
+        mutableStateOf(layoutPrefs.showSplits)
+    }
 
     LaunchedEffect(connectionState) {
         if (connectionState == ConnectionState.CONNECTED) {
@@ -380,40 +395,142 @@ fun RemoteScreen(
                         Spacer(modifier = Modifier.height(1.dp))
                     }
 
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center,
-                        modifier = Modifier.weight(1f)
+                    if (showSplitsInFullscreen) {
+                        if (isSplitsListSupported && splitsList.isNotEmpty()) {
+                            val listState = rememberLazyListState()
+                            LaunchedEffect(currentSplitIndex) {
+                                if (currentSplitIndex in splitsList.indices) {
+                                    listState.animateScrollToItem(currentSplitIndex)
+                                }
+                            }
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .weight(1f)
+                                    .padding(vertical = 16.dp),
+                                colors = CardDefaults.cardColors(containerColor = colors.elevatedSurface.copy(alpha = 0.3f)),
+                                border = androidx.compose.foundation.BorderStroke(1.dp, colors.cardBorder)
+                            ) {
+                                LazyColumn(
+                                    state = listState,
+                                    modifier = Modifier.padding(8.dp)
+                                ) {
+                                    itemsIndexed(splitsList) { index, name ->
+                                        val isActive = index == currentSplitIndex
+                                        val isCompleted = index < currentSplitIndex
+                                        Surface(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(vertical = 2.dp),
+                                            color = if (isActive) colors.success.copy(alpha = 0.15f) else Color.Transparent,
+                                            shape = MaterialTheme.shapes.small
+                                        ) {
+                                            Row(
+                                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                                                horizontalArrangement = Arrangement.SpaceBetween,
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Text(
+                                                    text = name,
+                                                    style = MaterialTheme.typography.bodyMedium,
+                                                    fontWeight = if (isActive) FontWeight.Bold else FontWeight.Normal,
+                                                    color = if (isActive) colors.success else if (isCompleted) colors.textSecondary else colors.textPrimary
+                                                )
+                                                if (isActive) {
+                                                    Text(
+                                                        text = "Actuel",
+                                                        style = MaterialTheme.typography.bodySmall,
+                                                        fontWeight = FontWeight.Bold,
+                                                        color = colors.success
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        } else if (!currentSplitName.isNullOrBlank()) {
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 16.dp),
+                                colors = CardDefaults.cardColors(containerColor = colors.elevatedSurface.copy(alpha = 0.3f)),
+                                border = androidx.compose.foundation.BorderStroke(1.dp, colors.cardBorder)
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Column {
+                                        Text(
+                                            text = "Split Actuel",
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = colors.textSecondary,
+                                            fontWeight = FontWeight.SemiBold
+                                        )
+                                        Spacer(modifier = Modifier.height(4.dp))
+                                        Text(
+                                            text = currentSplitName!!,
+                                            style = MaterialTheme.typography.titleMedium,
+                                            fontWeight = FontWeight.Bold,
+                                            color = colors.textPrimary
+                                        )
+                                    }
+                                    if (currentSplitIndex >= 0) {
+                                        Surface(
+                                            shape = CircleShape,
+                                            color = colors.success.copy(alpha = 0.15f)
+                                        ) {
+                                            Text(
+                                                text = "#${currentSplitIndex + 1}",
+                                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                fontWeight = FontWeight.Bold,
+                                                color = colors.success
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        } else {
+                            Spacer(modifier = Modifier.weight(1f))
+                        }
+                    } else {
+                        Spacer(modifier = Modifier.weight(1f))
+                    }
+
+                    Text(
+                        text = smoothRemoteTime,
+                        style = MaterialTheme.typography.displayLarge.copy(
+                            fontSize = if (showSplitsInFullscreen && ((isSplitsListSupported && splitsList.isNotEmpty()) || !currentSplitName.isNullOrBlank())) 70.sp else 90.sp
+                        ),
+                        fontWeight = FontWeight.Black,
+                        color = colors.timerText,
+                        textAlign = TextAlign.Center
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Surface(
+                        shape = MaterialTheme.shapes.small,
+                        color = when(remotePhase) {
+                            "Running" -> colors.success.copy(alpha = 0.2f)
+                            "Paused" -> colors.warning.copy(alpha = 0.2f)
+                            else -> colors.textSecondary.copy(alpha = 0.1f)
+                        }
                     ) {
                         Text(
-                            text = smoothRemoteTime,
-                            style = MaterialTheme.typography.displayLarge.copy(fontSize = 90.sp),
-                            fontWeight = FontWeight.Black,
-                            color = colors.timerText,
-                            textAlign = TextAlign.Center
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Surface(
-                            shape = MaterialTheme.shapes.small,
+                            text = getTranslatedPhase(remotePhase).uppercase(),
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Bold,
                             color = when(remotePhase) {
-                                "Running" -> colors.success.copy(alpha = 0.2f)
-                                "Paused" -> colors.warning.copy(alpha = 0.2f)
-                                else -> colors.textSecondary.copy(alpha = 0.1f)
+                                "Running" -> colors.success
+                                "Paused" -> colors.warning
+                                else -> colors.textSecondary
                             }
-                        ) {
-                            Text(
-                                text = getTranslatedPhase(remotePhase).uppercase(),
-                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                                style = MaterialTheme.typography.headlineMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = when(remotePhase) {
-                                    "Running" -> colors.success
-                                    "Paused" -> colors.warning
-                                    else -> colors.textSecondary
-                                }
-                            )
-                        }
+                        )
                     }
+                    Spacer(modifier = Modifier.height(16.dp))
 
                     Box(
                         modifier = Modifier
@@ -450,9 +567,114 @@ fun RemoteScreen(
                     horizontalArrangement = Arrangement.spacedBy(24.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    if (showSplitsInFullscreen) {
+                        if (isSplitsListSupported && splitsList.isNotEmpty()) {
+                            val listState = rememberLazyListState()
+                            LaunchedEffect(currentSplitIndex) {
+                                if (currentSplitIndex in splitsList.indices) {
+                                    listState.animateScrollToItem(currentSplitIndex)
+                                }
+                            }
+                            Card(
+                                modifier = Modifier
+                                    .weight(1.2f)
+                                    .fillMaxHeight(),
+                                colors = CardDefaults.cardColors(containerColor = colors.elevatedSurface.copy(alpha = 0.3f)),
+                                border = androidx.compose.foundation.BorderStroke(1.dp, colors.cardBorder)
+                            ) {
+                                LazyColumn(
+                                    state = listState,
+                                    modifier = Modifier.padding(8.dp)
+                                ) {
+                                    itemsIndexed(splitsList) { index, name ->
+                                        val isActive = index == currentSplitIndex
+                                        val isCompleted = index < currentSplitIndex
+                                        Surface(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(vertical = 2.dp),
+                                            color = if (isActive) colors.success.copy(alpha = 0.15f) else Color.Transparent,
+                                            shape = MaterialTheme.shapes.small
+                                        ) {
+                                            Row(
+                                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                                                horizontalArrangement = Arrangement.SpaceBetween,
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Text(
+                                                    text = name,
+                                                    style = MaterialTheme.typography.bodyMedium,
+                                                    fontWeight = if (isActive) FontWeight.Bold else FontWeight.Normal,
+                                                    color = if (isActive) colors.success else if (isCompleted) colors.textSecondary else colors.textPrimary
+                                                )
+                                                if (isActive) {
+                                                    Text(
+                                                        text = "Actuel",
+                                                        style = MaterialTheme.typography.bodySmall,
+                                                        fontWeight = FontWeight.Bold,
+                                                        color = colors.success
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        } else if (!currentSplitName.isNullOrBlank()) {
+                            Card(
+                                modifier = Modifier
+                                    .weight(1.2f)
+                                    .fillMaxHeight(),
+                                colors = CardDefaults.cardColors(containerColor = colors.elevatedSurface.copy(alpha = 0.3f)),
+                                border = androidx.compose.foundation.BorderStroke(1.dp, colors.cardBorder)
+                            ) {
+                                Box(
+                                    modifier = Modifier.fillMaxSize().padding(16.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Column {
+                                            Text(
+                                                text = "Split Actuel",
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = colors.textSecondary,
+                                                fontWeight = FontWeight.SemiBold
+                                            )
+                                            Spacer(modifier = Modifier.height(4.dp))
+                                            Text(
+                                                text = currentSplitName!!,
+                                                style = MaterialTheme.typography.titleMedium,
+                                                fontWeight = FontWeight.Bold,
+                                                color = colors.textPrimary
+                                            )
+                                        }
+                                        if (currentSplitIndex >= 0) {
+                                            Surface(
+                                                shape = CircleShape,
+                                                color = colors.success.copy(alpha = 0.15f)
+                                            ) {
+                                                Text(
+                                                    text = "#${currentSplitIndex + 1}",
+                                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                                                    style = MaterialTheme.typography.bodyMedium,
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = colors.success
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
                     Column(
                         modifier = Modifier
-                            .weight(1.2f)
+                            .weight(1f)
                             .fillMaxHeight(),
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
@@ -469,7 +691,9 @@ fun RemoteScreen(
                         }
                         Text(
                             text = smoothRemoteTime,
-                            style = MaterialTheme.typography.displayLarge.copy(fontSize = 80.sp),
+                            style = MaterialTheme.typography.displayLarge.copy(
+                                fontSize = if (showSplitsInFullscreen) 64.sp else 80.sp
+                            ),
                             fontWeight = FontWeight.Black,
                             color = colors.timerText,
                             textAlign = TextAlign.Center
@@ -495,40 +719,61 @@ fun RemoteScreen(
                                 }
                             )
                         }
-                    }
-
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .clickable(
-                                interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
-                                indication = null
-                            ) { }
-                    ) {
-                        TimerControls(
-                            timerState = timerState,
-                            isLastSplit = false,
-                            onStartSplit = { viewModel.sendCommand("startorsplit") },
-                            onPauseResume = { viewModel.sendCommand(if (remotePhase == "Paused") "resume" else "pause") },
-                            onUndo = { viewModel.sendCommand("unsplit") },
-                            onSkip = { viewModel.sendCommand("skipsplit") },
-                            onReset = { viewModel.sendCommand("reset") },
-                            showUndo = layoutPrefs.showUndoButton,
-                            showSkip = layoutPrefs.showSkipButton,
-                            showPause = layoutPrefs.showPauseButton
-                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable(
+                                    interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
+                                    indication = null
+                                ) { }
+                        ) {
+                            TimerControls(
+                                timerState = timerState,
+                                isLastSplit = false,
+                                onStartSplit = { viewModel.sendCommand("startorsplit") },
+                                onPauseResume = { viewModel.sendCommand(if (remotePhase == "Paused") "resume" else "pause") },
+                                onUndo = { viewModel.sendCommand("unsplit") },
+                                onSkip = { viewModel.sendCommand("skipsplit") },
+                                onReset = { viewModel.sendCommand("reset") },
+                                showUndo = layoutPrefs.showUndoButton,
+                                showSkip = layoutPrefs.showSkipButton,
+                                showPause = layoutPrefs.showPauseButton
+                            )
+                        }
                     }
                 }
             }
 
-            IconButton(
-                onClick = { isFullscreen = false },
+            Row(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
-                    .padding(16.dp)
-                    .background(Color.White.copy(alpha = 0.1f), shape = MaterialTheme.shapes.small)
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(Icons.Default.Close, contentDescription = null, tint = Color.White)
+                if ((isSplitsListSupported && splitsList.isNotEmpty()) || !currentSplitName.isNullOrBlank()) {
+                    IconButton(
+                        onClick = { showSplitsInFullscreen = !showSplitsInFullscreen },
+                        modifier = Modifier.background(
+                            if (showSplitsInFullscreen) colors.success.copy(alpha = 0.2f)
+                            else Color.White.copy(alpha = 0.1f),
+                            shape = MaterialTheme.shapes.small
+                        )
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.List,
+                            contentDescription = "Toggle Splits",
+                            tint = Color.White
+                        )
+                    }
+                }
+                IconButton(
+                    onClick = { isFullscreen = false },
+                    modifier = Modifier.background(Color.White.copy(alpha = 0.1f), shape = MaterialTheme.shapes.small)
+                ) {
+                    Icon(Icons.Default.Close, contentDescription = null, tint = Color.White)
+                }
             }
         }
     } else {
@@ -574,6 +819,32 @@ fun RemoteScreen(
                             Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
                                 Text(errorMessage!!, color = colors.error, modifier = Modifier.weight(1f))
                                 IconButton(onClick = { viewModel.clearError() }) { Icon(Icons.Default.Close, null, tint = colors.error) }
+                            }
+                        }
+                    }
+
+                    if (isReconnecting) {
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = CardDefaults.cardColors(containerColor = colors.warning.copy(alpha = 0.15f)),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, colors.warning.copy(alpha = 0.5f))
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(12.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(20.dp),
+                                    strokeWidth = 2.dp,
+                                    color = colors.warning
+                                )
+                                Text(
+                                    text = "Connexion perdue. Tentative de reconnexion ($reconnectAttempts/3)...",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = colors.warning,
+                                    fontWeight = FontWeight.Bold
+                                )
                             }
                         }
                     }
@@ -640,6 +911,104 @@ fun RemoteScreen(
                                         style = MaterialTheme.typography.titleMedium,
                                         color = colors.textSecondary
                                     )
+                                }
+                            }
+                        }
+                    }
+
+                    if (connectionState == ConnectionState.CONNECTED) {
+                        if (isSplitsListSupported && splitsList.isNotEmpty()) {
+                            val listState = rememberLazyListState()
+                            LaunchedEffect(currentSplitIndex) {
+                                if (currentSplitIndex in splitsList.indices) {
+                                    listState.animateScrollToItem(currentSplitIndex)
+                                }
+                            }
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .heightIn(max = 280.dp),
+                                colors = CardDefaults.cardColors(containerColor = colors.elevatedSurface.copy(alpha = 0.7f)),
+                                border = androidx.compose.foundation.BorderStroke(1.dp, colors.cardBorder)
+                            ) {
+                                LazyColumn(
+                                    state = listState,
+                                    modifier = Modifier.padding(8.dp)
+                                ) {
+                                    itemsIndexed(splitsList) { index, name ->
+                                        val isActive = index == currentSplitIndex
+                                        val isCompleted = index < currentSplitIndex
+                                        Surface(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(vertical = 2.dp),
+                                            color = if (isActive) colors.success.copy(alpha = 0.15f) else Color.Transparent,
+                                            shape = MaterialTheme.shapes.small
+                                        ) {
+                                            Row(
+                                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                                                horizontalArrangement = Arrangement.SpaceBetween,
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Text(
+                                                    text = name,
+                                                    style = MaterialTheme.typography.bodyMedium,
+                                                    fontWeight = if (isActive) FontWeight.Bold else FontWeight.Normal,
+                                                    color = if (isActive) colors.success else if (isCompleted) colors.textSecondary else colors.textPrimary
+                                                )
+                                                if (isActive) {
+                                                    Text(
+                                                        text = "Actuel",
+                                                        style = MaterialTheme.typography.bodySmall,
+                                                        fontWeight = FontWeight.Bold,
+                                                        color = colors.success
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        } else if (!currentSplitName.isNullOrBlank()) {
+                            Card(
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = CardDefaults.cardColors(containerColor = colors.elevatedSurface.copy(alpha = 0.7f)),
+                                border = androidx.compose.foundation.BorderStroke(1.dp, colors.cardBorder)
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Column {
+                                        Text(
+                                            text = "Split Actuel",
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = colors.textSecondary,
+                                            fontWeight = FontWeight.SemiBold
+                                        )
+                                        Spacer(modifier = Modifier.height(4.dp))
+                                        Text(
+                                            text = currentSplitName!!,
+                                            style = MaterialTheme.typography.titleMedium,
+                                            fontWeight = FontWeight.Bold,
+                                            color = colors.textPrimary
+                                        )
+                                    }
+                                    if (currentSplitIndex >= 0) {
+                                        Surface(
+                                            shape = CircleShape,
+                                            color = colors.success.copy(alpha = 0.15f)
+                                        ) {
+                                            Text(
+                                                text = "#${currentSplitIndex + 1}",
+                                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                fontWeight = FontWeight.Bold,
+                                                color = colors.success
+                                            )
+                                        }
+                                    }
                                 }
                             }
                         }

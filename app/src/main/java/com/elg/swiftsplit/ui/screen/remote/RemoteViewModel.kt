@@ -43,10 +43,30 @@ class RemoteViewModel @Inject constructor(
     private val _categoryName = MutableStateFlow<String?>(null)
     val categoryName: StateFlow<String?> = _categoryName.asStateFlow()
 
+    private val _currentSplitName = MutableStateFlow<String?>(null)
+    val currentSplitName: StateFlow<String?> = _currentSplitName.asStateFlow()
+
+    private val _currentSplitIndex = MutableStateFlow(-1)
+    val currentSplitIndex: StateFlow<Int> = _currentSplitIndex.asStateFlow()
+
+    private val _splitsList = MutableStateFlow<List<String>>(emptyList())
+    val splitsList: StateFlow<List<String>> = _splitsList.asStateFlow()
+
+    private val _isSplitsListSupported = MutableStateFlow(true)
+    val isSplitsListSupported: StateFlow<Boolean> = _isSplitsListSupported.asStateFlow()
+
+    private val _isReconnecting = MutableStateFlow(false)
+    val isReconnecting: StateFlow<Boolean> = _isReconnecting.asStateFlow()
+
+    private val _reconnectAttempts = MutableStateFlow(0)
+    val reconnectAttempts: StateFlow<Int> = _reconnectAttempts.asStateFlow()
+
     private var pollingJob: Job? = null
     private var pollCounter = 0
     private var isGameInfoSupported = true
-
+    private var isExplicitlyDisconnected = true
+    private var isFetchingSplits = false
+    private var reconnectJob: Job? = null
     val connectionState: StateFlow<ConnectionState> = observeLiveSplitConnectionUseCase().stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
@@ -70,8 +90,20 @@ class RemoteViewModel @Inject constructor(
         viewModelScope.launch { settingsPort.observeRemotePort().collect { _port.value = it } }
         
         viewModelScope.launch {
+            var lastState = ConnectionState.DISCONNECTED
             combine(connectionState, networkPreferences) { state, _ -> state }.collect { state ->
-                if (state == ConnectionState.CONNECTED) startPolling() else stopPolling()
+                if (state == ConnectionState.CONNECTED) {
+                    startPolling()
+                } else {
+                    stopPolling()
+                    if ((state == ConnectionState.DISCONNECTED || state == ConnectionState.ERROR) &&
+                        lastState == ConnectionState.CONNECTED &&
+                        !isExplicitlyDisconnected
+                    ) {
+                        triggerAutoReconnect()
+                    }
+                }
+                lastState = state
             }
         }
     }
@@ -91,6 +123,10 @@ class RemoteViewModel @Inject constructor(
     fun connect() {
         if (connectionState.value == ConnectionState.CONNECTING || connectionState.value == ConnectionState.CONNECTED) return
         viewModelScope.launch {
+            isExplicitlyDisconnected = false
+            reconnectJob?.cancel()
+            _isReconnecting.value = false
+            _reconnectAttempts.value = 0
             _errorMessage.value = null
             val portInt = _port.value.toIntOrNull() ?: 16834
             val result = connectToLiveSplitUseCase(_host.value, portInt)
@@ -100,7 +136,13 @@ class RemoteViewModel @Inject constructor(
         }
     }
 
-    fun disconnect() { viewModelScope.launch { disconnectLiveSplitUseCase() } }
+    fun disconnect() {
+        isExplicitlyDisconnected = true
+        reconnectJob?.cancel()
+        _isReconnecting.value = false
+        _reconnectAttempts.value = 0
+        viewModelScope.launch { disconnectLiveSplitUseCase() }
+    }
 
     fun sendCommand(command: String) {
         viewModelScope.launch {
@@ -126,6 +168,27 @@ class RemoteViewModel @Inject constructor(
         val phase = sendLiveSplitCommandUseCase("getcurrenttimerphase").getOrNull()
         if (phase != null) _remotePhase.value = phase.trim()
 
+        // Poll current split name and index every 5 ticks (500ms)
+        if (pollCounter % 5 == 0) {
+            val splitNameResult = sendLiveSplitCommandUseCase("getcurrentsplitname")
+            if (splitNameResult.isSuccess) {
+                val name = splitNameResult.getOrNull()
+                _currentSplitName.value = if (name == "-" || name.isNullOrBlank()) null else name.trim()
+            }
+            val splitIndexResult = sendLiveSplitCommandUseCase("getsplitindex")
+            if (splitIndexResult.isSuccess) {
+                val indexStr = splitIndexResult.getOrNull()
+                _currentSplitIndex.value = indexStr?.trim()?.toIntOrNull() ?: -1
+            }
+        }
+
+        // Periodically check/fetch full splits list if supported and empty
+        if (_isSplitsListSupported.value && _splitsList.value.isEmpty() && pollCounter % 10 == 0) {
+            viewModelScope.launch(Dispatchers.IO) {
+                fetchSplitsList()
+            }
+        }
+
         if (isGameInfoSupported && pollCounter % 20 == 0) {
             val gameResult = sendLiveSplitCommandUseCase("getgamename")
             if (gameResult.isSuccess) {
@@ -148,6 +211,66 @@ class RemoteViewModel @Inject constructor(
         pollCounter++
     }
 
+    private suspend fun fetchSplitsList() {
+        if (!_isSplitsListSupported.value || isFetchingSplits) return
+        isFetchingSplits = true
+        try {
+            val countResult = sendLiveSplitCommandUseCase("getsplitcount")
+            if (countResult.isFailure) {
+                if (countResult.exceptionOrNull() is java.net.SocketTimeoutException) {
+                    _isSplitsListSupported.value = false
+                }
+                return
+            }
+            
+            val countStr = countResult.getOrNull()?.trim() ?: return
+            val count = countStr.toIntOrNull() ?: return
+            
+            val list = mutableListOf<String>()
+            for (i in 0 until count) {
+                val nameResult = sendLiveSplitCommandUseCase("getsplitname $i")
+                if (nameResult.isSuccess) {
+                    val name = nameResult.getOrNull()?.trim() ?: "Split $i"
+                    list.add(name)
+                } else {
+                    if (nameResult.exceptionOrNull() is java.net.SocketTimeoutException) {
+                        _isSplitsListSupported.value = false
+                        return
+                    }
+                    list.add("Split $i")
+                }
+            }
+            _splitsList.value = list
+        } finally {
+            isFetchingSplits = false
+        }
+    }
+
+    private fun triggerAutoReconnect() {
+        reconnectJob?.cancel()
+        reconnectJob = viewModelScope.launch {
+            _isReconnecting.value = true
+            val hostVal = _host.value
+            val portInt = _port.value.toIntOrNull() ?: 16834
+            
+            for (attempt in 1..3) {
+                _reconnectAttempts.value = attempt
+                delay(2000)
+                if (isExplicitlyDisconnected) break
+                
+                val result = connectToLiveSplitUseCase(hostVal, portInt)
+                if (result.isSuccess) {
+                    _isReconnecting.value = false
+                    _reconnectAttempts.value = 0
+                    return@launch
+                }
+            }
+            _isReconnecting.value = false
+            _reconnectAttempts.value = 0
+            _errorMessage.value = "Connexion perdue. Reconnexion impossible."
+        }
+    }
+
     private fun stopPolling() {
         pollingJob?.cancel()
         pollingJob = null
@@ -155,8 +278,12 @@ class RemoteViewModel @Inject constructor(
         _remotePhase.value = "NotRunning"
         _gameName.value = null
         _categoryName.value = null
+        _currentSplitName.value = null
+        _currentSplitIndex.value = -1
+        _splitsList.value = emptyList()
         pollCounter = 0
         isGameInfoSupported = true
+        _isSplitsListSupported.value = true
     }
 
     override fun onCleared() {
