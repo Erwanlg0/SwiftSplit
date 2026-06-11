@@ -70,6 +70,11 @@
     <string name="remote_btn_resume">Reanudar</string>
     <string name="remote_empty_title">Conectar al servidor LiveSplit en PC</string>
     <string name="remote_empty_desc">Asegúrate de que el servidor TCP de LiveSplit esté iniciado en el puerto 16834</string>
+    <string name="remote_conn_failed">Error de conexión</string>
+    <string name="remote_reconnect_failed">Conexión perdida. Imposible reconectar.</string>
+    <string name="remote_current_split">Split actual</string>
+    <string name="remote_active">Actual</string>
+    <string name="remote_reconnecting">Conexión perdida. Reintentando (%1$d/3)...</string>
 
     <!-- Settings Screen -->
     <string name="settings_title">Ajustes</string>
@@ -87,7 +92,8 @@
     <string name="settings_theme_dark">Oscuro</string>
     <string name="settings_language_auto">Auto</string>
     <string name="settings_language_en">English</string>
-    <string name="settings_language_fr">Français</string>
+    <string name="settings_language_fr">Francés</string>
+    <string name="settings_language_de">Alemán</string>
     <string name="settings_appearance_header">Apariencia</string>
 
     <!-- Network Settings -->
@@ -213,7 +219,7 @@
     <string name="runs_list_speedrun_place_format">Puesto %1$d — %2$s</string>
 
     <string name="remote_tuto_title">Tutorial de conexión a PC (Paso %1$d / 6)</string>
-    <string name="remote_tuto_step_1">1. Descarga LiveSplit desde el sitio web oficial:</string>
+    <string name="remote_tuto_step_1">1. Descarga LiveSplit. Se recomienda usar una \"Dev Build\" para tener todas las funciones. La versión 1.8.37 funciona, pero algunas opciones de control remoto estarán limitadas:</string>
     <string name="remote_tuto_step_1_hint">(haz clic en el enlace para abrirlo en el navegador)</string>
     <string name="remote_tuto_step_2">2. Haz clic derecho en LiveSplit y pulsa el botón \'Settings\'.</string>
     <string name="remote_tuto_step_3">3. En settings, activa \'Startup Behavior\' en \'Start TCP Server\' para que la comunicación esté lista al iniciar.</string>

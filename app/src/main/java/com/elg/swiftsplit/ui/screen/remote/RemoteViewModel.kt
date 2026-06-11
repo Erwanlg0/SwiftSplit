@@ -22,6 +22,13 @@ class RemoteViewModel @Inject constructor(
     private val updateTimerLayoutPreferencesUseCase: UpdateTimerLayoutPreferencesUseCase
 ) : ViewModel() {
 
+    data class RemoteSplit(
+        val name: String,
+        val comparisonTime: String? = null,
+        val actualTime: String? = null,
+        val delta: String? = null
+    )
+
     private val _host = MutableStateFlow("192.168.1.10")
     val host: StateFlow<String> = _host.asStateFlow()
 
@@ -49,8 +56,8 @@ class RemoteViewModel @Inject constructor(
     private val _currentSplitIndex = MutableStateFlow(-1)
     val currentSplitIndex: StateFlow<Int> = _currentSplitIndex.asStateFlow()
 
-    private val _splitsList = MutableStateFlow<List<String>>(emptyList())
-    val splitsList: StateFlow<List<String>> = _splitsList.asStateFlow()
+    private val _splitsList = MutableStateFlow<List<RemoteSplit>>(emptyList())
+    val splitsList: StateFlow<List<RemoteSplit>> = _splitsList.asStateFlow()
 
     private val _isSplitsListSupported = MutableStateFlow(true)
     val isSplitsListSupported: StateFlow<Boolean> = _isSplitsListSupported.asStateFlow()
@@ -144,10 +151,19 @@ class RemoteViewModel @Inject constructor(
         viewModelScope.launch { disconnectLiveSplitUseCase() }
     }
 
+    private var lastSplitTime = 0L
+
     fun sendCommand(command: String) {
+        val now = System.currentTimeMillis()
+        val debounce = timerLayoutPreferences.value.splitDebounceMs
+        
+        if (command == "split" || command == "startorsplit") {
+            if (now - lastSplitTime < debounce) return
+            lastSplitTime = now
+        }
+
         viewModelScope.launch {
             sendLiveSplitCommandUseCase(command)
-            pollOnce()
         }
     }
 
@@ -163,10 +179,25 @@ class RemoteViewModel @Inject constructor(
 
     private suspend fun pollOnce() {
         val time = sendLiveSplitCommandUseCase("getcurrenttime").getOrNull()
-        if (time != null) _remoteTime.value = time.trim()
+        if (time != null) {
+            val trimmed = time.trim()
+            _remoteTime.value = if (trimmed.contains('.')) {
+                val parts = trimmed.split('.')
+                val millis = parts[1].take(3).padEnd(3, '0')
+                "${parts[0]}.$millis"
+            } else {
+                trimmed
+            }
+        }
 
         val phase = sendLiveSplitCommandUseCase("getcurrenttimerphase").getOrNull()
-        if (phase != null) _remotePhase.value = phase.trim()
+        if (phase != null) {
+            val oldPhase = _remotePhase.value
+            _remotePhase.value = phase.trim()
+            if (oldPhase != "NotRunning" && _remotePhase.value == "NotRunning") {
+                clearSplitTimesAndDeltas()
+            }
+        }
 
         // Poll current split name and index every 5 ticks (500ms)
         if (pollCounter % 5 == 0) {
@@ -178,7 +209,23 @@ class RemoteViewModel @Inject constructor(
             val splitIndexResult = sendLiveSplitCommandUseCase("getsplitindex")
             if (splitIndexResult.isSuccess) {
                 val indexStr = splitIndexResult.getOrNull()
-                _currentSplitIndex.value = indexStr?.trim()?.toIntOrNull() ?: -1
+                val newIndex = indexStr?.trim()?.toIntOrNull() ?: -1
+                val oldIndex = _currentSplitIndex.value
+                
+                if (newIndex != oldIndex) {
+                    _currentSplitIndex.value = newIndex
+                    if (newIndex > oldIndex && oldIndex >= 0) {
+                        updateCompletedSplitData(oldIndex)
+                    }
+                }
+            }
+
+            if (_remotePhase.value == "Running" && _currentSplitIndex.value >= 0) {
+                val deltaResult = sendLiveSplitCommandUseCase("getdelta")
+                if (deltaResult.isSuccess) {
+                    val delta = deltaResult.getOrNull()?.trim()
+                    updateCurrentSplitDelta(delta)
+                }
             }
         }
 
@@ -226,24 +273,71 @@ class RemoteViewModel @Inject constructor(
             val countStr = countResult.getOrNull()?.trim() ?: return
             val count = countStr.toIntOrNull() ?: return
             
-            val list = mutableListOf<String>()
+            val list = mutableListOf<RemoteSplit>()
             for (i in 0 until count) {
                 val nameResult = sendLiveSplitCommandUseCase("getsplitname $i")
-                if (nameResult.isSuccess) {
-                    val name = nameResult.getOrNull()?.trim() ?: "Split $i"
-                    list.add(name)
-                } else {
-                    if (nameResult.exceptionOrNull() is java.net.SocketTimeoutException) {
-                        _isSplitsListSupported.value = false
-                        return
-                    }
-                    list.add("Split $i")
-                }
+                val name = if (nameResult.isSuccess) nameResult.getOrNull()?.trim() ?: "Split $i" else "Split $i"
+                
+                list.add(RemoteSplit(name = name))
             }
             _splitsList.value = list
+
+            if (_remotePhase.value != "NotRunning" && _currentSplitIndex.value > 0) {
+                for (i in 0 until _currentSplitIndex.value) {
+                    updateCompletedSplitData(i)
+                }
+            }
         } finally {
             isFetchingSplits = false
         }
+    }
+
+    private suspend fun updateCompletedSplitData(index: Int) {
+        val list = _splitsList.value.toMutableList()
+        if (index !in list.indices) return
+
+        val timeResult = sendLiveSplitCommandUseCase("getlastsplittime")
+        val time = timeResult.getOrNull()?.trim()
+
+        if (time != null && time != "-") {
+            val formattedTime = if (time.contains('.')) {
+                val parts = time.split('.')
+                "${parts[0]}.${parts[1].take(3)}"
+            } else {
+                time
+            }
+            list[index] = list[index].copy(actualTime = formattedTime)
+            _splitsList.value = list
+        }
+    }
+
+    private fun updateCurrentSplitDelta(delta: String?) {
+        val index = _currentSplitIndex.value
+        val list = _splitsList.value.toMutableList()
+        if (index in list.indices) {
+            val formattedDelta = if (delta != null && delta.contains('.')) {
+                val parts = delta.split('.')
+                "${parts[0]}.${parts[1].take(3)}"
+            } else {
+                delta
+            }
+            list[index] = list[index].copy(delta = formattedDelta)
+            _splitsList.value = list
+        }
+    }
+
+    private fun updateCurrentSplitTime(time: String?) {
+        val index = _currentSplitIndex.value
+        val list = _splitsList.value.toMutableList()
+        if (index in list.indices) {
+            list[index] = list[index].copy(actualTime = time)
+            _splitsList.value = list
+        }
+    }
+
+    private fun clearSplitTimesAndDeltas() {
+        val list = _splitsList.value.map { it.copy(actualTime = null, delta = null) }
+        _splitsList.value = list
     }
 
     private fun triggerAutoReconnect() {

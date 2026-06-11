@@ -77,6 +77,11 @@
     <string name="remote_btn_resume">Reprendre</string>
     <string name="remote_empty_title">Se connecter au serveur LiveSplit sur PC</string>
     <string name="remote_empty_desc">Assurez-vous que le serveur LiveSplit TCP est démarré sur le port 16834</string>
+    <string name="remote_conn_failed">Connexion échouée</string>
+    <string name="remote_reconnect_failed">Connexion perdue. Reconnexion impossible.</string>
+    <string name="remote_current_split">Split Actuel</string>
+    <string name="remote_active">Actuel</string>
+    <string name="remote_reconnecting">Connexion perdue. Tentative de reconnexion (%1$d/3)...</string>
 
     <!-- Settings Screen -->
     <string name="settings_title">Paramètres</string>
@@ -95,6 +100,7 @@
     <string name="settings_language_auto">Auto</string>
     <string name="settings_language_en">English</string>
     <string name="settings_language_fr">Français</string>
+    <string name="settings_language_de">Allemand</string>
     <string name="settings_appearance_header">Apparence</string>
 
     <!-- Network Settings -->
@@ -251,7 +257,7 @@
     <string name="runs_list_speedrun_place_format">%1$de place — %2$s</string>
 
     <string name="remote_tuto_title">Tutoriel Connexion PC (Étape %1$d / 6)</string>
-    <string name="remote_tuto_step_1">1. Téléchargez LiveSplit depuis le site officiel :</string>
+    <string name="remote_tuto_step_1">1. Téléchargez LiveSplit. Il est recommandé d\'utiliser une \"Dev Build\" pour avoir toutes les fonctionnalités. La version 1.8.37 fonctionne mais certaines options de télécommande seront limitées :</string>
     <string name="remote_tuto_step_1_hint">(cliquez sur le lien pour l\'ouvrir dans votre navigateur)</string>
     <string name="remote_tuto_step_2">2. Faites un clic droit sur LiveSplit puis cliquez sur le bouton \'Settings\'.</string>
     <string name="remote_tuto_step_3">3. Dans les paramètres, réglez \'Startup Behavior\' à \'Start TCP Server\' pour que la communication puisse se faire dès le démarrage.</string>

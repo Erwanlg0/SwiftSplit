@@ -68,7 +68,6 @@ class LiveSplitTcpClient @Inject constructor() : LiveSplitRemotePort {
 
         try {
             ioMutex.withLock {
-                Log.d("LiveSplitClient", "Sending command: $command")
                 currentWriter.print(command + "\n")
                 currentWriter.flush()
 
@@ -80,7 +79,6 @@ class LiveSplitTcpClient @Inject constructor() : LiveSplitRemotePort {
                         _connectionState.value = ConnectionState.DISCONNECTED
                         Result.failure(Exception("Closed"))
                     } else {
-                        Log.d("LiveSplitClient", "Received response for '$command': '$response'")
                         Result.success(response.trim())
                     }
                 } else {

@@ -77,6 +77,11 @@
     <string name="remote_btn_resume">Resume</string>
     <string name="remote_empty_title">Connect to LiveSplit Server on PC</string>
     <string name="remote_empty_desc">Ensure LiveSplit TCP Server is started on port 16834</string>
+    <string name="remote_conn_failed">Connection failed</string>
+    <string name="remote_reconnect_failed">Connection lost. Reconnection impossible.</string>
+    <string name="remote_current_split">Current Split</string>
+    <string name="remote_active">Active</string>
+    <string name="remote_reconnecting">Connection lost. Retrying (%1$d/3)...</string>
 
     <!-- Settings Screen -->
     <string name="settings_title">Settings</string>
@@ -95,6 +100,7 @@
     <string name="settings_language_auto">Auto</string>
     <string name="settings_language_en">English</string>
     <string name="settings_language_fr">Français</string>
+    <string name="settings_language_de">Deutsch</string>
     <string name="settings_appearance_header">Appearance</string>
 
     <!-- Network Settings -->
@@ -251,7 +257,7 @@
     <string name="runs_list_speedrun_place_format">Rank %1$d — %2$s</string>
 
     <string name="remote_tuto_title">PC Connection Tutorial (Step %1$d / 6)</string>
-    <string name="remote_tuto_step_1">1. Download LiveSplit from the official website:</string>
+    <string name="remote_tuto_step_1">1. Download LiveSplit. It is recommended to use a \"Dev Build\" to have all the features. Version 1.8.37 works but some remote options will be limited:</string>
     <string name="remote_tuto_step_1_hint">(click the link to open it in your browser)</string>
     <string name="remote_tuto_step_2">2. Right-click on LiveSplit and click the \'Settings\' button.</string>
     <string name="remote_tuto_step_3">3. In settings, set \'Startup Behavior\' to \'Start TCP Server\' so communication is ready on startup.</string>
