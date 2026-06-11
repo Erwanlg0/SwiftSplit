@@ -25,7 +25,6 @@ class LiveSplitTcpClient @Inject constructor() : LiveSplitRemotePort {
     private var socket: Socket? = null
     private var writer: PrintWriter? = null
     private var reader: BufferedReader? = null
-
     private val ioMutex = Mutex()
 
     override val isConnected: Boolean
@@ -33,13 +32,13 @@ class LiveSplitTcpClient @Inject constructor() : LiveSplitRemotePort {
 
     override suspend fun connect(host: String, port: Int, timeoutMs: Int): Result<Unit> = withContext(Dispatchers.IO) {
         if (isConnected) return@withContext Result.success(Unit)
-
         _connectionState.value = ConnectionState.CONNECTING
         try {
             val address = InetSocketAddress(host, port)
             val newSocket = Socket()
             newSocket.connect(address, timeoutMs)
-            newSocket.soTimeout = timeoutMs
+            newSocket.soTimeout = 1000 
+            newSocket.tcpNoDelay = true
             
             socket = newSocket
             writer = PrintWriter(newSocket.getOutputStream(), true)
@@ -63,20 +62,20 @@ class LiveSplitTcpClient @Inject constructor() : LiveSplitRemotePort {
         val currentWriter = writer
         val currentReader = reader
         if (!isConnected || currentWriter == null || currentReader == null) {
-            return@withContext Result.failure(Exception("Not connected to LiveSplit Server"))
+            return@withContext Result.failure(Exception("Not connected"))
         }
 
         try {
             ioMutex.withLock {
-                currentWriter.print(command + LiveSplitProtocol.TERMINATOR)
+                currentWriter.print(command + "\n")
                 currentWriter.flush()
 
-                if (LiveSplitProtocol.expectsResponse(command)) {
+                if (command.startsWith("get") || command == "ping") {
                     val response = currentReader.readLine()
                     if (response == null) {
                         cleanup()
                         _connectionState.value = ConnectionState.DISCONNECTED
-                        Result.failure(Exception("Connection closed by server"))
+                        Result.failure(Exception("Closed"))
                     } else {
                         Result.success(response.trim())
                     }
@@ -85,6 +84,7 @@ class LiveSplitTcpClient @Inject constructor() : LiveSplitRemotePort {
                 }
             }
         } catch (e: Exception) {
+            if (e is CancellationException) throw e
             cleanup()
             _connectionState.value = ConnectionState.ERROR
             Result.failure(e)
@@ -96,12 +96,9 @@ class LiveSplitTcpClient @Inject constructor() : LiveSplitRemotePort {
             writer?.close()
             reader?.close()
             socket?.close()
-        } catch (e: Exception) {
-            // ignore
-        } finally {
-            writer = null
-            reader = null
-            socket = null
-        }
+        } catch (e: Exception) { }
+        writer = null
+        reader = null
+        socket = null
     }
 }

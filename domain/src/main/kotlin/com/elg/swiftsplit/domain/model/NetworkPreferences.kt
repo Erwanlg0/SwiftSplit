@@ -15,7 +15,7 @@ data class NetworkPreferences(
 
     companion object {
         const val DEFAULT_POLLING_DELAY_MS = 100L
-        const val DEFAULT_NETWORK_TIMEOUT_MS = 5000L
+        const val DEFAULT_NETWORK_TIMEOUT_MS = 2000L
         const val MIN_POLLING_DELAY_MS = 50L
         const val MAX_POLLING_DELAY_MS = 5000L
         const val MIN_NETWORK_TIMEOUT_MS = 1000L

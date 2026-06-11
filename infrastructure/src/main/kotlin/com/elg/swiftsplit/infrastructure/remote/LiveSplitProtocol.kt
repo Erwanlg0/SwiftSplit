@@ -3,7 +3,7 @@ package com.elg.swiftsplit.infrastructure.remote
 object LiveSplitProtocol {
     
     
-    const val TERMINATOR = "\r\n"
+    const val TERMINATOR = "\n"
     
     
     const val DEFAULT_PORT = 16834
