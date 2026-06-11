@@ -1,0 +1,323 @@
+<resources>
+    <string name="app_name">SwiftSplit</string>
+    <string name="back">返回</string>
+    <string name="save">保存</string>
+    <string name="delete">删除</string>
+    <string name="edit">编辑</string>
+    <string name="add">添加</string>
+    <string name="cancel">取消</string>
+    <string name="confirm">确认</string>
+
+    <!-- Runs List Screen -->
+    <string name="runs_list_title">SwiftSplit</string>
+    <string name="runs_list_pc_remote">PC遥控器</string>
+    <string name="runs_list_settings">设置</string>
+    <string name="runs_list_empty_title">尚未导入任何运行</string>
+    <string name="runs_list_empty_desc">点击 + 按钮以导入 LiveSplit .lss 文件或创建运行。</string>
+    <string name="runs_list_import_lss">导入 LSS 文件</string>
+    <string name="runs_list_no_pb">无个人最好成绩</string>
+    <string name="search">搜索</string>
+    <string name="close">关闭</string>
+
+    <!-- New Run Dialog -->
+    <string name="new_run_dialog_title">新建运行</string>
+    <string name="new_run_dialog_quick">快速秒表</string>
+    <string name="new_run_dialog_quick_desc">无需配置，立即启动简单计时器</string>
+    <string name="new_run_dialog_custom">创建自定义运行</string>
+    <string name="new_run_dialog_custom_desc">配置游戏信息并从头开始创建分段</string>
+    <string name="new_run_dialog_import">导入 LiveSplit 文件 (.lss)</string>
+    <string name="new_run_dialog_import_desc">从本地存储导入分段文件</string>
+    <string name="new_run_dialog_import_url">通过链接 / URL 导入</string>
+    <string name="new_run_dialog_import_url_desc">粘贴网页地址直接下载并导入 .lss 文件</string>
+    <string name="new_run_dialog_speedrun">在 Speedrun.com 上搜索</string>
+    <string name="new_run_dialog_speedrun_desc">搜索游戏并下载参考分段</string>
+    <string name="new_run_dialog_field_game">游戏名称</string>
+    <string name="new_run_dialog_field_category">分类 (例如 Any%)</string>
+    <string name="new_run_dialog_field_platform">平台 (可选)</string>
+    <string name="new_run_dialog_create">创建</string>
+
+    <!-- Timer Screen -->
+    <string name="timer_title">计时器</string>
+    <string name="timer_edit_splits">编辑分段</string>
+    <string name="timer_active_comparison">比较: %1$s</string>
+    <string name="timer_attempts">尝试次数: %1$d</string>
+    <string name="timer_attempts_label">尝试次数</string>
+    <string name="timer_finished">已完成</string>
+
+    <!-- Split Editor Screen -->
+    <string name="editor_title">编辑分段</string>
+    <string name="editor_game_name">游戏名称</string>
+    <string name="editor_category_name">分类名称</string>
+    <string name="editor_splits_count">分段数 (%1$d)</string>
+    <string name="editor_split_name_placeholder">分段名称</string>
+    <string name="editor_add_split">添加分段</string>
+    <string name="editor_move_up">上移</string>
+    <string name="editor_move_down">下移</string>
+
+    <!-- Remote Screen -->
+    <string name="remote_title">PC遥控器</string>
+    <string name="remote_conn_settings">连接设置</string>
+    <string name="remote_ip_address">IP 地址</string>
+    <string name="remote_port">端口</string>
+    <string name="remote_connect">连接</string>
+    <string name="remote_disconnect">断开连接</string>
+    <string name="remote_console_response">控制台响应</string>
+    <string name="remote_no_response">暂无响应</string>
+    <string name="remote_controls">遥控操作</string>
+    <string name="remote_btn_split">开始 / 分段 / 完成</string>
+    <string name="remote_btn_pause">一时停止</string>
+    <string name="remote_btn_undo">撤销分段</string>
+    <string name="remote_btn_skip">跳过分段</string>
+    <string name="remote_btn_reset">重置</string>
+    <string name="remote_btn_get_time">获取时间</string>
+    <string name="remote_btn_get_delta">获取时差 (Delta)</string>
+    <string name="remote_btn_ping">Ping PC</string>
+    <string name="remote_live_timer">实时 PC 计时器</string>
+    <string name="remote_btn_resume">继续</string>
+    <string name="remote_empty_title">连接到 PC 上的 LiveSplit 服务器</string>
+    <string name="remote_empty_desc">请确保 LiveSplit TCP 服务器已在端口 16834 启动</string>
+    <string name="remote_conn_failed">连接失败</string>
+    <string name="remote_reconnect_failed">连接已断开。无法重新连接。</string>
+    <string name="remote_current_split">当前分段</string>
+    <string name="remote_active">活动</string>
+    <string name="remote_reconnecting">连接已断开。正在重试 (%1$d/3)...</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_title">设置</string>
+    <string name="settings_timer_header">计时器设置</string>
+    <string name="settings_timing_method">计时方式</string>
+    <string name="settings_active_comparison">活动比较</string>
+    <string name="settings_global_hotkeys">启用全局快捷键</string>
+    <string name="settings_global_hotkeys_desc">允许使用音量键控制分段</string>
+    <string name="settings_save_quick_runs">保存快速运行</string>
+    <string name="settings_save_quick_runs_desc">自动保存快速秒表运行记录到列表中</string>
+    <string name="settings_language">语言</string>
+    <string name="settings_theme">主题</string>
+    <string name="settings_theme_system">系统默认</string>
+    <string name="settings_theme_light">浅色主题</string>
+    <string name="settings_theme_dark">深色主题</string>
+    <string name="settings_language_auto">自动</string>
+    <string name="settings_language_en">English</string>
+    <string name="settings_language_fr">Français</string>
+    <string name="settings_language_de">Deutsch</string>
+    <string name="settings_appearance_header">外观设置</string>
+
+    <!-- Network Settings -->
+    <string name="settings_network_header">网络设置</string>
+    <string name="settings_polling_delay">轮询延迟</string>
+    <string name="settings_polling_delay_desc">连接到远程 PC 计时器时的更新间隔</string>
+    <string name="settings_network_timeout">网络超时时间</string>
+    <string name="settings_network_timeout_desc">连接 LiveSplit 服务器或读取数据时的最大等待时间</string>
+    <string name="settings_network_ms_value">%1$d 毫秒</string>
+
+    <!-- Customization -->
+    <string name="settings_customization">界面自定义</string>
+    <string name="settings_customization_desc">计时器显示格式、颜色和首选项</string>
+
+    <!-- Layout Editor -->
+    <string name="layout_editor_title">计时器布局</string>
+    <string name="layout_editor_preview_header">预览</string>
+    <string name="layout_editor_format_header">时间格式</string>
+    <string name="layout_editor_leading_zeros">显示前导零</string>
+    <string name="layout_editor_leading_zeros_desc">显示为 00:05:30 而不是 5:30</string>
+    <string name="layout_editor_show_fraction">显示小数秒</string>
+    <string name="layout_editor_show_fraction_desc">显示小数点后的毫秒或百分之一秒</string>
+    <string name="layout_editor_decimal_places">小数位数</string>
+    <string name="layout_editor_decimal_places_value">%1$d 位数</string>
+    <string name="layout_editor_color_header">计时器颜色</string>
+    <string name="layout_editor_color_mode">色彩模式</string>
+    <string name="layout_editor_color_delta">比较时差 (Delta)</string>
+    <string name="layout_editor_color_delta_desc">根据与比较时间的快慢显示绿/红</string>
+    <string name="layout_editor_color_state">计时器状态</string>
+    <string name="layout_editor_color_state_desc">根据空闲、运行、暂停或结束状态显示颜色</string>
+    <string name="layout_editor_state_colors_legend">状态颜色</string>
+    <string name="layout_editor_state_idle">空闲</string>
+    <string name="layout_editor_state_running">运行中</string>
+    <string name="layout_editor_state_paused">已暂停</string>
+    <string name="layout_editor_state_finished">已结束</string>
+    <string name="layout_editor_preview_tap_hint">轻触以预览: %1$s</string>
+    <string name="layout_editor_timer_format">计时器格式</string>
+    <string name="layout_editor_format_examples">1秒: %1$s · 1小时: %2$s</string>
+    <string name="layout_editor_splits_header">分段布局</string>
+    <string name="layout_editor_show_splits">显示分段列表</string>
+    <string name="layout_editor_show_splits_desc">在计时器下方显示或隐藏分段</string>
+    <string name="layout_editor_orientation">全屏方向</string>
+    <string name="layout_editor_orientation_portrait">纵向 (Portrait)</string>
+    <string name="layout_editor_orientation_landscape">横向 (Landscape)</string>
+    <string name="layout_editor_orientation_auto">自动 (重力感应)</string>
+    <string name="layout_editor_splits_fraction">显示分段小数</string>
+    <string name="layout_editor_splits_fraction_desc">在分段时差中显示小数秒</string>
+    <string name="layout_editor_splits_decimals">分段时差小数位数</string>
+    <string name="layout_editor_split_approach_threshold">分段临近提示时差</string>
+    <string name="layout_editor_split_approach_threshold_disabled">已禁用</string>
+    <string name="layout_editor_split_approach_threshold_value">分段前 %1$d 秒</string>
+    <string name="layout_editor_split_approach_threshold_custom">自定义数值…</string>
+    <string name="layout_editor_split_approach_threshold_custom_title">自定义临近提示阈值</string>
+    <string name="layout_editor_split_approach_threshold_custom_hint">秒数 (0 = 禁用, 最大 120)</string>
+    <string name="layout_editor_delta_ahead_gaining">领先 (在拉开)</string>
+    <string name="layout_editor_delta_ahead_losing">领先 (在缩小)</string>
+    <string name="layout_editor_delta_behind_losing">落后 (在扩大)</string>
+    <string name="layout_editor_delta_behind_gaining">落后 (在追近)</string>
+    <string name="layout_editor_delta_best_segment">最好分段</string>
+    <string name="layout_editor_delta_exact">精确</string>
+
+    <string name="layout_editor_controls_header">按钮显示</string>
+    <string name="layout_editor_show_undo">显示撤销分段按钮</string>
+    <string name="layout_editor_show_skip">显示跳过分段按钮</string>
+    <string name="layout_editor_show_pause">显示暂停按钮</string>
+    <string name="layout_editor_enable_vibration">启用触觉反馈</string>
+    <string name="layout_editor_enable_vibration_desc">分段时震动</string>
+    <string name="layout_editor_show_sob">显示最好成绩总和 (SOB)</string>
+    <string name="layout_editor_show_durations">显示分段时长</string>
+    <string name="layout_editor_show_durations_desc">显示每个分段所用的时间</string>
+    <string name="layout_editor_minimalist">极简模式</string>
+    <string name="layout_editor_minimalist_desc">隐藏页眉和页脚</string>
+    <string name="layout_editor_use_subsplits">使用子分段</string>
+    <string name="layout_editor_use_subsplits_desc">以 - 开头的分段进行归类</string>
+    <string name="layout_editor_show_pts">显示可能节省的时间</string>
+    <string name="layout_editor_bg_gradient">背景渐变色</string>
+    <string name="layout_editor_bg_start">起始颜色 (HEX)</string>
+    <string name="layout_editor_bg_end">结束颜色 (HEX)</string>
+    <string name="layout_editor_lock">锁定计时器</string>
+    <string name="layout_editor_lock_desc">防止误触打开菜单</string>
+    <string name="layout_editor_confirm_reset">确认重置</string>
+    <string name="layout_editor_split_debounce">分段防抖延迟 (毫秒)</string>
+    <string name="layout_editor_timer_shadow">计时器阴影</string>
+    <string name="layout_editor_segment_opacity">分段不透明度</string>
+    <string name="layout_editor_auto_lock_fullscreen">全屏下自动锁定</string>
+    <string name="layout_editor_possible_time_save">可能节省的时间</string>
+
+    <string name="timer_toggle_splits">切换显示分段</string>
+    <string name="timer_exit_fullscreen">退出全屏</string>
+
+    <string name="timer_reset_confirm_title">重置运行？</string>
+
+    <string name="timer_reset_confirm_message">您确定要重置当前尝试吗？</string>
+
+    <!-- Timer Control Labels -->
+    <string name="timer_control_start">开始</string>
+    <string name="timer_control_split">分段</string>
+    <string name="timer_control_resume">继续</string>
+    <string name="timer_control_pause">暂停</string>
+    <string name="timer_control_undo">撤销分段</string>
+    <string name="timer_control_skip">跳过分段</string>
+    <string name="timer_control_reset">重置</string>
+
+    <!-- About / Legal Screen -->
+    <string name="settings_about_header">关于</string>
+    <string name="settings_about_title">关于与许可证</string>
+    <string name="settings_about_desc">法律声明、版本以及开源许可证</string>
+    <string name="settings_rate_app">在 Google Play 上评分</string>
+    <string name="settings_rate_app_desc">在 Google Play 商店留下评价</string>
+    <string name="about_title">关于与许可证</string>
+    <string name="about_version">版本 %1$s</string>
+    <string name="about_developer">开发者</string>
+    <string name="about_developer_value">Charlouw</string>
+    <string name="about_legal_mentions_title">法律声明</string>
+    <string name="about_legal_mentions_desc">本移动应用作为一个开源项目发布。所有功能均在本地运行，不收集任何数据。</string>
+    <string name="about_licenses_title">开源许可证</string>
+    <string name="about_licenses_desc">本应用使用包含开源许可证的库。以下是第三方组件的详细信息：</string>
+    <string name="license_livesplit_core_title">LiveSplit Core</string>
+    <string name="license_livesplit_core_desc">在 MIT 或 Apache License 2.0 双重许可证下授权</string>
+    <string name="license_view_mit">查看 MIT 许可证</string>
+    <string name="license_view_apache">查看 Apache License 2.0</string>
+
+    <!-- Timer Control Finish -->
+    <string name="timer_control_finish">完成</string>
+
+    <!-- Timer Phases -->
+    <string name="phase_running">运行中</string>
+    <string name="phase_paused">已暂停</string>
+    <string name="phase_ended">已结束</string>
+    <string name="phase_not_running">未运行</string>
+    <string name="editor_reset_dialog_title">重置统计数据</string>
+    <string name="editor_reset_dialog_text">这将清空您的尝试次数、历史记录、个人最好成绩和最好分段。分段名称将被保留。\n\n此操作无法撤销。</string>
+    <string name="editor_reset_dialog_confirm">重置</string>
+    <string name="editor_reset_stats_button">重置统计数据</string>
+    <string name="editor_reset_stats_success">统计数据已重置</string>
+
+    <string name="runs_list_import_url_title">通过链接 / URL 导入</string>
+    <string name="runs_list_import_url_placeholder">https://livesplit.org/splits/...</string>
+    <string name="runs_list_import_url_label">LSS 文件 URL 地址</string>
+    <string name="runs_list_import_url_btn">下载并导入</string>
+    <string name="runs_list_import_success">LSS 文件导入成功！</string>
+    <string name="runs_list_import_error">错误: %1$s</string>
+    <string name="runs_list_speedrun_dialog_title">导入 Speedrun.com</string>
+    <string name="runs_list_speedrun_game_placeholder">例如 Celeste, Portal...</string>
+    <string name="runs_list_speedrun_game_label">搜索游戏</string>
+    <string name="runs_list_speedrun_selected_game">游戏: %1$s</string>
+    <string name="runs_list_speedrun_selected_category">分类: %1$s</string>
+    <string name="runs_list_speedrun_only_splits">仅限有分段的记录</string>
+    <string name="runs_list_speedrun_no_runs">未找到运行记录。</string>
+    <string name="runs_list_speedrun_no_splits_toast">该运行记录在 splits.io 上没有关联的分段</string>
+    <string name="runs_list_speedrun_import_success">Speedrun.com 分段导入成功！</string>
+    <string name="runs_list_speedrun_badge_importable">可导入</string>
+    <string name="runs_list_speedrun_badge_no_splits">无分段</string>
+    <string name="runs_list_speedrun_place_format">第 %1$d 名 — %2$s</string>
+
+    <string name="remote_tuto_title">PC 连接向导 (步骤 %1$d / 6)</string>
+    <string name="remote_tuto_step_1">1. 下载 LiveSplit。推荐使用 \"Dev Build\" 开发者版本以获取完整功能。版本 1.8.37 也可以，但某些远程功能会受到限制：</string>
+    <string name="remote_tuto_step_1_hint">(点击链接以在浏览器中打开)</string>
+    <string name="remote_tuto_step_2">2. 右键单击 LiveSplit 并选择 \'Settings\'。</string>
+    <string name="remote_tuto_step_3">3. 在设置中，将 \'Startup Behavior\' 设置为 \'Start TCP Server\'，以便在启动时做好通信准备。</string>
+    <string name="remote_tuto_step_4">4. 如果服务器未运行，请右键单击 -> Control -> Start TCP Server。</string>
+    <string name="remote_tuto_step_5">5. 输入您 PC 的本地 IP 地址，如果修改了端口，也一并修改。</string>
+    <string name="remote_tuto_step_6">6. 最后，点击 \'Connect\' 按钮与 PC 上的 LiveSplit 建立连接！</string>
+    <string name="remote_tuto_btn_next">下一步</string>
+    <string name="remote_tuto_btn_prev">上一步</string>
+    <string name="remote_tuto_btn_close">关闭</string>
+    <string name="remote_tuto_btn_finish">完成</string>
+    <string name="remote_format_header">计时器格式</string>
+    <string name="remote_format_select">选择格式</string>
+    <string name="remote_toast_response">控制台响应: %1$s</string>
+
+    <string name="timer_export_chooser_title">导出 LiveSplit (.lss)</string>
+    <string name="timer_export_error">导出错误: %1$s</string>
+    <string name="timer_desc_share">导出 LSS</string>
+    <string name="timer_desc_stats">运行统计数据</string>
+    <string name="timer_sum_of_best">最好成绩总和 (SOB)</string>
+
+    <string name="stats_title">统计与历史记录</string>
+    <string name="stats_no_segments">未定义分段。</string>
+    <string name="stats_attempts">尝试次数</string>
+    <string name="stats_resets_format">重置次数: %1$d</string>
+    <string name="stats_completed">完成次数</string>
+    <string name="stats_rate_format">完成率: %1$.1f%%</string>
+    <string name="stats_pb_title">个人最好成绩 (PB)</string>
+    <string name="stats_pb_desc">最好最终时间</string>
+    <string name="stats_sob_title">最好分段总和 (SOB)</string>
+    <string name="stats_sob_desc">黄金分段总和</string>
+    <string name="stats_pb_progression">个人最好成绩提升轨迹</string>
+    <string name="stats_chart_hint">完成至少 2 次运行以绘制提升轨迹图表。</string>
+    <string name="stats_regularity_analysis">各分段一致性分析</string>
+    <string name="stats_segment_stats_summary">平均值: %1$s | 黄金值: %2$s</string>
+
+    <string name="main_import_success">已导入: %1$s — %2$s</string>
+    <string name="main_import_parse_failed">无法解析 .lss: %1$s</string>
+    <string name="main_import_error">导入文件时出错: %1$s</string>
+    <string name="runs_list_speedrun_run_id_format">运行 ID: %1$s</string>
+    <string name="settings_language_es">西班牙语</string>
+    <string name="settings_language_it">意大利语</string>
+    <string name="settings_language_pt">葡萄牙语</string>
+    <string name="settings_language_ja">日语</string>
+    <string name="settings_language_zh">简体中文</string>
+    <string name="settings_language_ru">俄语</string>
+    <string name="settings_language_ko">韩语</string>
+    <string name="settings_language_pl">波兰语</string>
+    <string name="timing_method_real_time">Real Time (真实时间)</string>
+    <string name="timing_method_game_time">Game Time (游戏时间)</string>
+    <string name="comparison_pb">Personal Best (个人最好成绩)</string>
+    <string name="comparison_best_segments">Best Segments (最好分段)</string>
+    <string name="comparison_average_segments">Average Segments (平均分段)</string>
+    <string name="comparison_worst_segments">Worst Segments (最差分段)</string>
+    <string name="comparison_median_segments">Median Segments (中位数分段)</string>
+    <string name="comparison_latest_run">Latest Run (最新运行)</string>
+    <string name="layout_editor_preset_format">预设: %1$s</string>
+    <string name="color_preset_green">绿色</string>
+    <string name="color_preset_blue">蓝色</string>
+    <string name="color_preset_gray">灰色</string>
+    <string name="color_preset_red">红色</string>
+    <string name="color_preset_orange">橙色</string>
+    <string name="color_preset_gold">金色</string>
+    <string name="color_preset_white">白色</string>
+</resources>

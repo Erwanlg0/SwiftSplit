@@ -298,6 +298,13 @@
     <string name="main_import_error">Error importing file: %1$s</string>
     <string name="runs_list_speedrun_run_id_format">Run ID: %1$s</string>
     <string name="settings_language_es">Español</string>
+    <string name="settings_language_it">Italiano</string>
+    <string name="settings_language_pt">Português</string>
+    <string name="settings_language_ja">日本語</string>
+    <string name="settings_language_zh">简体中文</string>
+    <string name="settings_language_ru">Русский</string>
+    <string name="settings_language_ko">한국어</string>
+    <string name="settings_language_pl">Polski</string>
     <string name="timing_method_real_time">Real Time</string>
     <string name="timing_method_game_time">Game Time</string>
     <string name="comparison_pb">Personal Best</string>

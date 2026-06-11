@@ -153,3 +153,5 @@ $RECYCLE.BIN/
 # Linux
 *~
 /.idea
+/application
+/domain

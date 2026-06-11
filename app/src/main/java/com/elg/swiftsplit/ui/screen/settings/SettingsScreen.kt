@@ -383,6 +383,14 @@ fun SettingsScreen(
                             "en" -> stringResource(R.string.settings_language_en)
                             "fr" -> stringResource(R.string.settings_language_fr)
                             "es" -> stringResource(R.string.settings_language_es)
+                            "de" -> stringResource(R.string.settings_language_de)
+                            "it" -> stringResource(R.string.settings_language_it)
+                            "pt" -> stringResource(R.string.settings_language_pt)
+                            "ja" -> stringResource(R.string.settings_language_ja)
+                            "zh" -> stringResource(R.string.settings_language_zh)
+                            "ru" -> stringResource(R.string.settings_language_ru)
+                            "ko" -> stringResource(R.string.settings_language_ko)
+                            "pl" -> stringResource(R.string.settings_language_pl)
                             else -> stringResource(R.string.settings_language_auto)
                         }
                         ListItem(
@@ -418,6 +426,38 @@ fun SettingsScreen(
                             DropdownMenuItem(
                                 text = { Text(stringResource(R.string.settings_language_es)) },
                                 onClick = { viewModel.setLanguage("es"); showLanguageMenu = false }
+                            )
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.settings_language_de)) },
+                                onClick = { viewModel.setLanguage("de"); showLanguageMenu = false }
+                            )
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.settings_language_it)) },
+                                onClick = { viewModel.setLanguage("it"); showLanguageMenu = false }
+                            )
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.settings_language_pt)) },
+                                onClick = { viewModel.setLanguage("pt"); showLanguageMenu = false }
+                            )
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.settings_language_ja)) },
+                                onClick = { viewModel.setLanguage("ja"); showLanguageMenu = false }
+                            )
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.settings_language_zh)) },
+                                onClick = { viewModel.setLanguage("zh"); showLanguageMenu = false }
+                            )
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.settings_language_ru)) },
+                                onClick = { viewModel.setLanguage("ru"); showLanguageMenu = false }
+                            )
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.settings_language_ko)) },
+                                onClick = { viewModel.setLanguage("ko"); showLanguageMenu = false }
+                            )
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.settings_language_pl)) },
+                                onClick = { viewModel.setLanguage("pl"); showLanguageMenu = false }
                             )
                         }
                     }

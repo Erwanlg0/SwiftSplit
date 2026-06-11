@@ -1,0 +1,323 @@
+<resources>
+    <string name="app_name">SwiftSplit</string>
+    <string name="back">뒤로</string>
+    <string name="save">저장</string>
+    <string name="delete">삭제</string>
+    <string name="edit">편집</string>
+    <string name="add">추가</string>
+    <string name="cancel">취소</string>
+    <string name="confirm">확인</string>
+
+    <!-- Runs List Screen -->
+    <string name="runs_list_title">SwiftSplit</string>
+    <string name="runs_list_pc_remote">PC 리모컨</string>
+    <string name="runs_list_settings">설정</string>
+    <string name="runs_list_empty_title">아직 가져온 기록이 없습니다</string>
+    <string name="runs_list_empty_desc">+ 버튼을 눌러 LiveSplit .lss 파일을 가져오거나 새 기록을 만드세요.</string>
+    <string name="runs_list_import_lss">LSS 파일 가져오기</string>
+    <string name="runs_list_no_pb">PB 없음</string>
+    <string name="search">검색</string>
+    <string name="close">닫기</string>
+
+    <!-- New Run Dialog -->
+    <string name="new_run_dialog_title">새 기록</string>
+    <string name="new_run_dialog_quick">빠른 스톱워치</string>
+    <string name="new_run_dialog_quick_desc">설정 없이 간편하게 타이머 시작</string>
+    <string name="new_run_dialog_custom">사용자 정의 기록 만들기</string>
+    <string name="new_run_dialog_custom_desc">게임 정보를 설정하고 처음부터 구간(splits) 만들기</string>
+    <string name="new_run_dialog_import">LiveSplit 파일 가져오기 (.lss)</string>
+    <string name="new_run_dialog_import_desc">로컬 저장소에서 구간 파일을 가져옵니다</string>
+    <string name="new_run_dialog_import_url">링크 / URL로 가져오기</string>
+    <string name="new_run_dialog_import_url_desc">웹 주소를 붙여넣어 .lss 파일을 직접 다운로드하고 가져옵니다</string>
+    <string name="new_run_dialog_speedrun">Speedrun.com에서 검색</string>
+    <string name="new_run_dialog_speedrun_desc">게임을 검색하고 참조용 구간 파일을 다운로드합니다</string>
+    <string name="new_run_dialog_field_game">게임 이름</string>
+    <string name="new_run_dialog_field_category">카테고리 (예: Any%)</string>
+    <string name="new_run_dialog_field_platform">플랫폼 (선택 사항)</string>
+    <string name="new_run_dialog_create">만들기</string>
+
+    <!-- Timer Screen -->
+    <string name="timer_title">타이머</string>
+    <string name="timer_edit_splits">구간 편집</string>
+    <string name="timer_active_comparison">비교 대상: %1$s</string>
+    <string name="timer_attempts">시도 횟수: %1$d</string>
+    <string name="timer_attempts_label">시도 횟수</string>
+    <string name="timer_finished">완료됨</string>
+
+    <!-- Split Editor Screen -->
+    <string name="editor_title">구간 편집</string>
+    <string name="editor_game_name">게임 이름</string>
+    <string name="editor_category_name">카테고리 이름</string>
+    <string name="editor_splits_count">구간 수 (%1$d)</string>
+    <string name="editor_split_name_placeholder">구간 이름</string>
+    <string name="editor_add_split">구간 추가</string>
+    <string name="editor_move_up">위로 이동</string>
+    <string name="editor_move_down">아래로 이동</string>
+
+    <!-- Remote Screen -->
+    <string name="remote_title">PC 리모컨</string>
+    <string name="remote_conn_settings">연결 설정</string>
+    <string name="remote_ip_address">IP 주소</string>
+    <string name="remote_port">포트</string>
+    <string name="remote_connect">연결</string>
+    <string name="remote_disconnect">연결 해제</string>
+    <string name="remote_console_response">콘솔 응답</string>
+    <string name="remote_no_response">아직 응답이 없습니다</string>
+    <string name="remote_controls">원격 제어</string>
+    <string name="remote_btn_split">시작 / 구간 / 완료</string>
+    <string name="remote_btn_pause">일시 중지</string>
+    <string name="remote_btn_undo">구간 취소 (Undo)</string>
+    <string name="remote_btn_skip">구간 건너뛰기 (Skip)</string>
+    <string name="remote_btn_reset">재설정 (Reset)</string>
+    <string name="remote_btn_get_time">시간 가져오기</string>
+    <string name="remote_btn_get_delta">델타 가져오기</string>
+    <string name="remote_btn_ping">PC 핑 테스트</string>
+    <string name="remote_live_timer">실시간 PC 타이머</string>
+    <string name="remote_btn_resume">재개</string>
+    <string name="remote_empty_title">PC의 LiveSplit 서버에 연결</string>
+    <string name="remote_empty_desc">LiveSplit TCP 서버가 16834 포트에서 시작되었는지 확인하세요</string>
+    <string name="remote_conn_failed">연결 실패</string>
+    <string name="remote_reconnect_failed">연결이 끊어졌습니다. 재연결할 수 없습니다.</string>
+    <string name="remote_current_split">현재 구간</string>
+    <string name="remote_active">활성</string>
+    <string name="remote_reconnecting">연결이 끊어졌습니다. 재시도 중 (%1$d/3)...</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_title">설정</string>
+    <string name="settings_timer_header">타이머 설정</string>
+    <string name="settings_timing_method">타이밍 방식</string>
+    <string name="settings_active_comparison">활성 비교 대상</string>
+    <string name="settings_global_hotkeys">글로벌 단축키 사용</string>
+    <string name="settings_global_hotkeys_desc">볼륨 버튼으로 구간을 제어할 수 있도록 허용</string>
+    <string name="settings_save_quick_runs">빠른 기록 저장</string>
+    <string name="settings_save_quick_runs_desc">빠른 스톱워치 기록을 목록에 자동으로 저장</string>
+    <string name="settings_language">언어</string>
+    <string name="settings_theme">테마</string>
+    <string name="settings_theme_system">시스템 기본값</string>
+    <string name="settings_theme_light">라이트 모드</string>
+    <string name="settings_theme_dark">다크 모드</string>
+    <string name="settings_language_auto">자동</string>
+    <string name="settings_language_en">English</string>
+    <string name="settings_language_fr">Français</string>
+    <string name="settings_language_de">Deutsch</string>
+    <string name="settings_appearance_header">화면 표시</string>
+
+    <!-- Network Settings -->
+    <string name="settings_network_header">네트워크</string>
+    <string name="settings_polling_delay">폴링 지연 시간</string>
+    <string name="settings_polling_delay_desc">원격 연결 시 PC 타이머 업데이트 간격</string>
+    <string name="settings_network_timeout">네트워크 제한 시간</string>
+    <string name="settings_network_timeout_desc">LiveSplit 서버 연결 및 데이터 읽기 최대 대기 시간</string>
+    <string name="settings_network_ms_value">%1$d ms</string>
+
+    <!-- Customization -->
+    <string name="settings_customization">디스플레이 개인 설정</string>
+    <string name="settings_customization_desc">타이머 표시 형식, 색상 및 레이아웃 설정</string>
+
+    <!-- Layout Editor -->
+    <string name="layout_editor_title">타이머 레이アウト</string>
+    <string name="layout_editor_preview_header">미리보기</string>
+    <string name="layout_editor_format_header">시간 표시 형식</string>
+    <string name="layout_editor_leading_zeros">앞에 0 표시</string>
+    <string name="layout_editor_leading_zeros_desc">5:30 대신 00:05:30으로 표시</string>
+    <string name="layout_editor_show_fraction">소수점 표시</string>
+    <string name="layout_editor_show_fraction_desc">초 아래 소수점 자리 표시</string>
+    <string name="layout_editor_decimal_places">소수점 자리수</string>
+    <string name="layout_editor_decimal_places_value">%1$d 자리</string>
+    <string name="layout_editor_color_header">타이머 색상</string>
+    <string name="layout_editor_color_mode">색상 모드</string>
+    <string name="layout_editor_color_delta">비교 델타</string>
+    <string name="layout_editor_color_delta_desc">비교 대상과의 차이에 따라 초록/빨강 표시</string>
+    <string name="layout_editor_color_state">타이머 상태</string>
+    <string name="layout_editor_color_state_desc">대기, 진행, 일시 정지, 완료 상태에 따라 색상 표시</string>
+    <string name="layout_editor_state_colors_legend">상태 색상</string>
+    <string name="layout_editor_state_idle">대기 중</string>
+    <string name="layout_editor_state_running">진행 중</string>
+    <string name="layout_editor_state_paused">일시 정지됨</string>
+    <string name="layout_editor_state_finished">완료됨</string>
+    <string name="layout_editor_preview_tap_hint">탭하여 미리보기: %1$s</string>
+    <string name="layout_editor_timer_format">타이머 형식</string>
+    <string name="layout_editor_format_examples">1초: %1$s · 1시간: %2$s</string>
+    <string name="layout_editor_splits_header">구간 레이아웃</string>
+    <string name="layout_editor_show_splits">구간 목록 표시</string>
+    <string name="layout_editor_show_splits_desc">타이머 아래에 세그먼트 목록 표시 여부</string>
+    <string name="layout_editor_orientation">전체 화면 방향</string>
+    <string name="layout_editor_orientation_portrait">세로 모드 (Portrait)</string>
+    <string name="layout_editor_orientation_landscape">가로 모드 (Landscape)</string>
+    <string name="layout_editor_orientation_auto">자동 (센서)</string>
+    <string name="layout_editor_splits_fraction">구간 소수점 표시</string>
+    <string name="layout_editor_splits_fraction_desc">구간 델타에 초 아래 소수점 표시</string>
+    <string name="layout_editor_splits_decimals">구간 델타 소수점 자리수</string>
+    <string name="layout_editor_split_approach_threshold">구간 접근 경고 알림</string>
+    <string name="layout_editor_split_approach_threshold_disabled">비활성화됨</string>
+    <string name="layout_editor_split_approach_threshold_value">구간 완료 %1$d초 전</string>
+    <string name="layout_editor_split_approach_threshold_custom">직접 입력…</string>
+    <string name="layout_editor_split_approach_threshold_custom_title">접근 알림 시간 설정</string>
+    <string name="layout_editor_split_approach_threshold_custom_hint">초 (0 = 비활성화, 최대 120)</string>
+    <string name="layout_editor_delta_ahead_gaining">앞섬 (단축 중)</string>
+    <string name="layout_editor_delta_ahead_losing">앞섬 (지체 중)</string>
+    <string name="layout_editor_delta_behind_losing">뒤쳐짐 (지체 중)</string>
+    <string name="layout_editor_delta_behind_gaining">뒤쳐짐 (단축 중)</string>
+    <string name="layout_editor_delta_best_segment">최고 구간 (Best)</string>
+    <string name="layout_editor_delta_exact">일치</string>
+
+    <string name="layout_editor_controls_header">버튼 표시 설정</string>
+    <string name="layout_editor_show_undo">구간 취소 버튼 표시</string>
+    <string name="layout_editor_show_skip">구간 건너뛰기 버튼 표시</string>
+    <string name="layout_editor_show_pause">일시 정지 버튼 표시</string>
+    <string name="layout_editor_enable_vibration">진동 피드백 사용</string>
+    <string name="layout_editor_enable_vibration_desc">구간 기록 시 진동</string>
+    <string name="layout_editor_show_sob">최고 기록 합계 (SOB) 표시</string>
+    <string name="layout_editor_show_durations">구간별 진행 시간 표시</string>
+    <string name="layout_editor_show_durations_desc">각 구간별 소요 시간 표시</string>
+    <string name="layout_editor_minimalist">미니멀 모드</string>
+    <string name="layout_editor_minimalist_desc">헤더 및 푸터 숨기기</string>
+    <string name="layout_editor_use_subsplits">서브스플릿 사용</string>
+    <string name="layout_editor_use_subsplits_desc">- 로 시작하는 구간을 그룹화합니다</string>
+    <string name="layout_editor_show_pts">가능한 시간 단축 폭 표시</string>
+    <string name="layout_editor_bg_gradient">배경 그라데이션</string>
+    <string name="layout_editor_bg_start">시작 색상 (HEX)</string>
+    <string name="layout_editor_bg_end">종료 색상 (HEX)</string>
+    <string name="layout_editor_lock">타이머 잠금</string>
+    <string name="layout_editor_lock_desc">오작동으로 인한 메뉴 열림 방지</string>
+    <string name="layout_editor_confirm_reset">초기화 확인 창 표시</string>
+    <string name="layout_editor_split_debounce">입력 방지 지연 시간 (ms)</string>
+    <string name="layout_editor_timer_shadow">타이머 그림자</string>
+    <string name="layout_editor_segment_opacity">구간 불투명도</string>
+    <string name="layout_editor_auto_lock_fullscreen">전체 화면 시 자동 잠금</string>
+    <string name="layout_editor_possible_time_save">가능한 시간 단축 폭</string>
+
+    <string name="timer_toggle_splits">구간 표시 전환</string>
+    <string name="timer_exit_fullscreen">전체 화면 종료</string>
+
+    <string name="timer_reset_confirm_title">기록을 초기화하시겠습니까?</string>
+
+    <string name="timer_reset_confirm_message">정말로 이번 시도를 초기화하시겠습니까?</string>
+
+    <!-- Timer Control Labels -->
+    <string name="timer_control_start">시작</string>
+    <string name="timer_control_split">구간</string>
+    <string name="timer_control_resume">재개</string>
+    <string name="timer_control_pause">일시 정지</string>
+    <string name="timer_control_undo">구간 취소</string>
+    <string name="timer_control_skip">구간 건너뛰기</string>
+    <string name="timer_control_reset">초기화</string>
+
+    <!-- About / Legal Screen -->
+    <string name="settings_about_header">정보</string>
+    <string name="settings_about_title">정보 및 라이선스</string>
+    <string name="settings_about_desc">법적 공지, 버전 정보 및 오픈소스 라이선스</string>
+    <string name="settings_rate_app">Google Play 평점 남기기</string>
+    <string name="settings_rate_app_desc">Play 스토어에 평점 및 리뷰 남기기</string>
+    <string name="about_title">정보 및 라이선스</string>
+    <string name="about_version">버전 %1$s</string>
+    <string name="about_developer">개발자</string>
+    <string name="about_developer_value">Charlouw</string>
+    <string name="about_legal_mentions_title">법적 고지</string>
+    <string name="about_legal_mentions_desc">이 모바일 애플리케이션은 오픈소스 프로젝트로 제공됩니다. 모든 기능은 데이터를 수집하지 않고 기기에서 로컬로 실행됩니다.</string>
+    <string name="about_licenses_title">오픈소스 라이선스</string>
+    <string name="about_licenses_desc">이 애플리케이션은 오픈소스 라이선스를 따르는 라이브러리를 사용합니다. 아래는 사용된 타사 컴포넌트 정보입니다:</string>
+    <string name="license_livesplit_core_title">LiveSplit Core</string>
+    <string name="license_livesplit_core_desc">MIT 또는 Apache License 2.0 라이선스로 배포됨</string>
+    <string name="license_view_mit">MIT 라이선스 보기</string>
+    <string name="license_view_apache">Apache License 2.0 보기</string>
+
+    <!-- Timer Control Finish -->
+    <string name="timer_control_finish">완료</string>
+
+    <!-- Timer Phases -->
+    <string name="phase_running">진행 중</string>
+    <string name="phase_paused">일시 정지됨</string>
+    <string name="phase_ended">완료됨</string>
+    <string name="phase_not_running">중지됨</string>
+    <string name="editor_reset_dialog_title">통계 재설정</string>
+    <string name="editor_reset_dialog_text">시도 횟수, 기록, PB 및 최고 구간(Best) 통계가 모두 재설정됩니다. 구간 이름은 유지됩니다.\n\n이 작업은 되돌릴 수 없습니다.</string>
+    <string name="editor_reset_dialog_confirm">재설정</string>
+    <string name="editor_reset_stats_button">통계 초기화</string>
+    <string name="editor_reset_stats_success">통계가 초기화되었습니다</string>
+
+    <string name="runs_list_import_url_title">링크 / URL로 가져오기</string>
+    <string name="runs_list_import_url_placeholder">https://livesplit.org/splits/...</string>
+    <string name="runs_list_import_url_label">LSS 파일 URL 주소</string>
+    <string name="runs_list_import_url_btn">다운로드 및 가져오기</string>
+    <string name="runs_list_import_success">LSS 파일을 성공적으로 가져왔습니다!</string>
+    <string name="runs_list_import_error">오류: %1$s</string>
+    <string name="runs_list_speedrun_dialog_title">Speedrun.com 가져오기</string>
+    <string name="runs_list_speedrun_game_placeholder">예: Celeste, Portal...</string>
+    <string name="runs_list_speedrun_game_label">게임 검색</string>
+    <string name="runs_list_speedrun_selected_game">게임: %1$s</string>
+    <string name="runs_list_speedrun_selected_category">카테고리: %1$s</string>
+    <string name="runs_list_speedrun_only_splits">구간 파일이 있는 기록만</string>
+    <string name="runs_list_speedrun_no_runs">기록을 찾을 수 없습니다.</string>
+    <string name="runs_list_speedrun_no_splits_toast">이 기록은 splits.io에 연동된 구간 파일이 없습니다</string>
+    <string name="runs_list_speedrun_import_success">Speedrun.com 구간 파일을 가져왔습니다!</string>
+    <string name="runs_list_speedrun_badge_importable">가져오기 가능</string>
+    <string name="runs_list_speedrun_badge_no_splits">구간 파일 없음</string>
+    <string name="runs_list_speedrun_place_format">%1$d위 — %2$s</string>
+
+    <string name="remote_tuto_title">PC 연결 가이드 (단계 %1$d / 6)</string>
+    <string name="remote_tuto_step_1">1. LiveSplit을 다운로드합니다. 모든 기능을 완벽하게 지원하는 \"Dev Build\" 버전 사용을 권장합니다. 1.8.37 버전도 연결 가능하지만 일부 원격 옵션이 제한됩니다:</string>
+    <string name="remote_tuto_step_1_hint">(링크를 클릭하면 브라우저에서 열립니다)</string>
+    <string name="remote_tuto_step_2">2. LiveSplit 프로그램에서 마우스 우클릭 후 \'Settings\'를 선택합니다.</string>
+    <string name="remote_tuto_step_3">3. 설정에서 \'Startup Behavior\' 옵션을 \'Start TCP Server\'로 체크하여 실행 시 자동으로 서버가 열리도록 합니다.</string>
+    <string name="remote_tuto_step_4">4. 서버가 시작되지 않은 경우, 우클릭 -> Control -> Start TCP Server를 선택하세요.</string>
+    <string name="remote_tuto_step_5">5. PC의 로컬 IP 주소를 입력하고, 포트를 수정한 경우 해당하는 포트 번호를 입력합니다.</string>
+    <string name="remote_tuto_step_6">6. 마지막으로, \'Connect\' 버튼을 클릭하여 PC의 LiveSplit과 연결을 설정하세요!</string>
+    <string name="remote_tuto_btn_next">다음</string>
+    <string name="remote_tuto_btn_prev">이전</string>
+    <string name="remote_tuto_btn_close">닫기</string>
+    <string name="remote_tuto_btn_finish">완료</string>
+    <string name="remote_format_header">타이머 표시 형식</string>
+    <string name="remote_format_select">형식 선택</string>
+    <string name="remote_toast_response">응답: %1$s</string>
+
+    <string name="timer_export_chooser_title">LiveSplit 내보내기 (.lss)</string>
+    <string name="timer_export_error">내보내기 실패: %1$s</string>
+    <string name="timer_desc_share">LSS 내보내기</string>
+    <string name="timer_desc_stats">기록 통계 보기</string>
+    <string name="timer_sum_of_best">최고 기록 합계 (SOB)</string>
+
+    <string name="stats_title">통계 및 기록</string>
+    <string name="stats_no_segments">구간이 정의되지 않았습니다.</string>
+    <string name="stats_attempts">시도 횟수</string>
+    <string name="stats_resets_format">초기화 횟수: %1$d</string>
+    <string name="stats_completed">완주 횟수</string>
+    <string name="stats_rate_format">완주율: %1$.1f%%</string>
+    <string name="stats_pb_title">개인 최고 기록 (PB)</string>
+    <string name="stats_pb_desc">가장 빠른 완주 시간</string>
+    <string name="stats_sob_title">최고 기록 합계 (SOB)</string>
+    <string name="stats_sob_desc">각 구간별 골드 기록 합산</string>
+    <string name="stats_pb_progression">개인 최고 기록 그래프</string>
+    <string name="stats_chart_hint">최소 2회 완주해야 통계 그래프가 표시됩니다.</string>
+    <string name="stats_regularity_analysis">구간별 일관성 분석</string>
+    <string name="stats_segment_stats_summary">평균: %1$s | 골드: %2$s</string>
+
+    <string name="main_import_success">가져옴: %1$s — %2$s</string>
+    <string name="main_import_parse_failed">.lss 분석 실패: %1$s</string>
+    <string name="main_import_error">파일을 가져오는 중 오류 발생: %1$s</string>
+    <string name="runs_list_speedrun_run_id_format">기록 ID: %1$s</string>
+    <string name="settings_language_es">스페인어</string>
+    <string name="settings_language_it">이탈리아어</string>
+    <string name="settings_language_pt">포르투갈어</string>
+    <string name="settings_language_ja">일본어</string>
+    <string name="settings_language_zh">중국어 (간체)</string>
+    <string name="settings_language_ru">러시아어</string>
+    <string name="settings_language_ko">한국어</string>
+    <string name="settings_language_pl">폴란드어</string>
+    <string name="timing_method_real_time">Real Time</string>
+    <string name="timing_method_game_time">Game Time</string>
+    <string name="comparison_pb">Personal Best</string>
+    <string name="comparison_best_segments">Best Segments</string>
+    <string name="comparison_average_segments">Average Segments</string>
+    <string name="comparison_worst_segments">Worst Segments</string>
+    <string name="comparison_median_segments">Median Segments</string>
+    <string name="comparison_latest_run">Latest Run</string>
+    <string name="layout_editor_preset_format">프리셋: %1$s</string>
+    <string name="color_preset_green">초록색</string>
+    <string name="color_preset_blue">파란색</string>
+    <string name="color_preset_gray">회색</string>
+    <string name="color_preset_red">빨간색</string>
+    <string name="color_preset_orange">주황색</string>
+    <string name="color_preset_gold">금색</string>
+    <string name="color_preset_white">흰색</string>
+</resources>

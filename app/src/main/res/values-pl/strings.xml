@@ -1,0 +1,323 @@
+<resources>
+    <string name="app_name">SwiftSplit</string>
+    <string name="back">Wstecz</string>
+    <string name="save">Zapisz</string>
+    <string name="delete">Usuń</string>
+    <string name="edit">Edytuj</string>
+    <string name="add">Dodaj</string>
+    <string name="cancel">Anuluj</string>
+    <string name="confirm">Potwierdź</string>
+
+    <!-- Runs List Screen -->
+    <string name="runs_list_title">SwiftSplit</string>
+    <string name="runs_list_pc_remote">PC Remote</string>
+    <string name="runs_list_settings">Ustawienia</string>
+    <string name="runs_list_empty_title">Nie zaimportowano jeszcze żadnych biegów</string>
+    <string name="runs_list_empty_desc">Stuknij przycisk +, aby zaimportować plik LiveSplit .lss lub utworzyć bieg.</string>
+    <string name="runs_list_import_lss">Zaimportuj plik LSS</string>
+    <string name="runs_list_no_pb">Brak PB</string>
+    <string name="search">Szukaj</string>
+    <string name="close">Zamknij</string>
+
+    <!-- New Run Dialog -->
+    <string name="new_run_dialog_title">Nowy Bieg</string>
+    <string name="new_run_dialog_quick">Szybki Stoper</string>
+    <string name="new_run_dialog_quick_desc">Natychmiast rozpocznij prosty stoper bez konfiguracji</string>
+    <string name="new_run_dialog_custom">Stwórz Własny Bieg</string>
+    <string name="new_run_dialog_custom_desc">Skonfiguruj informacje o grze i stwórz podziały od zera</string>
+    <string name="new_run_dialog_import">Zaimportuj Plik LiveSplit (.lss)</string>
+    <string name="new_run_dialog_import_desc">Zaimportuj plik podziałów z pamięci lokalnej</string>
+    <string name="new_run_dialog_import_url">Importuj przez Link / URL</string>
+    <string name="new_run_dialog_import_url_desc">Pobierz plik .lss bezpośrednio, wklejając jego adres URL</string>
+    <string name="new_run_dialog_speedrun">Szukaj na Speedrun.com</string>
+    <string name="new_run_dialog_speedrun_desc">Wyszukaj grę i pobierz referencyjne podziały</string>
+    <string name="new_run_dialog_field_game">Nazwa Gry</string>
+    <string name="new_run_dialog_field_category">Kategoria (np. Any%)</string>
+    <string name="new_run_dialog_field_platform">Platforma (opcjonalnie)</string>
+    <string name="new_run_dialog_create">Stwórz</string>
+
+    <!-- Timer Screen -->
+    <string name="timer_title">Stoper</string>
+    <string name="timer_edit_splits">Edytuj Podziały</string>
+    <string name="timer_active_comparison">Porównanie: %1$s</string>
+    <string name="timer_attempts">Próby: %1$d</string>
+    <string name="timer_attempts_label">Próby</string>
+    <string name="timer_finished">Ukończono</string>
+
+    <!-- Split Editor Screen -->
+    <string name="editor_title">Edytuj Podziały</string>
+    <string name="editor_game_name">Nazwa Gry</string>
+    <string name="editor_category_name">Nazwa Kategorii</string>
+    <string name="editor_splits_count">Podziały (%1$d)</string>
+    <string name="editor_split_name_placeholder">Nazwa Podziału</string>
+    <string name="editor_add_split">Dodaj Podział</string>
+    <string name="editor_move_up">Przenieś w Górę</string>
+    <string name="editor_move_down">Przenieś w Dół</string>
+
+    <!-- Remote Screen -->
+    <string name="remote_title">PC Remote</string>
+    <string name="remote_conn_settings">Ustawienia Połączenia</string>
+    <string name="remote_ip_address">Adres IP</string>
+    <string name="remote_port">Port</string>
+    <string name="remote_connect">Połącz</string>
+    <string name="remote_disconnect">Rozłącz</string>
+    <string name="remote_console_response">Odpowiedź Konsoli</string>
+    <string name="remote_no_response">Brak odpowiedzi</string>
+    <string name="remote_controls">Zdalne Sterowanie</string>
+    <string name="remote_btn_split">Start / Podział / Koniec</string>
+    <string name="remote_btn_pause">Pauza</string>
+    <string name="remote_btn_undo">Cofnij Podział</string>
+    <string name="remote_btn_skip">Pomiń Podział</string>
+    <string name="remote_btn_reset">Reset</string>
+    <string name="remote_btn_get_time">Pobierz Czas</string>
+    <string name="remote_btn_get_delta">Pobierz Deltę</string>
+    <string name="remote_btn_ping">Ping PC</string>
+    <string name="remote_live_timer">LIVE PC TIMER</string>
+    <string name="remote_btn_resume">Wznów</string>
+    <string name="remote_empty_title">Połącz z Serwerem LiveSplit na PC</string>
+    <string name="remote_empty_desc">Upewnij się, że serwer TCP LiveSplit jest uruchomiony na porcie 16834</string>
+    <string name="remote_conn_failed">Połączenie nieudane</string>
+    <string name="remote_reconnect_failed">Połączenie utracone. Reaktywacja niemożliwa.</string>
+    <string name="remote_current_split">Aktualny Podział</string>
+    <string name="remote_active">Aktywny</string>
+    <string name="remote_reconnecting">Połączenie utracone. Ponowna próba (%1$d/3)...</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_title">Ustawienia</string>
+    <string name="settings_timer_header">Ustawienia Stopera</string>
+    <string name="settings_timing_method">Metoda Pomiaru Czasu</string>
+    <string name="settings_active_comparison">Aktywne Porównanie</string>
+    <string name="settings_global_hotkeys">Aktywuj Klawisze Globalne</string>
+    <string name="settings_global_hotkeys_desc">Umożliwia przyciskom głośności kontrolowanie podziałów</string>
+    <string name="settings_save_quick_runs">Zapisuj Szybkie Biegi</string>
+    <string name="settings_save_quick_runs_desc">Automatycznie zapisuj szybkie biegi ze stopera na liście</string>
+    <string name="settings_language">Język</string>
+    <string name="settings_theme">Motyw</string>
+    <string name="settings_theme_system">Systemowy</string>
+    <string name="settings_theme_light">Jasny</string>
+    <string name="settings_theme_dark">Ciemny</string>
+    <string name="settings_language_auto">Auto</string>
+    <string name="settings_language_en">English</string>
+    <string name="settings_language_fr">Français</string>
+    <string name="settings_language_de">Deutsch</string>
+    <string name="settings_appearance_header">Wygląd</string>
+
+    <!-- Network Settings -->
+    <string name="settings_network_header">Sieć</string>
+    <string name="settings_polling_delay">Opóźnienie odpytywania</string>
+    <string name="settings_polling_delay_desc">Interwał odświeżania czasu z PC w trybie zdalnym</string>
+    <string name="settings_network_timeout">Limit czasu sieci</string>
+    <string name="settings_network_timeout_desc">Maksymalny czas oczekiwania podczas łączenia lub odczytu z serwera LiveSplit</string>
+    <string name="settings_network_ms_value">%1$d ms</string>
+
+    <!-- Customization -->
+    <string name="settings_customization">Personalizacja</string>
+    <string name="settings_customization_desc">Format stopera, kolory i preferencje wyświetlania</string>
+
+    <!-- Layout Editor -->
+    <string name="layout_editor_title">Układ Stopera</string>
+    <string name="layout_editor_preview_header">Podgląd</string>
+    <string name="layout_editor_format_header">Format Czasu</string>
+    <string name="layout_editor_leading_zeros">Pokazuj wiodące zera</string>
+    <string name="layout_editor_leading_zeros_desc">Wyświetlaj jako 00:05:30 zamiast 5:30</string>
+    <string name="layout_editor_show_fraction">Pokazuj części dziesiętne</string>
+    <string name="layout_editor_show_fraction_desc">Wyświetlaj ułamki sekund po przecinku</string>
+    <string name="layout_editor_decimal_places">Miejsca po przecinku</string>
+    <string name="layout_editor_decimal_places_value">%1$d cyfra/y</string>
+    <string name="layout_editor_color_header">Kolor Stopera</string>
+    <string name="layout_editor_color_mode">Tryb koloru</string>
+    <string name="layout_editor_color_delta">Delta porównania</string>
+    <string name="layout_editor_color_delta_desc">Zielony/czerwony w zależności od tempa względem porównania</string>
+    <string name="layout_editor_color_state">Stan stopera</string>
+    <string name="layout_editor_color_state_desc">Kolor w zależności od bezczynności, biegu, pauzy lub końca</string>
+    <string name="layout_editor_state_colors_legend">Kolory stanów</string>
+    <string name="layout_editor_state_idle">Bezczynny</string>
+    <string name="layout_editor_state_running">W biegu</string>
+    <string name="layout_editor_state_paused">Wstrzymany</string>
+    <string name="layout_editor_state_finished">Ukończony</string>
+    <string name="layout_editor_preview_tap_hint">Stuknij, aby podglądnąć: %1$s</string>
+    <string name="layout_editor_timer_format">Format stopera</string>
+    <string name="layout_editor_format_examples">1s: %1$s · 1h: %2$s</string>
+    <string name="layout_editor_splits_header">Układ podziałów</string>
+    <string name="layout_editor_show_splits">Pokazuj listę podziałów</string>
+    <string name="layout_editor_show_splits_desc">Pokaż lub ukryj segmenty pod stoperem</string>
+    <string name="layout_editor_orientation">Orientacja pełnoekranowa</string>
+    <string name="layout_editor_orientation_portrait">Pionowa (portrait)</string>
+    <string name="layout_editor_orientation_landscape">Pozioma (landscape)</string>
+    <string name="layout_editor_orientation_auto">Automatyczna (czujnik)</string>
+    <string name="layout_editor_splits_fraction">Pokazuj ułamki podziałów</string>
+    <string name="layout_editor_splits_fraction_desc">Pokazuj części dziesiętne sekund w deltach podziałów</string>
+    <string name="layout_editor_splits_decimals">Miejsca dziesiętne delty</string>
+    <string name="layout_editor_split_approach_threshold">Delta zbliżania do podziału</string>
+    <string name="layout_editor_split_approach_threshold_disabled">Wyłączone</string>
+    <string name="layout_editor_split_approach_threshold_value">%1$d s przed podziałem</string>
+    <string name="layout_editor_split_approach_threshold_custom">Własna wartość…</string>
+    <string name="layout_editor_split_approach_threshold_custom_title">Własny próg zbliżania</string>
+    <string name="layout_editor_split_approach_threshold_custom_hint">Sekundy (0 = wyłączone, maks 120)</string>
+    <string name="layout_editor_delta_ahead_gaining">Z przodu (zyskujesz)</string>
+    <string name="layout_editor_delta_ahead_losing">Z przodu (tracisz)</string>
+    <string name="layout_editor_delta_behind_losing">Z tyłu (tracisz)</string>
+    <string name="layout_editor_delta_behind_gaining">Z tyłu (zyskujesz)</string>
+    <string name="layout_editor_delta_best_segment">Najlepszy segment</string>
+    <string name="layout_editor_delta_exact">Dokładnie</string>
+
+    <string name="layout_editor_controls_header">Przyciski</string>
+    <string name="layout_editor_show_undo">Pokazuj przycisk cofania</string>
+    <string name="layout_editor_show_skip">Pokazuj przycisk pomijania</string>
+    <string name="layout_editor_show_pause">Pokazuj przycisk pauzy</string>
+    <string name="layout_editor_enable_vibration">Wibracje</string>
+    <string name="layout_editor_enable_vibration_desc">Wibruj przy podziale</string>
+    <string name="layout_editor_show_sob">Pokazuj Sumę Najlepszych (SOB)</string>
+    <string name="layout_editor_show_durations">Pokazuj czas segmentów</string>
+    <string name="layout_editor_show_durations_desc">Wyświetlaj czas dla każdej sekcji</string>
+    <string name="layout_editor_minimalist">Tryb minimalistyczny</string>
+    <string name="layout_editor_minimalist_desc">Ukryj nagłówki i stopki</string>
+    <string name="layout_editor_use_subsplits">Używaj Podpodziałów</string>
+    <string name="layout_editor_use_subsplits_desc">Grupuj segmenty zaczynające się od -</string>
+    <string name="layout_editor_show_pts">Pokazuj możliwą oszczędność czasu</string>
+    <string name="layout_editor_bg_gradient">Gradient tła</string>
+    <string name="layout_editor_bg_start">Kolor początkowy (HEX)</string>
+    <string name="layout_editor_bg_end">Kolor końcowy (HEX)</string>
+    <string name="layout_editor_lock">Zablokuj stoper</string>
+    <string name="layout_editor_lock_desc">Zapobiegaj przypadkowemu otwarciu menu</string>
+    <string name="layout_editor_confirm_reset">Potwierdzaj reset</string>
+    <string name="layout_editor_split_debounce">Debounce podziału (ms)</string>
+    <string name="layout_editor_timer_shadow">Cień stopera</string>
+    <string name="layout_editor_segment_opacity">Przezroczystość segmentów</string>
+    <string name="layout_editor_auto_lock_fullscreen">Autoblokada w pełnym ekranie</string>
+    <string name="layout_editor_possible_time_save">Możliwa oszczędność czasu</string>
+
+    <string name="timer_toggle_splits">Przełącz podziały</string>
+    <string name="timer_exit_fullscreen">Wyjdź z pełnego ekranu</string>
+
+    <string name="timer_reset_confirm_title">Zresetować bieg?</string>
+
+    <string name="timer_reset_confirm_message">Czy na pewno chcesz zresetować tę próbę?</string>
+
+    <!-- Timer Control Labels -->
+    <string name="timer_control_start">Start</string>
+    <string name="timer_control_split">Podział</string>
+    <string name="timer_control_resume">Wznów</string>
+    <string name="timer_control_pause">Pauza</string>
+    <string name="timer_control_undo">Cofnij podział</string>
+    <string name="timer_control_skip">Pomiń podział</string>
+    <string name="timer_control_reset">Reset</string>
+
+    <!-- About / Legal Screen -->
+    <string name="settings_about_header">O programie</string>
+    <string name="settings_about_title">O programie i Licencje</string>
+    <string name="settings_about_desc">Notki prawne, wersja i licencje open source</string>
+    <string name="settings_rate_app">Oceń w Google Play</string>
+    <string name="settings_rate_app_desc">Zostaw opinię w sklepie Play Store</string>
+    <string name="about_title">O programie i Licencje</string>
+    <string name="about_version">Wersja %1$s</string>
+    <string name="about_developer">Autor</string>
+    <string name="about_developer_value">Charlouw</string>
+    <string name="about_legal_mentions_title">Informacje Prawne</string>
+    <string name="about_legal_mentions_desc">Ta aplikacja mobilna jest publikowana jako projekt open source. Wszystkie funkcje działają lokalnie na urządzeniu bez zbierania danych.</string>
+    <string name="about_licenses_title">Licencje Open Source</string>
+    <string name="about_licenses_desc">Ta aplikacja używa bibliotek na licencjach open source. Poniżej szczegóły komponentów zewnętrznych:</string>
+    <string name="license_livesplit_core_title">LiveSplit Core</string>
+    <string name="license_livesplit_core_desc">Podwójna licencja MIT lub Apache License 2.0</string>
+    <string name="license_view_mit">Zobacz licencję MIT</string>
+    <string name="license_view_apache">Zobacz licencję Apache 2.0</string>
+
+    <!-- Timer Control Finish -->
+    <string name="timer_control_finish">Zakończ</string>
+
+    <!-- Timer Phases -->
+    <string name="phase_running">W biegu</string>
+    <string name="phase_paused">Wstrzymany</string>
+    <string name="phase_ended">Ukończony</string>
+    <string name="phase_not_running">Zatrzymany</string>
+    <string name="editor_reset_dialog_title">Resetuj statystyki</string>
+    <string name="editor_reset_dialog_text">Spowoduje to zresetowanie liczby prób, historii, PB i najlepszych segmentów. Nazwy podziałów zostaną zachowane.\n\nTej operacji nie można cofnąć.</string>
+    <string name="editor_reset_dialog_confirm">Resetuj</string>
+    <string name="editor_reset_stats_button">Resetuj statystyki</string>
+    <string name="editor_reset_stats_success">Statystyki zresetowane</string>
+
+    <string name="runs_list_import_url_title">Importuj przez Link / URL</string>
+    <string name="runs_list_import_url_placeholder">https://livesplit.org/splits/...</string>
+    <string name="runs_list_import_url_label">Adres URL pliku LSS</string>
+    <string name="runs_list_import_url_btn">Pobierz i zaimportuj</string>
+    <string name="runs_list_import_success">Plik LSS pomyślnie zaimportowany!</string>
+    <string name="runs_list_import_error">Błąd: %1$s</string>
+    <string name="runs_list_speedrun_dialog_title">Importuj Speedrun.com</string>
+    <string name="runs_list_speedrun_game_placeholder">np. Celeste, Portal...</string>
+    <string name="runs_list_speedrun_game_label">Szukaj gry</string>
+    <string name="runs_list_speedrun_selected_game">Gra: %1$s</string>
+    <string name="runs_list_speedrun_selected_category">Kategoria: %1$s</string>
+    <string name="runs_list_speedrun_only_splits">Tylko z podziałami</string>
+    <string name="runs_list_speedrun_no_runs">Nie znaleziono biegów.</string>
+    <string name="runs_list_speedrun_no_splits_toast">Ten bieg nie ma przypisanych podziałów na splits.io</string>
+    <string name="runs_list_speedrun_import_success">Podziały Speedrun.com zaimportowane!</string>
+    <string name="runs_list_speedrun_badge_importable">Importowalny</string>
+    <string name="runs_list_speedrun_badge_no_splits">Brak podziałów</string>
+    <string name="runs_list_speedrun_place_format">Pozycja %1$d — %2$s</string>
+
+    <string name="remote_tuto_title">Poradnik połączenia z PC (Krok %1$d / 6)</string>
+    <string name="remote_tuto_step_1">1. Pobierz LiveSplit. Zaleca się używanie wersji \"Dev Build\", aby uzyskać wszystkie funkcje. Wersja 1.8.37 działa, ale niektóre funkcje zdalne będą ograniczone:</string>
+    <string name="remote_tuto_step_1_hint">(kliknij w link, aby otworzyć go w przeglądarce)</string>
+    <string name="remote_tuto_step_2">2. Kliknij prawym przyciskiem myszy na LiveSplit i wybierz \'Settings\'.</string>
+    <string name="remote_tuto_step_3">3. W ustawieniach ustaw \'Startup Behavior\' na \'Start TCP Server\', aby komunikacja była gotowa przy uruchomieniu.</string>
+    <string name="remote_tuto_step_4">4. Jeśli serwer nie działa: prawy przycisk myszy -> Control -> Start TCP Server.</string>
+    <string name="remote_tuto_step_5">5. Wpisz lokalny adres IP swojego komputera i zmień port, jeśli go modyfikowałeś.</string>
+    <string name="remote_tuto_step_6">6. Na koniec kliknij przycisk \'Połącz\', aby nawiązać połączenie z LiveSplit na komputerze!</string>
+    <string name="remote_tuto_btn_next">Dalej</string>
+    <string name="remote_tuto_btn_prev">Wstecz</string>
+    <string name="remote_tuto_btn_close">Zamknij</string>
+    <string name="remote_tuto_btn_finish">Zakończ</string>
+    <string name="remote_format_header">Format stopera</string>
+    <string name="remote_format_select">Wybierz format</string>
+    <string name="remote_toast_response">Odpowiedź: %1$s</string>
+
+    <string name="timer_export_chooser_title">Eksportuj LiveSplit (.lss)</string>
+    <string name="timer_export_error">Błąd eksportu: %1$s</string>
+    <string name="timer_desc_share">Eksportuj LSS</string>
+    <string name="timer_desc_stats">Statystyki biegu</string>
+    <string name="timer_sum_of_best">Suma Najlepszych</string>
+
+    <string name="stats_title">Statystyki i Historia</string>
+    <string name="stats_no_segments">Brak zdefiniowanych segmentów.</string>
+    <string name="stats_attempts">Próby</string>
+    <string name="stats_resets_format">Resety: %1$d</string>
+    <string name="stats_completed">Ukończone</string>
+    <string name="stats_rate_format">Współczynnik: %1$.1f%%</string>
+    <string name="stats_pb_title">Rekord życiowy (PB)</string>
+    <string name="stats_pb_desc">Najlepszy czas końcowy</string>
+    <string name="stats_sob_title">Suma Najlepszych (SOB)</string>
+    <string name="stats_sob_desc">Suma złotych segmentów</string>
+    <string name="stats_pb_progression">Progresja rekordu życiowego</string>
+    <string name="stats_chart_hint">Ukończ co najmniej 2 biegi, aby wyświetlić wykres progresji.</string>
+    <string name="stats_regularity_analysis">Analiza stabilności segmentów</string>
+    <string name="stats_segment_stats_summary">Średnia: %1$s | Złoto: %2$s</string>
+
+    <string name="main_import_success">Zaimportowano: %1$s — %2$s</string>
+    <string name="main_import_parse_failed">Nie udało się przeanalizować pliku .lss: %1$s</string>
+    <string name="main_import_error">Błąd importowania pliku: %1$s</string>
+    <string name="runs_list_speedrun_run_id_format">ID Biegu: %1$s</string>
+    <string name="settings_language_es">Hiszpański</string>
+    <string name="settings_language_it">Włoski</string>
+    <string name="settings_language_pt">Portugalski</string>
+    <string name="settings_language_ja">Japoński</string>
+    <string name="settings_language_zh">Chiński (Uproszczony)</string>
+    <string name="settings_language_ru">Rosyjski</string>
+    <string name="settings_language_ko">Koreański</string>
+    <string name="settings_language_pl">Polski</string>
+    <string name="timing_method_real_time">Real Time</string>
+    <string name="timing_method_game_time">Game Time</string>
+    <string name="comparison_pb">Personal Best</string>
+    <string name="comparison_best_segments">Best Segments</string>
+    <string name="comparison_average_segments">Average Segments</string>
+    <string name="comparison_worst_segments">Worst Segments</string>
+    <string name="comparison_median_segments">Median Segments</string>
+    <string name="comparison_latest_run">Latest Run</string>
+    <string name="layout_editor_preset_format">Preset: %1$s</string>
+    <string name="color_preset_green">Zielony</string>
+    <string name="color_preset_blue">Niebieski</string>
+    <string name="color_preset_gray">Szary</string>
+    <string name="color_preset_red">Czerwony</string>
+    <string name="color_preset_orange">Pomarańczowy</string>
+    <string name="color_preset_gold">Złoty</string>
+    <string name="color_preset_white">Biały</string>
+</resources>

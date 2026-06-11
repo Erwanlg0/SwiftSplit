@@ -1,0 +1,323 @@
+<resources>
+    <string name="app_name">SwiftSplit</string>
+    <string name="back">Indietro</string>
+    <string name="save">Salva</string>
+    <string name="delete">Elimina</string>
+    <string name="edit">Modifica</string>
+    <string name="add">Aggiungi</string>
+    <string name="cancel">Annulla</string>
+    <string name="confirm">Conferma</string>
+
+    <!-- Runs List Screen -->
+    <string name="runs_list_title">SwiftSplit</string>
+    <string name="runs_list_pc_remote">Controllo PC</string>
+    <string name="runs_list_settings">Impostazioni</string>
+    <string name="runs_list_empty_title">Nessun tentativo importato</string>
+    <string name="runs_list_empty_desc">Tocca il pulsante + per importare un file .lss di LiveSplit o creare un tentativo.</string>
+    <string name="runs_list_import_lss">Importa file LSS</string>
+    <string name="runs_list_no_pb">Nessun PB</string>
+    <string name="search">Cerca</string>
+    <string name="close">Chiudi</string>
+
+    <!-- New Run Dialog -->
+    <string name="new_run_dialog_title">Nuovo tentativo</string>
+    <string name="new_run_dialog_quick">Cronometro rapido</string>
+    <string name="new_run_dialog_quick_desc">Avvia immediatamente un cronometro semplice senza configurazione</string>
+    <string name="new_run_dialog_custom">Crea tentativo personalizzato</string>
+    <string name="new_run_dialog_custom_desc">Configura le info del gioco e crea segmenti da zero</string>
+    <string name="new_run_dialog_import">Importa file LiveSplit (.lss)</string>
+    <string name="new_run_dialog_import_desc">Importa un file di segmenti dalla memoria locale</string>
+    <string name="new_run_dialog_import_url">Importa tramite link / URL</string>
+    <string name="new_run_dialog_import_url_desc">Scarica un file .lss direttamente incollando il suo indirizzo web</string>
+    <string name="new_run_dialog_speedrun">Cerca su Speedrun.com</string>
+    <string name="new_run_dialog_speedrun_desc">Cerca un gioco e scarica i segmenti di riferimento</string>
+    <string name="new_run_dialog_field_game">Nome del gioco</string>
+    <string name="new_run_dialog_field_category">Categoria (es. Any%)</string>
+    <string name="new_run_dialog_field_platform">Piattaforma (opzionale)</string>
+    <string name="new_run_dialog_create">Crea</string>
+
+    <!-- Timer Screen -->
+    <string name="timer_title">Cronometro</string>
+    <string name="timer_edit_splits">Modifica segmenti</string>
+    <string name="timer_active_comparison">Confronto: %1$s</string>
+    <string name="timer_attempts">Tentativi: %1$d</string>
+    <string name="timer_attempts_label">Tentativi</string>
+    <string name="timer_finished">Terminato</string>
+
+    <!-- Split Editor Screen -->
+    <string name="editor_title">Modifica segmenti</string>
+    <string name="editor_game_name">Nome del gioco</string>
+    <string name="editor_category_name">Nome della categoria</string>
+    <string name="editor_splits_count">Segmenti (%1$d)</string>
+    <string name="editor_split_name_placeholder">Nome del segmento</string>
+    <string name="editor_add_split">Aggiungi segmento</string>
+    <string name="editor_move_up">Sposta su</string>
+    <string name="editor_move_down">Sposta giù</string>
+
+    <!-- Remote Screen -->
+    <string name="remote_title">Controllo PC</string>
+    <string name="remote_conn_settings">Impostazioni di connessione</string>
+    <string name="remote_ip_address">Indirizzo IP</string>
+    <string name="remote_port">Porta</string>
+    <string name="remote_connect">Connetti</string>
+    <string name="remote_disconnect">Disconnetti</string>
+    <string name="remote_console_response">Risposta della console</string>
+    <string name="remote_no_response">Nessuna risposta ancora</string>
+    <string name="remote_controls">Controlli remoti</string>
+    <string name="remote_btn_split">Avvia / Segmento / Termina</string>
+    <string name="remote_btn_pause">Pausa</string>
+    <string name="remote_btn_undo">Annulla segmento</string>
+    <string name="remote_btn_skip">Salta segmento</string>
+    <string name="remote_btn_reset">Reset</string>
+    <string name="remote_btn_get_time">Ottieni tempo</string>
+    <string name="remote_btn_get_delta">Ottieni delta</string>
+    <string name="remote_btn_ping">Esegui ping su PC</string>
+    <string name="remote_live_timer">CRONOMETRO PC IN TEMPO REALE</string>
+    <string name="remote_btn_resume">Riprendi</string>
+    <string name="remote_empty_title">Connetti al server LiveSplit su PC</string>
+    <string name="remote_empty_desc">Assicurati che il server TCP di LiveSplit sia avviato sulla porta 16834</string>
+    <string name="remote_conn_failed">Connessione fallita</string>
+    <string name="remote_reconnect_failed">Connessione persa. Riconnessione impossibile.</string>
+    <string name="remote_current_split">Segmento corrente</string>
+    <string name="remote_active">Attivo</string>
+    <string name="remote_reconnecting">Connessione persa. Riprovo (%1$d/3)...</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_title">Impostazioni</string>
+    <string name="settings_timer_header">Impostazioni cronometro</string>
+    <string name="settings_timing_method">Metodo di cronometraggio</string>
+    <string name="settings_active_comparison">Confronto attivo</string>
+    <string name="settings_global_hotkeys">Abilita tasti di scelta rapida globali</string>
+    <string name="settings_global_hotkeys_desc">Consente ai pulsanti del volume di controllare i segmenti</string>
+    <string name="settings_save_quick_runs">Salva corse rapide</string>
+    <string name="settings_save_quick_runs_desc">Salva automaticamente i tentativi del cronometro rapido nell\'elenco</string>
+    <string name="settings_language">Lingua</string>
+    <string name="settings_theme">Tema</string>
+    <string name="settings_theme_system">Sistema</string>
+    <string name="settings_theme_light">Chiaro</string>
+    <string name="settings_theme_dark">Scuro</string>
+    <string name="settings_language_auto">Auto</string>
+    <string name="settings_language_en">English</string>
+    <string name="settings_language_fr">Français</string>
+    <string name="settings_language_de">Deutsch</string>
+    <string name="settings_appearance_header">Aspetto</string>
+
+    <!-- Network Settings -->
+    <string name="settings_network_header">Rete</string>
+    <string name="settings_polling_delay">Ritardo di polling</string>
+    <string name="settings_polling_delay_desc">Intervallo tra gli aggiornamenti del cronometro del PC quando connesso tramite telecomando</string>
+    <string name="settings_network_timeout">Timeout di rete</string>
+    <string name="settings_network_timeout_desc">Tempo massimo di attesa durante la connessione o la lettura dal server LiveSplit</string>
+    <string name="settings_network_ms_value">%1$d ms</string>
+
+    <!-- Customization -->
+    <string name="settings_customization">Personalizzazione</string>
+    <string name="settings_customization_desc">Formato del cronometro, colori e preferenze di visualizzazione</string>
+
+    <!-- Layout Editor -->
+    <string name="layout_editor_title">Layout del cronometro</string>
+    <string name="layout_editor_preview_header">Anteprima</string>
+    <string name="layout_editor_format_header">Formato ora</string>
+    <string name="layout_editor_leading_zeros">Mostra zeri iniziali</string>
+    <string name="layout_editor_leading_zeros_desc">Visualizza come 00:05:30 invece di 5:30</string>
+    <string name="layout_editor_show_fraction">Mostra decimali</string>
+    <string name="layout_editor_show_fraction_desc">Visualizza frazioni di secondo dopo la virgola</string>
+    <string name="layout_editor_decimal_places">Cifre decimali</string>
+    <string name="layout_editor_decimal_places_value">%1$d cifra/e</string>
+    <string name="layout_editor_color_header">Colore del cronometro</string>
+    <string name="layout_editor_color_mode">Modalità colore</string>
+    <string name="layout_editor_color_delta">Delta di confronto</string>
+    <string name="layout_editor_color_delta_desc">Verde/rosso in base al passo rispetto al confronto</string>
+    <string name="layout_editor_color_state">Stato del cronometro</string>
+    <string name="layout_editor_color_state_desc">Colore in base a inattivo, in esecuzione, in pausa o terminato</string>
+    <string name="layout_editor_state_colors_legend">Colori di stato</string>
+    <string name="layout_editor_state_idle">Inattivo</string>
+    <string name="layout_editor_state_running">In esecuzione</string>
+    <string name="layout_editor_state_paused">In pausa</string>
+    <string name="layout_editor_state_finished">Terminato</string>
+    <string name="layout_editor_preview_tap_hint">Tocca per l\'anteprima: %1$s</string>
+    <string name="layout_editor_timer_format">Formato del cronometro</string>
+    <string name="layout_editor_format_examples">1s: %1$s · 1h: %2$s</string>
+    <string name="layout_editor_splits_header">Layout segmenti</string>
+    <string name="layout_editor_show_splits">Mostra elenco segmenti</string>
+    <string name="layout_editor_show_splits_desc">Mostra o nascondi i segmenti sotto il cronometro</string>
+    <string name="layout_editor_orientation">Orientamento a schermo intero</string>
+    <string name="layout_editor_orientation_portrait">Verticale (portrait)</string>
+    <string name="layout_editor_orientation_landscape">Orizzontale (landscape)</string>
+    <string name="layout_editor_orientation_auto">Automatico (sensore)</string>
+    <string name="layout_editor_splits_fraction">Mostra decimali dei segmenti</string>
+    <string name="layout_editor_splits_fraction_desc">Mostra frazioni di secondo sui delta dei segmenti</string>
+    <string name="layout_editor_splits_decimals">Cifre decimali delta</string>
+    <string name="layout_editor_split_approach_threshold">Delta di avvicinamento al segmento</string>
+    <string name="layout_editor_split_approach_threshold_disabled">Disabilitato</string>
+    <string name="layout_editor_split_approach_threshold_value">%1$d s prima del segmento</string>
+    <string name="layout_editor_split_approach_threshold_custom">Valore personalizzato…</string>
+    <string name="layout_editor_split_approach_threshold_custom_title">Soglia di avvicinamento personalizzata</string>
+    <string name="layout_editor_split_approach_threshold_custom_hint">Secondi (0 = disabilitato, max 120)</string>
+    <string name="layout_editor_delta_ahead_gaining">In vantaggio (guadagno)</string>
+    <string name="layout_editor_delta_ahead_losing">In vantaggio (perdita)</string>
+    <string name="layout_editor_delta_behind_losing">In svantaggio (perdita)</string>
+    <string name="layout_editor_delta_behind_gaining">In svantaggio (guadagno)</string>
+    <string name="layout_editor_delta_best_segment">Miglior segmento</string>
+    <string name="layout_editor_delta_exact">Esatto</string>
+
+    <string name="layout_editor_controls_header">Visibilità pulsanti</string>
+    <string name="layout_editor_show_undo">Mostra pulsante annulla</string>
+    <string name="layout_editor_show_skip">Mostra pulsante salta</string>
+    <string name="layout_editor_show_pause">Mostra pulsante pausa</string>
+    <string name="layout_editor_enable_vibration">Abilita feedback tattile</string>
+    <string name="layout_editor_enable_vibration_desc">Vibra al segmento</string>
+    <string name="layout_editor_show_sob">Mostra Somma dei migliori (SOB)</string>
+    <string name="layout_editor_show_durations">Mostra durata segmenti</string>
+    <string name="layout_editor_show_durations_desc">Visualizza il tempo per ogni sezione</string>
+    <string name="layout_editor_minimalist">Modalità minimalista</string>
+    <string name="layout_editor_minimalist_desc">Nascondi intestazioni e piè di pagina</string>
+    <string name="layout_editor_use_subsplits">Usa sub-segmenti</string>
+    <string name="layout_editor_use_subsplits_desc">Raggruppa i segmenti che iniziano con -</string>
+    <string name="layout_editor_show_pts">Mostra Possibile risparmio di tempo</string>
+    <string name="layout_editor_bg_gradient">Gradiente di sfondo</string>
+    <string name="layout_editor_bg_start">Colore di inizio (HEX)</string>
+    <string name="layout_editor_bg_end">Colore di fine (HEX)</string>
+    <string name="layout_editor_lock">Blocca cronometro</string>
+    <string name="layout_editor_lock_desc">Previene l\'apertura accidentale del menu</string>
+    <string name="layout_editor_confirm_reset">Conferma reset</string>
+    <string name="layout_editor_split_debounce">Debounce del segmento (ms)</string>
+    <string name="layout_editor_timer_shadow">Ombra del cronometro</string>
+    <string name="layout_editor_segment_opacity">Opacità dei segmenti</string>
+    <string name="layout_editor_auto_lock_fullscreen">Blocco automatico in schermo intero</string>
+    <string name="layout_editor_possible_time_save">Possibile risparmio di tempo</string>
+
+    <string name="timer_toggle_splits">Attiva/disattiva segmenti</string>
+    <string name="timer_exit_fullscreen">Esci da schermo intero</string>
+
+    <string name="timer_reset_confirm_title">Ripristinare tentativo?</string>
+
+    <string name="timer_reset_confirm_message">Sei sicuro di voler ripristinare questo tentativo?</string>
+
+    <!-- Timer Control Labels -->
+    <string name="timer_control_start">Inizia</string>
+    <string name="timer_control_split">Segmento</string>
+    <string name="timer_control_resume">Riprendi</string>
+    <string name="timer_control_pause">Pausa</string>
+    <string name="timer_control_undo">Annulla segmento</string>
+    <string name="timer_control_skip">Salta segmento</string>
+    <string name="timer_control_reset">Reset</string>
+
+    <!-- About / Legal Screen -->
+    <string name="settings_about_header">Info</string>
+    <string name="settings_about_title">Info e Licenze</string>
+    <string name="settings_about_desc">Note legali, versione e licenze open source</string>
+    <string name="settings_rate_app">Valuta su Google Play</string>
+    <string name="settings_rate_app_desc">Lascia una recensione sul Play Store</string>
+    <string name="about_title">Info e Licenze</string>
+    <string name="about_version">Versione %1$s</string>
+    <string name="about_developer">Sviluppatore</string>
+    <string name="about_developer_value">Charlouw</string>
+    <string name="about_legal_mentions_title">Note Legali</string>
+    <string name="about_legal_mentions_desc">Questa applicazione mobile è pubblicata come progetto open source. Tutte le funzionalità vengono eseguite localmente sul dispositivo senza raccolta di dati.</string>
+    <string name="about_licenses_title">Licenze Open Source</string>
+    <string name="about_licenses_desc">Questa applicazione utilizza librerie con licenza open source. Di seguito i dettagli dei componenti di terze parti:</string>
+    <string name="license_livesplit_core_title">LiveSplit Core</string>
+    <string name="license_livesplit_core_desc">Doppia licenza MIT o Apache License 2.0</string>
+    <string name="license_view_mit">Visualizza Licenza MIT</string>
+    <string name="license_view_apache">Visualizza Licenza Apache 2.0</string>
+
+    <!-- Timer Control Finish -->
+    <string name="timer_control_finish">Termina</string>
+
+    <!-- Timer Phases -->
+    <string name="phase_running">In esecuzione</string>
+    <string name="phase_paused">In pausa</string>
+    <string name="phase_ended">Terminato</string>
+    <string name="phase_not_running">Interrotto</string>
+    <string name="editor_reset_dialog_title">Ripristina statistiche</string>
+    <string name="editor_reset_dialog_text">Questo ripristinerà il conteggio dei tentativi, la cronologia, i PB e i migliori segmenti. I nomi dei segmenti saranno mantenuti.\n\nQuesta azione non può essere annullata.</string>
+    <string name="editor_reset_dialog_confirm">Ripristina</string>
+    <string name="editor_reset_stats_button">Ripristina statistiche</string>
+    <string name="editor_reset_stats_success">Statistiche ripristinate</string>
+
+    <string name="runs_list_import_url_title">Importa tramite link / URL</string>
+    <string name="runs_list_import_url_placeholder">https://livesplit.org/splits/...</string>
+    <string name="runs_list_import_url_label">Indirizzo URL del file LSS</string>
+    <string name="runs_list_import_url_btn">Scarica e importa</string>
+    <string name="runs_list_import_success">File LSS importato con successo!</string>
+    <string name="runs_list_import_error">Errore: %1$s</string>
+    <string name="runs_list_speedrun_dialog_title">Importa da Speedrun.com</string>
+    <string name="runs_list_speedrun_game_placeholder">es. Celeste, Portal...</string>
+    <string name="runs_list_speedrun_game_label">Cerca un gioco</string>
+    <string name="runs_list_speedrun_selected_game">Gioco: %1$s</string>
+    <string name="runs_list_speedrun_selected_category">Categoria: %1$s</string>
+    <string name="runs_list_speedrun_only_splits">Solo con segmenti</string>
+    <string name="runs_list_speedrun_no_runs">Nessun tentativo trovato.</string>
+    <string name="runs_list_speedrun_no_splits_toast">Questo tentativo non ha segmenti associati su splits.io</string>
+    <string name="runs_list_speedrun_import_success">Segmenti di Speedrun.com importati!</string>
+    <string name="runs_list_speedrun_badge_importable">Importabile</string>
+    <string name="runs_list_speedrun_badge_no_splits">Nessun segmento</string>
+    <string name="runs_list_speedrun_place_format">Classifica %1$d — %2$s</string>
+
+    <string name="remote_tuto_title">Tutorial di connessione PC (Passaggio %1$d / 6)</string>
+    <string name="remote_tuto_step_1">1. Scarica LiveSplit. Si consiglia di utilizzare una \"Dev Build\" per avere tutte le funzionalità. La versione 1.8.37 funziona ma alcune opzioni remote saranno limitate:</string>
+    <string name="remote_tuto_step_1_hint">(fai clic sul link per aprirlo nel browser)</string>
+    <string name="remote_tuto_step_2">2. Fai clic con il pulsante destro del mouse su LiveSplit e fai clic sul pulsante \'Settings\'.</string>
+    <string name="remote_tuto_step_3">3. Nelle impostazioni, imposta \'Startup Behavior\' su \'Start TCP Server\' in modo che la comunicazione sia pronta all\'avvio.</string>
+    <string name="remote_tuto_step_4">4. Se il server non è in esecuzione, fai clic con il pulsante destro del mouse -> Control -> Start TCP Server.</string>
+    <string name="remote_tuto_step_5">5. Inserisci l\'indirizzo IP locale del tuo PC e cambia la porta se l\'hai modificata.</string>
+    <string name="remote_tuto_step_6">6. Infine, fai clic sul pulsante \'Connetti\' per stabilire la connessione con LiveSplit sul tuo PC!</string>
+    <string name="remote_tuto_btn_next">Avanti</string>
+    <string name="remote_tuto_btn_prev">Precedente</string>
+    <string name="remote_tuto_btn_close">Chiudi</string>
+    <string name="remote_tuto_btn_finish">Fine</string>
+    <string name="remote_format_header">Formato cronometro</string>
+    <string name="remote_format_select">Seleziona formato</string>
+    <string name="remote_toast_response">Risposta: %1$s</string>
+
+    <string name="timer_export_chooser_title">Esporta LiveSplit (.lss)</string>
+    <string name="timer_export_error">Errore di esportazione: %1$s</string>
+    <string name="timer_desc_share">Esporta LSS</string>
+    <string name="timer_desc_stats">Statistiche del tentativo</string>
+    <string name="timer_sum_of_best">Somma dei migliori</string>
+
+    <string name="stats_title">Statistiche e Cronologia</string>
+    <string name="stats_no_segments">Nessun segmento definito.</string>
+    <string name="stats_attempts">Tentativi</string>
+    <string name="stats_resets_format">Reset: %1$d</string>
+    <string name="stats_completed">Completati</string>
+    <string name="stats_rate_format">Tasso: %1$.1f%%</string>
+    <string name="stats_pb_title">Miglior tempo personale (PB)</string>
+    <string name="stats_pb_desc">Miglior tempo finale</string>
+    <string name="stats_sob_title">Somma dei migliori (SOB)</string>
+    <string name="stats_sob_desc">Somme dei segmenti d\'oro</string>
+    <string name="stats_pb_progression">Progressione del miglior tempo personale</string>
+    <string name="stats_chart_hint">Completa almeno 2 tentativi per tracciare il grafico di progressione.</string>
+    <string name="stats_regularity_analysis">Analisi della costanza per segmento</string>
+    <string name="stats_segment_stats_summary">Media: %1$s | Oro: %2$s</string>
+
+    <string name="main_import_success">Importato: %1$s — %2$s</string>
+    <string name="main_import_parse_failed">Impossibile analizzare .lss: %1$s</string>
+    <string name="main_import_error">Errore durante l\'importazione del file: %1$s</string>
+    <string name="runs_list_speedrun_run_id_format">ID tentativo: %1$s</string>
+    <string name="settings_language_es">Español</string>
+    <string name="settings_language_it">Italiano</string>
+    <string name="settings_language_pt">Português</string>
+    <string name="settings_language_ja">Giapponese</string>
+    <string name="settings_language_zh">Cinese (Semplificato)</string>
+    <string name="settings_language_ru">Russo</string>
+    <string name="settings_language_ko">Coreano</string>
+    <string name="settings_language_pl">Polacco</string>
+    <string name="timing_method_real_time">Real Time</string>
+    <string name="timing_method_game_time">Game Time</string>
+    <string name="comparison_pb">Personal Best</string>
+    <string name="comparison_best_segments">Best Segments</string>
+    <string name="comparison_average_segments">Average Segments</string>
+    <string name="comparison_worst_segments">Worst Segments</string>
+    <string name="comparison_median_segments">Median Segments</string>
+    <string name="comparison_latest_run">Latest Run</string>
+    <string name="layout_editor_preset_format">Preimpostazione: %1$s</string>
+    <string name="color_preset_green">Verde</string>
+    <string name="color_preset_blue">Blu</string>
+    <string name="color_preset_gray">Grigio</string>
+    <string name="color_preset_red">Rosso</string>
+    <string name="color_preset_orange">Arancione</string>
+    <string name="color_preset_gold">Oro</string>
+    <string name="color_preset_white">Bianco</string>
+</resources>

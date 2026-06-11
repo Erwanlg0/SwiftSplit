@@ -1,0 +1,323 @@
+<resources>
+    <string name="app_name">SwiftSplit</string>
+    <string name="back">Назад</string>
+    <string name="save">Сохранить</string>
+    <string name="delete">Удалить</string>
+    <string name="edit">Изменить</string>
+    <string name="add">Добавить</string>
+    <string name="cancel">Отмена</string>
+    <string name="confirm">Подтвердить</string>
+
+    <!-- Runs List Screen -->
+    <string name="runs_list_title">SwiftSplit</string>
+    <string name="runs_list_pc_remote">ПК пульт</string>
+    <string name="runs_list_settings">Настройки</string>
+    <string name="runs_list_empty_title">Раны еще не импортированы</string>
+    <string name="runs_list_empty_desc">Нажмите кнопку +, чтобы импортировать файл .lss LiveSplit или создать новый ран.</string>
+    <string name="runs_list_import_lss">Импортировать файл LSS</string>
+    <string name="runs_list_no_pb">Нет PB</string>
+    <string name="search">Поиск</string>
+    <string name="close">Закрыть</string>
+
+    <!-- New Run Dialog -->
+    <string name="new_run_dialog_title">Новый ран</string>
+    <string name="new_run_dialog_quick">Быстрый секундомер</string>
+    <string name="new_run_dialog_quick_desc">Быстрый запуск простого таймера без настроек</string>
+    <string name="new_run_dialog_custom">Создать свой ран</string>
+    <string name="new_run_dialog_custom_desc">Настроить информацию о игре и создать сплиты с нуля</string>
+    <string name="new_run_dialog_import">Импортировать файл LiveSplit (.lss)</string>
+    <string name="new_run_dialog_import_desc">Импортировать файл сплитов из локального хранилища</string>
+    <string name="new_run_dialog_import_url">Импорт по ссылке / URL</string>
+    <string name="new_run_dialog_import_url_desc">Скачать файл .lss напрямую, вставив его веб-адрес</string>
+    <string name="new_run_dialog_speedrun">Поиск на Speedrun.com</string>
+    <string name="new_run_dialog_speedrun_desc">Найти игру и скачать эталонные сплиты</string>
+    <string name="new_run_dialog_field_game">Название игры</string>
+    <string name="new_run_dialog_field_category">Категория (например, Any%)</string>
+    <string name="new_run_dialog_field_platform">Платформа (опционально)</string>
+    <string name="new_run_dialog_create">Создать</string>
+
+    <!-- Timer Screen -->
+    <string name="timer_title">Таймер</string>
+    <string name="timer_edit_splits">Изменить сплиты</string>
+    <string name="timer_active_comparison">Сравнение: %1$s</string>
+    <string name="timer_attempts">Попытки: %1$d</string>
+    <string name="timer_attempts_label">Попытки</string>
+    <string name="timer_finished">Завершено</string>
+
+    <!-- Split Editor Screen -->
+    <string name="editor_title">Изменить сплиты</string>
+    <string name="editor_game_name">Название игры</string>
+    <string name="editor_category_name">Название категории</string>
+    <string name="editor_splits_count">Сплиты (%1$d)</string>
+    <string name="editor_split_name_placeholder">Название сплита</string>
+    <string name="editor_add_split">Добавить сплит</string>
+    <string name="editor_move_up">Переместить вверх</string>
+    <string name="editor_move_down">Переместить вниз</string>
+
+    <!-- Remote Screen -->
+    <string name="remote_title">ПК пульт</string>
+    <string name="remote_conn_settings">Настройки подключения</string>
+    <string name="remote_ip_address">IP-адрес</string>
+    <string name="remote_port">Порт</string>
+    <string name="remote_connect">Подключиться</string>
+    <string name="remote_disconnect">Отключиться</string>
+    <string name="remote_console_response">Ответ консоли</string>
+    <string name="remote_no_response">Ответов пока нет</string>
+    <string name="remote_controls">Управление</string>
+    <string name="remote_btn_split">Старт / Сплит / Финиш</string>
+    <string name="remote_btn_pause">Пауза</string>
+    <string name="remote_btn_undo">Отменить сплит</string>
+    <string name="remote_btn_skip">Пропустить сплит</string>
+    <string name="remote_btn_reset">Сброс</string>
+    <string name="remote_btn_get_time">Получить время</string>
+    <string name="remote_btn_get_delta">Получить дельту</string>
+    <string name="remote_btn_ping">Пинг ПК</string>
+    <string name="remote_live_timer">LIVE ТАЙМЕР ПК</string>
+    <string name="remote_btn_resume">Продолжить</string>
+    <string name="remote_empty_title">Подключитесь к серверу LiveSplit на ПК</string>
+    <string name="remote_empty_desc">Убедитесь, что сервер TCP LiveSplit запущен на порту 16834</string>
+    <string name="remote_conn_failed">Подключение не удалось</string>
+    <string name="remote_reconnect_failed">Соединение потеряно. Переподключение невозможно.</string>
+    <string name="remote_current_split">Текущий сплит</string>
+    <string name="remote_active">Активен</string>
+    <string name="remote_reconnecting">Соединение потеряно. Повторная попытка (%1$d/3)...</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_title">Настройки</string>
+    <string name="settings_timer_header">Настройки таймера</string>
+    <string name="settings_timing_method">Метод измерения</string>
+    <string name="settings_active_comparison">Активное сравнение</string>
+    <string name="settings_global_hotkeys">Глобальные клавиши управления</string>
+    <string name="settings_global_hotkeys_desc">Кнопки громкости управляют сплитами</string>
+    <string name="settings_save_quick_runs">Сохранять быстрые раны</string>
+    <string name="settings_save_quick_runs_desc">Автоматически сохранять быстрые запуски секундомера в список</string>
+    <string name="settings_language">Язык</string>
+    <string name="settings_theme">Тема оформления</string>
+    <string name="settings_theme_system">Системная</string>
+    <string name="settings_theme_light">Светлая</string>
+    <string name="settings_theme_dark">Темная</string>
+    <string name="settings_language_auto">Авто</string>
+    <string name="settings_language_en">English</string>
+    <string name="settings_language_fr">Français</string>
+    <string name="settings_language_de">Deutsch</string>
+    <string name="settings_appearance_header">Внешний вид</string>
+
+    <!-- Network Settings -->
+    <string name="settings_network_header">Сеть</string>
+    <string name="settings_polling_delay">Задержка обновления</string>
+    <string name="settings_polling_delay_desc">Интервал обновлений таймера ПК при подключении через пульт</string>
+    <string name="settings_network_timeout">Сетевой таймаут</string>
+    <string name="settings_network_timeout_desc">Максимальное время ожидания при подключении или чтении с сервера LiveSplit</string>
+    <string name="settings_network_ms_value">%1$d мс</string>
+
+    <!-- Customization -->
+    <string name="settings_customization">Настройка интерфейса</string>
+    <string name="settings_customization_desc">Формат таймера, цвета и параметры отображения</string>
+
+    <!-- Layout Editor -->
+    <string name="layout_editor_title">Макет таймера</string>
+    <string name="layout_editor_preview_header">Предпросмотр</string>
+    <string name="layout_editor_format_header">Формат времени</string>
+    <string name="layout_editor_leading_zeros">Ведущие нули</string>
+    <string name="layout_editor_leading_zeros_desc">Отображать как 00:05:30 вместо 5:30</string>
+    <string name="layout_editor_show_fraction">Десятичные доли</string>
+    <string name="layout_editor_show_fraction_desc">Показывать доли секунды после запятой</string>
+    <string name="layout_editor_decimal_places">Знаков после запятой</string>
+    <string name="layout_editor_decimal_places_value">%1$d цифра/цифр</string>
+    <string name="layout_editor_color_header">Цвет таймера</string>
+    <string name="layout_editor_color_mode">Цветовой режим</string>
+    <string name="layout_editor_color_delta">Дельта сравнения</string>
+    <string name="layout_editor_color_delta_desc">Зеленый/красный в зависимости от темпа относительно сравнения</string>
+    <string name="layout_editor_color_state">Состояние таймера</string>
+    <string name="layout_editor_color_state_desc">Цвет в зависимости от: ожидания, работы, паузы или финиша</string>
+    <string name="layout_editor_state_colors_legend">Цвета состояний</string>
+    <string name="layout_editor_state_idle">Ожидание</string>
+    <string name="layout_editor_state_running">Работает</string>
+    <string name="layout_editor_state_paused">На паузе</string>
+    <string name="layout_editor_state_finished">Завершен</string>
+    <string name="layout_editor_preview_tap_hint">Нажмите для предпросмотра: %1$s</string>
+    <string name="layout_editor_timer_format">Формат таймера</string>
+    <string name="layout_editor_format_examples">1с: %1$s · 1ч: %2$s</string>
+    <string name="layout_editor_splits_header">Макет сплитов</string>
+    <string name="layout_editor_show_splits">Список сплитов</string>
+    <string name="layout_editor_show_splits_desc">Показывать или скрывать сегменты под таймером</string>
+    <string name="layout_editor_orientation">Ориентация экрана</string>
+    <string name="layout_editor_orientation_portrait">Вертикально (портрет)</string>
+    <string name="layout_editor_orientation_landscape">Горизонтально (альбом)</string>
+    <string name="layout_editor_orientation_auto">Автоматически (датчик)</string>
+    <string name="layout_editor_splits_fraction">Доли секунд в сплитах</string>
+    <string name="layout_editor_splits_fraction_desc">Показывать доли секунды в дельтах сплитов</string>
+    <string name="layout_editor_splits_decimals">Знаков дельты сплита</string>
+    <string name="layout_editor_split_approach_threshold">Приближение к сплиту</string>
+    <string name="layout_editor_split_approach_threshold_disabled">Отключено</string>
+    <string name="layout_editor_split_approach_threshold_value">за %1$d с до сплита</string>
+    <string name="layout_editor_split_approach_threshold_custom">Свое значение…</string>
+    <string name="layout_editor_split_approach_threshold_custom_title">Свой порог приближения</string>
+    <string name="layout_editor_split_approach_threshold_custom_hint">Секунды (0 = отключено, макс. 120)</string>
+    <string name="layout_editor_delta_ahead_gaining">Опережение (ускорение)</string>
+    <string name="layout_editor_delta_ahead_losing">Опережение (замедление)</string>
+    <string name="layout_editor_delta_behind_losing">Отставание (замедление)</string>
+    <string name="layout_editor_delta_behind_gaining">Отставание (ускорение)</string>
+    <string name="layout_editor_delta_best_segment">Лучший сегмент</string>
+    <string name="layout_editor_delta_exact">Точно</string>
+
+    <string name="layout_editor_controls_header">Видимость кнопок</string>
+    <string name="layout_editor_show_undo">Показывать кнопку отмены</string>
+    <string name="layout_editor_show_skip">Показывать кнопку пропуска</string>
+    <string name="layout_editor_show_pause">Показывать кнопку паузы</string>
+    <string name="layout_editor_enable_vibration">Виброотклик</string>
+    <string name="layout_editor_enable_vibration_desc">Вибрировать при сплите</string>
+    <string name="layout_editor_show_sob">Сумма лучших сегментов (SOB)</string>
+    <string name="layout_editor_show_durations">Длительность сегментов</string>
+    <string name="layout_editor_show_durations_desc">Показывать время для каждого сегмента</string>
+    <string name="layout_editor_minimalist">Минималистичный режим</string>
+    <string name="layout_editor_minimalist_desc">Скрыть верхний и нижний колонтитулы</string>
+    <string name="layout_editor_use_subsplits">Использовать субсплиты</string>
+    <string name="layout_editor_use_subsplits_desc">Группировать сегменты, начинающиеся с -</string>
+    <string name="layout_editor_show_pts">Показывать возможное сбереженное время</string>
+    <string name="layout_editor_bg_gradient">Градиент фона</string>
+    <string name="layout_editor_bg_start">Начальный цвет (HEX)</string>
+    <string name="layout_editor_bg_end">Конечный цвет (HEX)</string>
+    <string name="layout_editor_lock">Блокировка таймера</string>
+    <string name="layout_editor_lock_desc">Предотвращать случайное открытие меню</string>
+    <string name="layout_editor_confirm_reset">Подтверждать сброс</string>
+    <string name="layout_editor_split_debounce">Задержка двойного нажатия (мс)</string>
+    <string name="layout_editor_timer_shadow">Тень таймера</string>
+    <string name="layout_editor_segment_opacity">Прозрачность сегментов</string>
+    <string name="layout_editor_auto_lock_fullscreen">Автоблок во весь экран</string>
+    <string name="layout_editor_possible_time_save">Возможное сбереженное время</string>
+
+    <string name="timer_toggle_splits">Переключение сплитов</string>
+    <string name="timer_exit_fullscreen">Выйти из полноэкранного режима</string>
+
+    <string name="timer_reset_confirm_title">Сбросить попытку?</string>
+
+    <string name="timer_reset_confirm_message">Вы уверены, что хотите сбросить эту попытку?</string>
+
+    <!-- Timer Control Labels -->
+    <string name="timer_control_start">Старт</string>
+    <string name="timer_control_split">Сплит</string>
+    <string name="timer_control_resume">Продолжить</string>
+    <string name="timer_control_pause">Пауза</string>
+    <string name="timer_control_undo">Отменить сплит</string>
+    <string name="timer_control_skip">Пропустить сплит</string>
+    <string name="timer_control_reset">Сброс</string>
+
+    <!-- About / Legal Screen -->
+    <string name="settings_about_header">О программе</string>
+    <string name="settings_about_title">О программе и лицензиях</string>
+    <string name="settings_about_desc">Юридическая информация, версия и открытые лицензии</string>
+    <string name="settings_rate_app">Оценить в Google Play</string>
+    <string name="settings_rate_app_desc">Оставить отзыв в Play Store</string>
+    <string name="about_title">О программе и лицензиях</string>
+    <string name="about_version">Версия %1$s</string>
+    <string name="about_developer">Разработчик</string>
+    <string name="about_developer_value">Charlouw</string>
+    <string name="about_legal_mentions_title">Юридическая информация</string>
+    <string name="about_legal_mentions_desc">Это мобильное приложение опубликовано как проект с открытым исходным кодом. Все функции работают локально на устройстве без сбора данных.</string>
+    <string name="about_licenses_title">Лицензии ПО с открытым кодом</string>
+    <string name="about_licenses_desc">Это приложение использует сторонние библиотеки. Подробности ниже:</string>
+    <string name="license_livesplit_core_title">LiveSplit Core</string>
+    <string name="license_livesplit_core_desc">Двойная лицензия MIT или Apache License 2.0</string>
+    <string name="license_view_mit">Посмотреть лицензию MIT</string>
+    <string name="license_view_apache">Посмотреть лицензию Apache 2.0</string>
+
+    <!-- Timer Control Finish -->
+    <string name="timer_control_finish">Финиш</string>
+
+    <!-- Timer Phases -->
+    <string name="phase_running">Идет бег</string>
+    <string name="phase_paused">Пауза</string>
+    <string name="phase_ended">Завершено</string>
+    <string name="phase_not_running">Остановлено</string>
+    <string name="editor_reset_dialog_title">Сброс статистики</string>
+    <string name="editor_reset_dialog_text">Это приведет к сбросу количества попыток, истории, личных рекордов и лучших сегментов. Названия сплитов сохранятся.\n\nЭто действие нельзя отменить.</string>
+    <string name="editor_reset_dialog_confirm">Сбросить</string>
+    <string name="editor_reset_stats_button">Сбросить статистику</string>
+    <string name="editor_reset_stats_success">Статистика сброшена</string>
+
+    <string name="runs_list_import_url_title">Импорт по ссылке / URL</string>
+    <string name="runs_list_import_url_placeholder">https://livesplit.org/splits/...</string>
+    <string name="runs_list_import_url_label">URL-адрес LSS файла</string>
+    <string name="runs_list_import_url_btn">Скачать и импортировать</string>
+    <string name="runs_list_import_success">LSS-файл успешно импортирован!</string>
+    <string name="runs_list_import_error">Ошибка: %1$s</string>
+    <string name="runs_list_speedrun_dialog_title">Импорт с Speedrun.com</string>
+    <string name="runs_list_speedrun_game_placeholder">например, Celeste, Portal...</string>
+    <string name="runs_list_speedrun_game_label">Поиск игры</string>
+    <string name="runs_list_speedrun_selected_game">Игра: %1$s</string>
+    <string name="runs_list_speedrun_selected_category">Категория: %1$s</string>
+    <string name="runs_list_speedrun_only_splits">Только с готовыми сплитами</string>
+    <string name="runs_list_speedrun_no_runs">Забегов не найдено.</string>
+    <string name="runs_list_speedrun_no_splits_toast">Для этого забега нет сплитов на splits.io</string>
+    <string name="runs_list_speedrun_import_success">Сплиты с Speedrun.com импортированы!</string>
+    <string name="runs_list_speedrun_badge_importable">Импортируемый</string>
+    <string name="runs_list_speedrun_badge_no_splits">Без сплитов</string>
+    <string name="runs_list_speedrun_place_format">Место %1$d — %2$s</string>
+
+    <string name="remote_tuto_title">Инструкция по подключению к ПК (Шаг %1$d / 6)</string>
+    <string name="remote_tuto_step_1">1. Скачайте LiveSplit. Рекомендуется использовать \"Dev Build\", чтобы иметь все функции. Версия 1.8.37 работает, но некоторые функции пульта будут ограничены:</string>
+    <string name="remote_tuto_step_1_hint">(нажмите на ссылку, чтобы открыть её в браузере)</string>
+    <string name="remote_tuto_step_2">2. Кликните правой кнопкой мыши по LiveSplit и выберите \'Settings\'.</string>
+    <string name="remote_tuto_step_3">3. В настройках включите \'Startup Behavior\' -> \'Start TCP Server\', чтобы соединение было готово при запуске.</string>
+    <string name="remote_tuto_step_4">4. Если сервер не запущен: правой кнопкой мыши -> Control -> Start TCP Server.</string>
+    <string name="remote_tuto_step_5">5. Введите локальный IP-адрес вашего ПК и порт (если вы меняли его).</string>
+    <string name="remote_tuto_step_6">6. Наконец, нажмите кнопку \'Connect\', чтобы установить связь с LiveSplit на ПК!</string>
+    <string name="remote_tuto_btn_next">Далее</string>
+    <string name="remote_tuto_btn_prev">Назад</string>
+    <string name="remote_tuto_btn_close">Закрыть</string>
+    <string name="remote_tuto_btn_finish">Завершить</string>
+    <string name="remote_format_header">Формат таймера</string>
+    <string name="remote_format_select">Выбор формата</string>
+    <string name="remote_toast_response">Ответ: %1$s</string>
+
+    <string name="timer_export_chooser_title">Экспорт LiveSplit (.lss)</string>
+    <string name="timer_export_error">Ошибка экспорта: %1$s</string>
+    <string name="timer_desc_share">Экспорт LSS</string>
+    <string name="timer_desc_stats">Статистика рана</string>
+    <string name="timer_sum_of_best">Сумма лучших</string>
+
+    <string name="stats_title">Статистика и история</string>
+    <string name="stats_no_segments">Сегменты не заданы.</string>
+    <string name="stats_attempts">Попытки</string>
+    <string name="stats_resets_format">Сбросы: %1$d</string>
+    <string name="stats_completed">Завершено</string>
+    <string name="stats_rate_format">Доля завершений: %1$.1f%%</string>
+    <string name="stats_pb_title">Личный рекорд (PB)</string>
+    <string name="stats_pb_desc">Лучшее итоговое время</string>
+    <string name="stats_sob_title">Сумма лучших (SOB)</string>
+    <string name="stats_sob_desc">Сумма золотых сегментов</string>
+    <string name="stats_pb_progression">История личных рекордов</string>
+    <string name="stats_chart_hint">Завершите как минимум 2 забега, чтобы построить график прогресса.</string>
+    <string name="stats_regularity_analysis">Анализ стабильности сегментов</string>
+    <string name="stats_segment_stats_summary">Среднее: %1$s | Золото: %2$s</string>
+
+    <string name="main_import_success">Импортировано: %1$s — %2$s</string>
+    <string name="main_import_parse_failed">Не удалось разобрать .lss: %1$s</string>
+    <string name="main_import_error">Ошибка при импорте файла: %1$s</string>
+    <string name="runs_list_speedrun_run_id_format">ID забега: %1$s</string>
+    <string name="settings_language_es">Испанский</string>
+    <string name="settings_language_it">Итальянский</string>
+    <string name="settings_language_pt">Португальский</string>
+    <string name="settings_language_ja">Японский</string>
+    <string name="settings_language_zh">Китайский (упрощенный)</string>
+    <string name="settings_language_ru">Русский</string>
+    <string name="settings_language_ko">Корейский</string>
+    <string name="settings_language_pl">Польский</string>
+    <string name="timing_method_real_time">Real Time</string>
+    <string name="timing_method_game_time">Game Time</string>
+    <string name="comparison_pb">Personal Best</string>
+    <string name="comparison_best_segments">Best Segments</string>
+    <string name="comparison_average_segments">Average Segments</string>
+    <string name="comparison_worst_segments">Worst Segments</string>
+    <string name="comparison_median_segments">Median Segments</string>
+    <string name="comparison_latest_run">Latest Run</string>
+    <string name="layout_editor_preset_format">Пресет: %1$s</string>
+    <string name="color_preset_green">Зеленый</string>
+    <string name="color_preset_blue">Синий</string>
+    <string name="color_preset_gray">Серый</string>
+    <string name="color_preset_red">Красный</string>
+    <string name="color_preset_orange">Оранжевый</string>
+    <string name="color_preset_gold">Золотой</string>
+    <string name="color_preset_white">Белый</string>
+</resources>

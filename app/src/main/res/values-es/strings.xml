@@ -259,6 +259,13 @@
     <string name="main_import_error">Error al importar el archivo: %1$s</string>
     <string name="runs_list_speedrun_run_id_format">ID de la carrera: %1$s</string>
     <string name="settings_language_es">Español</string>
+    <string name="settings_language_it">Italiano</string>
+    <string name="settings_language_pt">Portugués</string>
+    <string name="settings_language_ja">Japonés</string>
+    <string name="settings_language_zh">Chino (Simplificado)</string>
+    <string name="settings_language_ru">Ruso</string>
+    <string name="settings_language_ko">Coreano</string>
+    <string name="settings_language_pl">Polaco</string>
     <string name="timing_method_real_time">Real Time (Tiempo Real)</string>
     <string name="timing_method_game_time">Game Time (Tiempo de Juego)</string>
     <string name="comparison_pb">Mejor marca personal (PB)</string>
