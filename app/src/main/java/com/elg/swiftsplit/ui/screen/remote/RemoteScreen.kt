@@ -122,6 +122,8 @@ fun RemoteScreen(
     val connectionState by viewModel.connectionState.collectAsStateWithLifecycle()
     val remoteTime by viewModel.remoteTime.collectAsStateWithLifecycle()
     val remotePhase by viewModel.remotePhase.collectAsStateWithLifecycle()
+    val gameName by viewModel.gameName.collectAsStateWithLifecycle()
+    val categoryName by viewModel.categoryName.collectAsStateWithLifecycle()
     val layoutPrefs by viewModel.timerLayoutPreferences.collectAsStateWithLifecycle()
     val errorMessage by viewModel.errorMessage.collectAsStateWithLifecycle()
     
@@ -356,13 +358,24 @@ fun RemoteScreen(
                     verticalArrangement = Arrangement.SpaceBetween
                 ) {
                     if (!layoutPrefs.isMinimalistMode) {
-                        Text(
-                            text = stringResource(R.string.remote_title),
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.SemiBold,
-                            color = Color.White.copy(alpha = 0.7f),
-                            textAlign = TextAlign.Center
-                        )
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(
+                                text = gameName ?: stringResource(R.string.remote_title),
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                color = Color.White.copy(alpha = 0.9f),
+                                textAlign = TextAlign.Center
+                            )
+                            if (!categoryName.isNullOrBlank()) {
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Text(
+                                    text = categoryName!!,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = Color.White.copy(alpha = 0.6f),
+                                    textAlign = TextAlign.Center
+                                )
+                            }
+                        }
                     } else {
                         Spacer(modifier = Modifier.height(1.dp))
                     }
@@ -444,6 +457,16 @@ fun RemoteScreen(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
                     ) {
+                        if (!layoutPrefs.isMinimalistMode && !gameName.isNullOrBlank()) {
+                            Text(
+                                text = gameName!! + if (!categoryName.isNullOrBlank()) " - $categoryName" else "",
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White.copy(alpha = 0.7f),
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.padding(bottom = 8.dp)
+                            )
+                        }
                         Text(
                             text = smoothRemoteTime,
                             style = MaterialTheme.typography.displayLarge.copy(fontSize = 80.sp),
@@ -592,6 +615,31 @@ fun RemoteScreen(
                                     ) {
                                         Text(if (connectionState == ConnectionState.CONNECTED) "Disconnect" else "Connect")
                                     }
+                                }
+                            }
+                        }
+                    }
+
+                    if (connectionState == ConnectionState.CONNECTED && !gameName.isNullOrBlank()) {
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = CardDefaults.cardColors(containerColor = colors.elevatedSurface.copy(alpha = 0.7f)),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, colors.cardBorder)
+                        ) {
+                            Column(Modifier.padding(16.dp)) {
+                                Text(
+                                    text = gameName!!,
+                                    style = MaterialTheme.typography.titleLarge,
+                                    fontWeight = FontWeight.Bold,
+                                    color = colors.textPrimary
+                                )
+                                if (!categoryName.isNullOrBlank()) {
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Text(
+                                        text = categoryName!!,
+                                        style = MaterialTheme.typography.titleMedium,
+                                        color = colors.textSecondary
+                                    )
                                 }
                             }
                         }

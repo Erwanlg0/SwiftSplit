@@ -37,7 +37,15 @@ class RemoteViewModel @Inject constructor(
     private val _remotePhase = MutableStateFlow("NotRunning")
     val remotePhase: StateFlow<String> = _remotePhase.asStateFlow()
 
+    private val _gameName = MutableStateFlow<String?>(null)
+    val gameName: StateFlow<String?> = _gameName.asStateFlow()
+
+    private val _categoryName = MutableStateFlow<String?>(null)
+    val categoryName: StateFlow<String?> = _categoryName.asStateFlow()
+
     private var pollingJob: Job? = null
+    private var pollCounter = 0
+    private var isGameInfoSupported = true
 
     val connectionState: StateFlow<ConnectionState> = observeLiveSplitConnectionUseCase().stateIn(
         scope = viewModelScope,
@@ -117,6 +125,27 @@ class RemoteViewModel @Inject constructor(
 
         val phase = sendLiveSplitCommandUseCase("getcurrenttimerphase").getOrNull()
         if (phase != null) _remotePhase.value = phase.trim()
+
+        if (isGameInfoSupported && pollCounter % 20 == 0) {
+            val gameResult = sendLiveSplitCommandUseCase("getgamename")
+            if (gameResult.isSuccess) {
+                val game = gameResult.getOrNull()
+                if (game != null) _gameName.value = game.trim()
+            } else if (gameResult.exceptionOrNull() is java.net.SocketTimeoutException) {
+                isGameInfoSupported = false
+            }
+
+            if (isGameInfoSupported) {
+                val categoryResult = sendLiveSplitCommandUseCase("getcategoryname")
+                if (categoryResult.isSuccess) {
+                    val category = categoryResult.getOrNull()
+                    if (category != null) _categoryName.value = category.trim()
+                } else if (categoryResult.exceptionOrNull() is java.net.SocketTimeoutException) {
+                    isGameInfoSupported = false
+                }
+            }
+        }
+        pollCounter++
     }
 
     private fun stopPolling() {
@@ -124,6 +153,10 @@ class RemoteViewModel @Inject constructor(
         pollingJob = null
         _remoteTime.value = "00:00:00.000"
         _remotePhase.value = "NotRunning"
+        _gameName.value = null
+        _categoryName.value = null
+        pollCounter = 0
+        isGameInfoSupported = true
     }
 
     override fun onCleared() {

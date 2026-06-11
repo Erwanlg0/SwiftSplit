@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import android.util.Log
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.io.PrintWriter
@@ -67,24 +68,31 @@ class LiveSplitTcpClient @Inject constructor() : LiveSplitRemotePort {
 
         try {
             ioMutex.withLock {
+                Log.d("LiveSplitClient", "Sending command: $command")
                 currentWriter.print(command + "\n")
                 currentWriter.flush()
 
                 if (command.startsWith("get") || command == "ping") {
                     val response = currentReader.readLine()
                     if (response == null) {
+                        Log.w("LiveSplitClient", "Received null response (connection closed) for command: $command")
                         cleanup()
                         _connectionState.value = ConnectionState.DISCONNECTED
                         Result.failure(Exception("Closed"))
                     } else {
+                        Log.d("LiveSplitClient", "Received response for '$command': '$response'")
                         Result.success(response.trim())
                     }
                 } else {
                     Result.success(null)
                 }
             }
+        } catch (e: java.net.SocketTimeoutException) {
+            Log.w("LiveSplitClient", "Timeout waiting for response to command: $command")
+            Result.failure(e)
         } catch (e: Exception) {
             if (e is CancellationException) throw e
+            Log.e("LiveSplitClient", "Error sending command: $command", e)
             cleanup()
             _connectionState.value = ConnectionState.ERROR
             Result.failure(e)
