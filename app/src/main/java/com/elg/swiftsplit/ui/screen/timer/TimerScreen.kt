@@ -532,7 +532,7 @@ fun TimerScreen(
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.List,
-                            contentDescription = "Toggle Splits",
+                            contentDescription = stringResource(R.string.timer_toggle_splits),
                             tint = androidx.compose.ui.graphics.Color.White
                         )
                     }
@@ -542,7 +542,7 @@ fun TimerScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Close,
-                            contentDescription = "Exit Fullscreen",
+                            contentDescription = stringResource(R.string.timer_exit_fullscreen),
                             tint = androidx.compose.ui.graphics.Color.White
                         )
                     }

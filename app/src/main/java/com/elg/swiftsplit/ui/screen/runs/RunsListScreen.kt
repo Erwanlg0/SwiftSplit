@@ -183,13 +183,13 @@ fun RunsListScreen(
                     ) {
                         Column(modifier = Modifier.padding(12.dp)) {
                             Text(
-                                text = "Importer via Lien URL",
+                                text = stringResource(R.string.new_run_dialog_import_url),
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.tertiary
                             )
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                text = "Télécharger directement un fichier .lss en collant son adresse web",
+                                text = stringResource(R.string.new_run_dialog_import_url_desc),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = swiftSplitColors.textSecondary
                             )
@@ -207,13 +207,13 @@ fun RunsListScreen(
                     ) {
                         Column(modifier = Modifier.padding(12.dp)) {
                             Text(
-                                text = "Rechercher sur Speedrun.com",
+                                text = stringResource(R.string.new_run_dialog_speedrun),
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.secondary
                             )
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                text = "Rechercher un jeu et télécharger les splits de référence",
+                                text = stringResource(R.string.new_run_dialog_speedrun_desc),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = swiftSplitColors.textSecondary
                             )
@@ -318,7 +318,7 @@ fun RunsListScreen(
                             modifier = Modifier.fillMaxWidth(),
                             trailingIcon = {
                                 IconButton(onClick = { viewModel.searchSpeedrunGames(speedrunQuery) }) {
-                                    Icon(Icons.Default.Search, contentDescription = "Search")
+                                    Icon(Icons.Default.Search, contentDescription = stringResource(R.string.search))
                                 }
                             }
                         )
@@ -522,7 +522,7 @@ fun RunsListScreen(
                         }
                     }
                 ) {
-                    Text(if (selectedGameId != null) "Retour" else "Fermer")
+                    Text(if (selectedGameId != null) stringResource(R.string.back) else stringResource(R.string.close))
                 }
             },
             containerColor = swiftSplitColors.cardBackground
@@ -711,7 +711,7 @@ fun RunsListScreen(
                 }
                 is RunsListUiState.Error -> {
                     Text(
-                        text = "Error: ${state.message}",
+                        text = stringResource(R.string.runs_list_import_error, state.message),
                         style = MaterialTheme.typography.bodyLarge,
                         color = swiftSplitColors.error,
                         modifier = Modifier

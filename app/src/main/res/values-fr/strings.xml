@@ -16,6 +16,8 @@
     <string name="runs_list_empty_desc">Appuyez sur le bouton + pour importer un fichier LiveSplit .lss ou créer un chrono.</string>
     <string name="runs_list_import_lss">Importer un fichier LSS</string>
     <string name="runs_list_no_pb">Pas de PB</string>
+    <string name="search">Rechercher</string>
+    <string name="close">Fermer</string>
 
     <!-- New Run Dialog -->
     <string name="new_run_dialog_title">Nouveau LiveSplit</string>
@@ -25,7 +27,12 @@
     <string name="new_run_dialog_custom_desc">Configurer les informations du jeu et créer vos segments</string>
     <string name="new_run_dialog_import">Importer un fichier LiveSplit (.lss)</string>
     <string name="new_run_dialog_import_desc">Importer un fichier de splits depuis votre stockage local</string>
+    <string name="new_run_dialog_import_url">Importer via Lien / URL</string>
+    <string name="new_run_dialog_import_url_desc">Télécharger directement un fichier .lss en collant son adresse web</string>
+    <string name="new_run_dialog_speedrun">Rechercher sur Speedrun.com</string>
+    <string name="new_run_dialog_speedrun_desc">Rechercher un jeu et télécharger les splits de référence</string>
     <string name="new_run_dialog_field_game">Nom du jeu</string>
+
     <string name="new_run_dialog_field_category">Catégorie (ex. Any%)</string>
     <string name="new_run_dialog_field_platform">Plateforme (facultatif)</string>
     <string name="new_run_dialog_create">Créer</string>
@@ -175,7 +182,11 @@
     <string name="layout_editor_auto_lock_fullscreen">Auto-verrouillage plein écran</string>
     <string name="layout_editor_possible_time_save">Gain de temps potentiel</string>
 
+    <string name="timer_toggle_splits">Afficher/Masquer segments</string>
+    <string name="timer_exit_fullscreen">Quitter plein écran</string>
+
     <string name="timer_reset_confirm_title">Réinitialiser ?</string>
+
     <string name="timer_reset_confirm_message">Voulez-vous vraiment réinitialiser cette tentative ?</string>
 
     <!-- Timer Control Labels -->

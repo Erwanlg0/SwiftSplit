@@ -16,6 +16,8 @@
     <string name="runs_list_empty_desc">Tap the + button to import a LiveSplit .lss file or create a run.</string>
     <string name="runs_list_import_lss">Import LSS file</string>
     <string name="runs_list_no_pb">No PB</string>
+    <string name="search">Search</string>
+    <string name="close">Close</string>
 
     <!-- New Run Dialog -->
     <string name="new_run_dialog_title">New Run</string>
@@ -25,7 +27,12 @@
     <string name="new_run_dialog_custom_desc">Configure game info and create splits from scratch</string>
     <string name="new_run_dialog_import">Import LiveSplit File (.lss)</string>
     <string name="new_run_dialog_import_desc">Import a splits file from your local storage</string>
+    <string name="new_run_dialog_import_url">Import via Link / URL</string>
+    <string name="new_run_dialog_import_url_desc">Download an .lss file directly by pasting its web address</string>
+    <string name="new_run_dialog_speedrun">Search on Speedrun.com</string>
+    <string name="new_run_dialog_speedrun_desc">Search for a game and download reference splits</string>
     <string name="new_run_dialog_field_game">Game Name</string>
+
     <string name="new_run_dialog_field_category">Category (e.g. Any%)</string>
     <string name="new_run_dialog_field_platform">Platform (optional)</string>
     <string name="new_run_dialog_create">Create</string>
@@ -175,7 +182,11 @@
     <string name="layout_editor_auto_lock_fullscreen">Auto-lock in Fullscreen</string>
     <string name="layout_editor_possible_time_save">Possible Time Save</string>
 
+    <string name="timer_toggle_splits">Toggle Splits</string>
+    <string name="timer_exit_fullscreen">Exit Fullscreen</string>
+
     <string name="timer_reset_confirm_title">Reset Run?</string>
+
     <string name="timer_reset_confirm_message">Are you sure you want to reset this attempt?</string>
 
     <!-- Timer Control Labels -->
