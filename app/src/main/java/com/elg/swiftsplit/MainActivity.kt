@@ -30,6 +30,8 @@ import androidx.core.view.WindowCompat
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -117,12 +119,13 @@ class MainActivity : AppCompatActivity() {
     private fun handleIntent(intent: Intent?) {
         if (intent == null || intent.action != Intent.ACTION_VIEW) return
         val uri = intent.data ?: return
-        lifecycleScope.launch {
+        lifecycleScope.launch(Dispatchers.IO) {
             try {
                 val bytes = contentResolver.openInputStream(uri)?.use { it.readBytes() }
                 if (bytes != null) {
-                    importRunUseCase(bytes)
-                        .onSuccess { run ->
+                    val result = importRunUseCase(bytes)
+                    withContext(Dispatchers.Main) {
+                        result.onSuccess { run ->
                             Toast.makeText(
                                 this@MainActivity,
                                 getString(R.string.main_import_success, run.gameInfo.gameName, run.gameInfo.categoryName),
@@ -136,13 +139,16 @@ class MainActivity : AppCompatActivity() {
                                 Toast.LENGTH_LONG
                             ).show()
                         }
+                    }
                 }
             } catch (e: Exception) {
-                Toast.makeText(
-                    this@MainActivity,
-                    getString(R.string.main_import_error, e.localizedMessage),
-                    Toast.LENGTH_LONG
-                ).show()
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(
+                        this@MainActivity,
+                        getString(R.string.main_import_error, e.localizedMessage),
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
             }
         }
     }

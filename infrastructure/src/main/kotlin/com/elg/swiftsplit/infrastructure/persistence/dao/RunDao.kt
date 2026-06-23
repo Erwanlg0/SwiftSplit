@@ -47,12 +47,20 @@ interface RunDao {
         insertRun(run)
         val segmentIds = insertSegments(segments)
         
+        val allSplitTimes = mutableListOf<SplitTimeEntity>()
+        val allSegmentHistory = mutableListOf<SegmentHistoryEntity>()
+        
         for (i in segments.indices) {
             val segmentId = segmentIds[i]
-            val segmentSplits = splitTimes[i].map { it.copy(segmentId = segmentId) }
-            val segmentHist = segmentHistory[i].map { it.copy(segmentId = segmentId) }
-            insertSplitTimes(segmentSplits)
-            insertSegmentHistory(segmentHist)
+            allSplitTimes.addAll(splitTimes[i].map { it.copy(segmentId = segmentId) })
+            allSegmentHistory.addAll(segmentHistory[i].map { it.copy(segmentId = segmentId) })
+        }
+        
+        if (allSplitTimes.isNotEmpty()) {
+            insertSplitTimes(allSplitTimes)
+        }
+        if (allSegmentHistory.isNotEmpty()) {
+            insertSegmentHistory(allSegmentHistory)
         }
         
         val attemptEntities = attempts.map { it.copy(runId = run.id) }

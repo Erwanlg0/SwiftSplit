@@ -25,6 +25,8 @@ import com.elg.swiftsplit.ui.screen.runs.components.RunCard
 import com.elg.swiftsplit.ui.theme.SwiftSplitThemeColors
 import android.widget.Toast
 import com.elg.swiftsplit.R
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -65,16 +67,19 @@ fun RunsListScreen(
     var onlyRunsWithSplits by remember { mutableStateOf(false) }
 
     
+    val coroutineScope = rememberCoroutineScope()
     val fileLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri ->
         uri?.let {
-            try {
-                context.contentResolver.openInputStream(uri)?.use { input ->
-                    viewModel.importRun(input.readBytes())
+            coroutineScope.launch(Dispatchers.IO) {
+                try {
+                    context.contentResolver.openInputStream(uri)?.use { input ->
+                        viewModel.importRun(input.readBytes())
+                    }
+                } catch (e: Exception) {
+                    
                 }
-            } catch (e: Exception) {
-                
             }
         }
     }

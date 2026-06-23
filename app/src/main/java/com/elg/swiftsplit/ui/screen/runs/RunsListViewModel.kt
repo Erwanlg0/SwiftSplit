@@ -123,7 +123,7 @@ class RunsListViewModel @Inject constructor(
         )
 
     fun importRun(content: ByteArray) {
-        viewModelScope.launch {
+        viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
             importRunUseCase(content)
         }
     }
