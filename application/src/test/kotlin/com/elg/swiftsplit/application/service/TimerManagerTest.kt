@@ -1,5 +1,6 @@
 package com.elg.swiftsplit.application.service
 
+import com.elg.swiftsplit.application.port.output.HapticFeedbackPort
 import com.elg.swiftsplit.application.port.output.RunRepository
 import com.elg.swiftsplit.application.port.output.SettingsPort
 import com.elg.swiftsplit.domain.model.*
@@ -25,7 +26,8 @@ class TimerManagerTest {
     private val settingsPort: SettingsPort = mockk {
         every { observeSaveQuickRuns() } returns flowOf(false)
     }
-    private val timerManager = TimerManager(runRepository, timerService, settingsPort, clock)
+    private val hapticFeedbackPort: HapticFeedbackPort = mockk(relaxed = true)
+    private val timerManager = TimerManager(runRepository, timerService, settingsPort, clock, hapticFeedbackPort)
 
     @Test
     fun testResetIncrementsAttemptCountEvenIfNoSegmentsCompleted() = runTest {
@@ -61,5 +63,60 @@ class TimerManagerTest {
         
         val state = timerManager.timerState.first()
         assertTrue(state is TimerState.Idle)
+    }
+
+    @Test
+    fun testSetComparisonUpdatesRunningState() = runTest {
+        val runId = RunId("test-run-id")
+        coEvery { runRepository.getById(runId) } returns Run(
+            id = runId,
+            gameInfo = GameInfo("Super Mario 64", "120 Star"),
+            segments = listOf(Segment("Bob-omb Battlefield"))
+        )
+
+        timerManager.start(runId, ComparisonName.PERSONAL_BEST, TimingMethod.REAL_TIME)
+        timerManager.setComparison(ComparisonName.BEST_SEGMENTS)
+
+        val state = timerManager.timerState.first()
+        assertTrue(state is TimerState.Running)
+        assertEquals(ComparisonName.BEST_SEGMENTS, (state as TimerState.Running).comparison)
+    }
+
+    @Test
+    fun testSplitVibratesLongOnGoldSegment() = runTest {
+        every { settingsPort.observeTimerLayoutPreferences() } returns flowOf(TimerLayoutPreferences.DEFAULT)
+        val runId = RunId("test-run-id")
+        coEvery { runRepository.getById(runId) } returns Run(
+            id = runId,
+            gameInfo = GameInfo("Super Mario 64", "120 Star"),
+            segments = listOf(
+                Segment("Bob-omb Battlefield", bestSegmentTime = SplitTime(realTime = TimeSpan(100L))),
+                Segment("Whomps Fortress")
+            )
+        )
+
+        timerManager.start(runId, ComparisonName.PERSONAL_BEST, TimingMethod.REAL_TIME)
+        timerManager.split()
+
+        verify(exactly = 1) { hapticFeedbackPort.vibrate(150) }
+    }
+
+    @Test
+    fun testSplitVibratesShortWithoutBestSegment() = runTest {
+        every { settingsPort.observeTimerLayoutPreferences() } returns flowOf(TimerLayoutPreferences.DEFAULT)
+        val runId = RunId("test-run-id")
+        coEvery { runRepository.getById(runId) } returns Run(
+            id = runId,
+            gameInfo = GameInfo("Super Mario 64", "120 Star"),
+            segments = listOf(
+                Segment("Bob-omb Battlefield"),
+                Segment("Whomps Fortress")
+            )
+        )
+
+        timerManager.start(runId, ComparisonName.PERSONAL_BEST, TimingMethod.REAL_TIME)
+        timerManager.split()
+
+        verify(exactly = 1) { hapticFeedbackPort.vibrate(50) }
     }
 }

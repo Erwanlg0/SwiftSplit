@@ -5,6 +5,7 @@ import com.elg.swiftsplit.application.port.output.RunRepository
 import com.elg.swiftsplit.application.port.output.SettingsPort
 import com.elg.swiftsplit.domain.model.*
 import com.elg.swiftsplit.domain.service.Clock
+import com.elg.swiftsplit.domain.service.SplitTimeCalculator
 import com.elg.swiftsplit.domain.service.TimerService
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -60,10 +61,12 @@ class TimerManager @Inject constructor(
         activeRun = updated
 
         if (layoutPrefs.enableVibration) {
-            val isGold = event is TimerEvent.Split && current.run.segments[event.segmentIndex].bestSegmentTime?.getTime(current.timingMethod)?.let {
-                event.splitTime <= it
-            } ?: false
-            
+            val isGold = event is TimerEvent.Split && run {
+                val segmentTime = SplitTimeCalculator.getSegmentTime(updated.splitTimes, event.segmentIndex)
+                val best = current.run.segments[event.segmentIndex].bestSegmentTime?.getTime(current.timingMethod)
+                segmentTime != null && best != null && segmentTime <= best
+            }
+
             if (isGold) {
                 hapticFeedbackPort.vibrate(150) // Longer for gold
             } else {
@@ -89,6 +92,17 @@ class TimerManager @Inject constructor(
                 )
             }
             else -> {}
+        }
+    }
+
+    fun setComparison(comparison: ComparisonName) {
+        val current = activeRun ?: return
+        activeRun = current.copy(comparison = comparison)
+        _timerState.value = when (val state = _timerState.value) {
+            is TimerState.Running -> state.copy(comparison = comparison)
+            is TimerState.Paused -> state.copy(comparison = comparison)
+            is TimerState.Finished -> state.copy(comparison = comparison)
+            else -> state
         }
     }
 

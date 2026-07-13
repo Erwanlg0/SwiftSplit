@@ -28,6 +28,7 @@ class TimerViewModel @Inject constructor(
     private val deleteRunUseCase: DeleteRunUseCase,
     private val exportRunUseCase: ExportRunUseCase,
     private val settingsPort: SettingsPort,
+    private val timerManager: com.elg.swiftsplit.application.service.TimerManager,
     private val clock: com.elg.swiftsplit.domain.service.Clock,
     private val updateTimerLayoutPreferencesUseCase: UpdateTimerLayoutPreferencesUseCase,
     observeTimerLayoutPreferencesUseCase: ObserveTimerLayoutPreferencesUseCase
@@ -96,7 +97,9 @@ class TimerViewModel @Inject constructor(
 
     fun startTimer() {
         viewModelScope.launch {
-            startTimerUseCase(RunId(runId), ComparisonName.PERSONAL_BEST, TimingMethod.REAL_TIME)
+            val comparison = settingsPort.observeComparison().first()
+            val timingMethod = settingsPort.observeTimingMethod().first()
+            startTimerUseCase(RunId(runId), comparison, timingMethod)
         }
     }
 
@@ -149,6 +152,7 @@ class TimerViewModel @Inject constructor(
             
             val nextComp = comparisons[(comparisons.indexOf(currentComp) + 1) % comparisons.size]
             settingsPort.setComparison(nextComp)
+            timerManager.setComparison(nextComp)
         }
     }
 

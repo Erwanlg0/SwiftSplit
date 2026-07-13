@@ -172,7 +172,7 @@ class RemoteViewModel @Inject constructor(
         pollingJob = viewModelScope.launch(Dispatchers.IO) {
             while (isActive) {
                 pollOnce()
-                delay(100)
+                delay(networkPreferences.value.pollingDelayMs)
             }
         }
     }
@@ -322,15 +322,6 @@ class RemoteViewModel @Inject constructor(
                 delta
             }
             list[index] = list[index].copy(delta = formattedDelta)
-            _splitsList.value = list
-        }
-    }
-
-    private fun updateCurrentSplitTime(time: String?) {
-        val index = _currentSplitIndex.value
-        val list = _splitsList.value.toMutableList()
-        if (index in list.indices) {
-            list[index] = list[index].copy(actualTime = time)
             _splitsList.value = list
         }
     }
